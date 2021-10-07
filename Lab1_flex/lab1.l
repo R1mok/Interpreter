@@ -23,7 +23,6 @@ void inMap(std::string& s){
 . ;
 }
 
-
 <NUMBER_SMS>{
 (\+[0-9]{11})/((\,\+[0-9]{11})*\;\?(body\=[a-zA-Z0-9\%\,\.\!\?]{1,64})?)\n {
 std::string s;
@@ -68,17 +67,24 @@ inMap(s); BEGIN(NUMBER_OTH);}
 
 %%
 
+#include <chrono>
 #include <fstream>
+using namespace std::chrono;
 int main (int argc, char* argv[]){
 	std::ifstream fin(argv[1]);
 	yyFlexLexer ftp(fin, std::cout);
 	std::string s;
-	int n = 20;
-	while (n--){ ftp.yylex(); }
+	int n = 1000000;
+	auto first = high_resolution_clock::now();
+	while (n--) { ftp.yylex(); }
+	auto second = high_resolution_clock::now();
+	duration<double> diff = second - first;
+	milliseconds d = duration_cast<milliseconds>(diff);
 	for (auto elem : m){
 		std::cout << elem.first << ": " << elem.second << std::endl;
 	}
 	fin.close();
+	std::cout << "Time: " << d.count() << std::endl;
 return 0;
 }
 

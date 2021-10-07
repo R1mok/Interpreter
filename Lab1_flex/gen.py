@@ -58,8 +58,8 @@ def Gen(count):
 		count = count - 1
 
 
-n = int(input())
-mfile = open("textfile1.txt", "w")		
-Gen(n)
+args = input().split()
+mfile = open(str(args[1]), "w")		
+Gen(int(args[0]))
 mfile.close()
 print("Write in file succesfull")
