@@ -64,28 +64,29 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <chrono>
 
 using namespace std;
 using namespace statemap;
-
-int main(int argc, char *argv[])
+using namespace std::chrono;
+int main(int argc, char* argv[])
 {
     AppClass thisContext;
     int retcode = 0;
-    int n = 10;
-    for (int i = 0; i < n; ++i) {
-        vector<string> source_string = { "sms:+79123432124;?body=text",
-            "sms:+98321423485,+32323232312,+79123432124;?body=text", "tel:+79123493262;?", "fax:+79123493262,+79123493262;?",
-            "sms:+70123403272;?", "blablabla", "tel:+793231;?", "tel:dsad", "fax:+79123493262;?body=text", 
-            "sms:+79123432124;?body=dasd*2))"};
-        //string source_string; // sms:+79123432124;?body=text
-        //cin >> source_string; // sms:+79123432124,+98321423485;?body=text
+    int n = 0;
+    FILE* fd = fopen("textfile1.txt", "r");
+    std::string source_string;
+    std::ifstream is(fd);
+    auto first = high_resolution_clock::now();
+    while (getline(is, source_string)) {
+        ++n;
         try {
-            if (thisContext.CheckString(source_string[i]) == true) {
-                cout << i + 1 << ": String \\ " << source_string[i] << " \\ is acceptable!" << endl;
+            if (thisContext.CheckString(source_string) == true) {
+                cout << n << ": String \\ " << source_string << " \\ is acceptable!" << endl;
             }
             else {
-                cout << i + 1 << ": String \\ " << source_string[i] << " \\ is unacceptable!" << endl;
+                cout << n << ": String \\ " << source_string << " \\ is unacceptable!" << endl;
             }
         }
         catch (const SmcException& smcex)
@@ -98,11 +99,15 @@ int main(int argc, char *argv[])
             retcode = 1;
         }
     }
+    auto second = high_resolution_clock::now();
+    duration<double>diff = second - first;
+    milliseconds d = duration_cast<milliseconds>(diff);
     std::cout << "------------------" << std::endl;
     std::cout << "Correct numbers: " << std::endl;
-    for (auto elem : thisContext.m) {
+   for (auto elem : thisContext.m) {
         std::cout << elem.first << ":" << elem.second << std::endl;
     }
+    std::cout << "Time: " << d.count() << std::endl;
     /*
     if (argc < 2)
     {
