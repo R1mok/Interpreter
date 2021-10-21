@@ -46,7 +46,7 @@
 
 
 #include "AppClass.h"
-#include "C:\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381-20210913T092731Z-001\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381\examples\C++\EX1\AppClass_sm.h"
+#include "C:\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381-20210913T092731Z-001\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381\examples\C++\Lab1_smc\AppClass_sm.h"
 
 using namespace statemap;
 
