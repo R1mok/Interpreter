@@ -52,31 +52,20 @@ using namespace statemap;
 
 // Static class declarations.
 Map1_Start Map1::Start("Map1::Start", 0);
-Map1_Tel Map1::Tel("Map1::Tel", 1);
-Map1_Sms Map1::Sms("Map1::Sms", 2);
-Map1_Fax Map1::Fax("Map1::Fax", 3);
-Map1_Number Map1::Number("Map1::Number", 4);
-Map1_Digit Map1::Digit("Map1::Digit", 5);
-Map1_MessageText Map1::MessageText("Map1::MessageText", 6);
-Map1_Correct Map1::Correct("Map1::Correct", 7);
-Map1_Error Map1::Error("Map1::Error", 8);
-
-void AppClassState::CorrectMessage(AppClassContext& context)
-{
-    Default(context);
-}
+Map1_TEL_FAX Map1::TEL_FAX("Map1::TEL_FAX", 1);
+Map1_SMS Map1::SMS("Map1::SMS", 2);
+Map1_NUMBER Map1::NUMBER("Map1::NUMBER", 3);
+Map1_DIGIT Map1::DIGIT("Map1::DIGIT", 4);
+Map1_PLUS Map1::PLUS("Map1::PLUS", 5);
+Map1_MESSAGE Map1::MESSAGE("Map1::MESSAGE", 6);
+Map1_CORRECT Map1::CORRECT("Map1::CORRECT", 7);
 
 void AppClassState::EOS(AppClassContext& context)
 {
     Default(context);
 }
 
-void AppClassState::Message(AppClassContext& context)
-{
-    Default(context);
-}
-
-void AppClassState::Unknown(AppClassContext& context)
+void AppClassState::cormes(AppClassContext& context)
 {
     Default(context);
 }
@@ -86,7 +75,7 @@ void AppClassState::digit(AppClassContext& context)
     Default(context);
 }
 
-void AppClassState::fax(AppClassContext& context)
+void AppClassState::message(AppClassContext& context)
 {
     Default(context);
 }
@@ -96,12 +85,32 @@ void AppClassState::number(AppClassContext& context)
     Default(context);
 }
 
+void AppClassState::plus(AppClassContext& context)
+{
+    Default(context);
+}
+
 void AppClassState::sms(AppClassContext& context)
 {
     Default(context);
 }
 
-void AppClassState::tel(AppClassContext& context)
+void AppClassState::tel_fax(AppClassContext& context)
+{
+    Default(context);
+}
+
+void AppClassState::wrong_begin(AppClassContext& context)
+{
+    Default(context);
+}
+
+void AppClassState::wrong_message(AppClassContext& context)
+{
+    Default(context);
+}
+
+void AppClassState::wrong_number(AppClassContext& context)
 {
     Default(context);
 }
@@ -123,85 +132,9 @@ void AppClassState::Default(AppClassContext& context)
 
 }
 
-void Map1_Start::Unknown(AppClassContext& context)
-{
-    AppClass& ctxt = context.getOwner();
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Start"
-                << std::endl;
-    }
-
-    context.getState().Exit(context);
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Start::Unknown()"
-            << std::endl;
-    }
-
-    context.clearState();
-    try
-    {
-        ctxt.Unacceptable();
-        if (context.getDebugFlag())
-        {
-            std::ostream& str = context.getDebugStream();
-
-            str << "EXIT TRANSITION : Map1::Start::Unknown()"
-                << std::endl;
-        }
-
-        context.setState(Map1::Start);
-    }
-    catch (...)
-    {
-        context.setState(Map1::Start);
-        throw;
-    }
-    context.getState().Entry(context);
-
-}
-
-void Map1_Start::fax(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Start"
-                << std::endl;
-    }
-
-    context.getState().Exit(context);
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Start::fax()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Start::fax()"
-            << std::endl;
-    }
-
-    context.setState(Map1::Fax);
-    context.getState().Entry(context);
-
-}
-
 void Map1_Start::sms(AppClassContext& context)
 {
+    AppClass& ctxt = context.getOwner();
 
     if (context.getDebugFlag())
     {
@@ -220,21 +153,32 @@ void Map1_Start::sms(AppClassContext& context)
             << std::endl;
     }
 
-    if (context.getDebugFlag())
+    context.clearState();
+    try
     {
-        std::ostream& str = context.getDebugStream();
+        ctxt.isSMS();
+        if (context.getDebugFlag())
+        {
+            std::ostream& str = context.getDebugStream();
 
-        str << "EXIT TRANSITION : Map1::Start::sms()"
-            << std::endl;
+            str << "EXIT TRANSITION : Map1::Start::sms()"
+                << std::endl;
+        }
+
+        context.setState(Map1::SMS);
     }
-
-    context.setState(Map1::Sms);
+    catch (...)
+    {
+        context.setState(Map1::SMS);
+        throw;
+    }
     context.getState().Entry(context);
 
 }
 
-void Map1_Start::tel(AppClassContext& context)
+void Map1_Start::tel_fax(AppClassContext& context)
 {
+    AppClass& ctxt = context.getOwner();
 
     if (context.getDebugFlag())
     {
@@ -249,24 +193,34 @@ void Map1_Start::tel(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::Start::tel()"
+        str << "ENTER TRANSITION: Map1::Start::tel_fax()"
             << std::endl;
     }
 
-    if (context.getDebugFlag())
+    context.clearState();
+    try
     {
-        std::ostream& str = context.getDebugStream();
+        ctxt.notSMS();
+        if (context.getDebugFlag())
+        {
+            std::ostream& str = context.getDebugStream();
 
-        str << "EXIT TRANSITION : Map1::Start::tel()"
-            << std::endl;
+            str << "EXIT TRANSITION : Map1::Start::tel_fax()"
+                << std::endl;
+        }
+
+        context.setState(Map1::TEL_FAX);
     }
-
-    context.setState(Map1::Tel);
+    catch (...)
+    {
+        context.setState(Map1::TEL_FAX);
+        throw;
+    }
     context.getState().Entry(context);
 
 }
 
-void Map1_Tel::Unknown(AppClassContext& context)
+void Map1_Start::wrong_begin(AppClassContext& context)
 {
     AppClass& ctxt = context.getOwner();
 
@@ -274,7 +228,7 @@ void Map1_Tel::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::Tel"
+        str << "LEAVING STATE   : Map1::Start"
                 << std::endl;
     }
 
@@ -283,7 +237,7 @@ void Map1_Tel::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::Tel::Unknown()"
+        str << "ENTER TRANSITION: Map1::Start::wrong_begin()"
             << std::endl;
     }
 
@@ -295,7 +249,7 @@ void Map1_Tel::Unknown(AppClassContext& context)
         {
             std::ostream& str = context.getDebugStream();
 
-            str << "EXIT TRANSITION : Map1::Tel::Unknown()"
+            str << "EXIT TRANSITION : Map1::Start::wrong_begin()"
                 << std::endl;
         }
 
@@ -310,14 +264,14 @@ void Map1_Tel::Unknown(AppClassContext& context)
 
 }
 
-void Map1_Tel::number(AppClassContext& context)
+void Map1_TEL_FAX::number(AppClassContext& context)
 {
 
     if (context.getDebugFlag())
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::Tel"
+        str << "LEAVING STATE   : Map1::TEL_FAX"
                 << std::endl;
     }
 
@@ -326,7 +280,7 @@ void Map1_Tel::number(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::Tel::number()"
+        str << "ENTER TRANSITION: Map1::TEL_FAX::number()"
             << std::endl;
     }
 
@@ -334,16 +288,16 @@ void Map1_Tel::number(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "EXIT TRANSITION : Map1::Tel::number()"
+        str << "EXIT TRANSITION : Map1::TEL_FAX::number()"
             << std::endl;
     }
 
-    context.setState(Map1::Number);
+    context.setState(Map1::NUMBER);
     context.getState().Entry(context);
 
 }
 
-void Map1_Sms::Unknown(AppClassContext& context)
+void Map1_TEL_FAX::wrong_number(AppClassContext& context)
 {
     AppClass& ctxt = context.getOwner();
 
@@ -351,7 +305,7 @@ void Map1_Sms::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::Sms"
+        str << "LEAVING STATE   : Map1::TEL_FAX"
                 << std::endl;
     }
 
@@ -360,7 +314,7 @@ void Map1_Sms::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::Sms::Unknown()"
+        str << "ENTER TRANSITION: Map1::TEL_FAX::wrong_number()"
             << std::endl;
     }
 
@@ -372,7 +326,7 @@ void Map1_Sms::Unknown(AppClassContext& context)
         {
             std::ostream& str = context.getDebugStream();
 
-            str << "EXIT TRANSITION : Map1::Sms::Unknown()"
+            str << "EXIT TRANSITION : Map1::TEL_FAX::wrong_number()"
                 << std::endl;
         }
 
@@ -387,14 +341,14 @@ void Map1_Sms::Unknown(AppClassContext& context)
 
 }
 
-void Map1_Sms::number(AppClassContext& context)
+void Map1_SMS::number(AppClassContext& context)
 {
 
     if (context.getDebugFlag())
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::Sms"
+        str << "LEAVING STATE   : Map1::SMS"
                 << std::endl;
     }
 
@@ -403,7 +357,7 @@ void Map1_Sms::number(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::Sms::number()"
+        str << "ENTER TRANSITION: Map1::SMS::number()"
             << std::endl;
     }
 
@@ -411,16 +365,16 @@ void Map1_Sms::number(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "EXIT TRANSITION : Map1::Sms::number()"
+        str << "EXIT TRANSITION : Map1::SMS::number()"
             << std::endl;
     }
 
-    context.setState(Map1::Number);
+    context.setState(Map1::NUMBER);
     context.getState().Entry(context);
 
 }
 
-void Map1_Fax::Unknown(AppClassContext& context)
+void Map1_SMS::wrong_number(AppClassContext& context)
 {
     AppClass& ctxt = context.getOwner();
 
@@ -428,7 +382,7 @@ void Map1_Fax::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::Fax"
+        str << "LEAVING STATE   : Map1::SMS"
                 << std::endl;
     }
 
@@ -437,7 +391,7 @@ void Map1_Fax::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::Fax::Unknown()"
+        str << "ENTER TRANSITION: Map1::SMS::wrong_number()"
             << std::endl;
     }
 
@@ -449,7 +403,7 @@ void Map1_Fax::Unknown(AppClassContext& context)
         {
             std::ostream& str = context.getDebugStream();
 
-            str << "EXIT TRANSITION : Map1::Fax::Unknown()"
+            str << "EXIT TRANSITION : Map1::SMS::wrong_number()"
                 << std::endl;
         }
 
@@ -464,40 +418,7 @@ void Map1_Fax::Unknown(AppClassContext& context)
 
 }
 
-void Map1_Fax::number(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Fax"
-                << std::endl;
-    }
-
-    context.getState().Exit(context);
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Fax::number()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Fax::number()"
-            << std::endl;
-    }
-
-    context.setState(Map1::Number);
-    context.getState().Entry(context);
-
-}
-
-void Map1_Number::Unknown(AppClassContext& context)
+void Map1_NUMBER::plus(AppClassContext& context)
 {
     AppClass& ctxt = context.getOwner();
 
@@ -505,7 +426,7 @@ void Map1_Number::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::Number"
+        str << "LEAVING STATE   : Map1::NUMBER"
                 << std::endl;
     }
 
@@ -514,7 +435,51 @@ void Map1_Number::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::Number::Unknown()"
+        str << "ENTER TRANSITION: Map1::NUMBER::plus()"
+            << std::endl;
+    }
+
+    context.clearState();
+    try
+    {
+        ctxt.kIsNull();
+        if (context.getDebugFlag())
+        {
+            std::ostream& str = context.getDebugStream();
+
+            str << "EXIT TRANSITION : Map1::NUMBER::plus()"
+                << std::endl;
+        }
+
+        context.setState(Map1::PLUS);
+    }
+    catch (...)
+    {
+        context.setState(Map1::PLUS);
+        throw;
+    }
+    context.getState().Entry(context);
+
+}
+
+void Map1_NUMBER::wrong_number(AppClassContext& context)
+{
+    AppClass& ctxt = context.getOwner();
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::NUMBER"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::NUMBER::wrong_number()"
             << std::endl;
     }
 
@@ -526,7 +491,7 @@ void Map1_Number::Unknown(AppClassContext& context)
         {
             std::ostream& str = context.getDebugStream();
 
-            str << "EXIT TRANSITION : Map1::Number::Unknown()"
+            str << "EXIT TRANSITION : Map1::NUMBER::wrong_number()"
                 << std::endl;
         }
 
@@ -541,40 +506,7 @@ void Map1_Number::Unknown(AppClassContext& context)
 
 }
 
-void Map1_Number::digit(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Number"
-                << std::endl;
-    }
-
-    context.getState().Exit(context);
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Number::digit()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Number::digit()"
-            << std::endl;
-    }
-
-    context.setState(Map1::Digit);
-    context.getState().Entry(context);
-
-}
-
-void Map1_Digit::EOS(AppClassContext& context)
+void Map1_DIGIT::EOS(AppClassContext& context)
 {
     AppClass& ctxt = context.getOwner();
 
@@ -582,7 +514,7 @@ void Map1_Digit::EOS(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::Digit"
+        str << "LEAVING STATE   : Map1::DIGIT"
                 << std::endl;
     }
 
@@ -591,7 +523,7 @@ void Map1_Digit::EOS(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::Digit::EOS()"
+        str << "ENTER TRANSITION: Map1::DIGIT::EOS()"
             << std::endl;
     }
 
@@ -603,7 +535,7 @@ void Map1_Digit::EOS(AppClassContext& context)
         {
             std::ostream& str = context.getDebugStream();
 
-            str << "EXIT TRANSITION : Map1::Digit::EOS()"
+            str << "EXIT TRANSITION : Map1::DIGIT::EOS()"
                 << std::endl;
         }
 
@@ -618,40 +550,7 @@ void Map1_Digit::EOS(AppClassContext& context)
 
 }
 
-void Map1_Digit::Message(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Digit"
-                << std::endl;
-    }
-
-    context.getState().Exit(context);
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Digit::Message()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Digit::Message()"
-            << std::endl;
-    }
-
-    context.setState(Map1::MessageText);
-    context.getState().Entry(context);
-
-}
-
-void Map1_Digit::Unknown(AppClassContext& context)
+void Map1_DIGIT::digit(AppClassContext& context)
 {
     AppClass& ctxt = context.getOwner();
 
@@ -659,7 +558,7 @@ void Map1_Digit::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::Digit"
+        str << "LEAVING STATE   : Map1::DIGIT"
                 << std::endl;
     }
 
@@ -668,7 +567,139 @@ void Map1_Digit::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::Digit::Unknown()"
+        str << "ENTER TRANSITION: Map1::DIGIT::digit()"
+            << std::endl;
+    }
+
+    context.clearState();
+    try
+    {
+        ctxt.kPlusOne();
+        if (context.getDebugFlag())
+        {
+            std::ostream& str = context.getDebugStream();
+
+            str << "EXIT TRANSITION : Map1::DIGIT::digit()"
+                << std::endl;
+        }
+
+        context.setState(Map1::DIGIT);
+    }
+    catch (...)
+    {
+        context.setState(Map1::DIGIT);
+        throw;
+    }
+    context.getState().Entry(context);
+
+}
+
+void Map1_DIGIT::message(AppClassContext& context)
+{
+    AppClass& ctxt = context.getOwner();
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::DIGIT"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::DIGIT::message()"
+            << std::endl;
+    }
+
+    context.clearState();
+    try
+    {
+        ctxt.isCorrectNumber();
+        if (context.getDebugFlag())
+        {
+            std::ostream& str = context.getDebugStream();
+
+            str << "EXIT TRANSITION : Map1::DIGIT::message()"
+                << std::endl;
+        }
+
+        context.setState(Map1::MESSAGE);
+    }
+    catch (...)
+    {
+        context.setState(Map1::MESSAGE);
+        throw;
+    }
+    context.getState().Entry(context);
+
+}
+
+void Map1_DIGIT::number(AppClassContext& context)
+{
+    AppClass& ctxt = context.getOwner();
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::DIGIT"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::DIGIT::number()"
+            << std::endl;
+    }
+
+    context.clearState();
+    try
+    {
+        ctxt.isCorrectNumber();
+        if (context.getDebugFlag())
+        {
+            std::ostream& str = context.getDebugStream();
+
+            str << "EXIT TRANSITION : Map1::DIGIT::number()"
+                << std::endl;
+        }
+
+        context.setState(Map1::NUMBER);
+    }
+    catch (...)
+    {
+        context.setState(Map1::NUMBER);
+        throw;
+    }
+    context.getState().Entry(context);
+
+}
+
+void Map1_DIGIT::wrong_number(AppClassContext& context)
+{
+    AppClass& ctxt = context.getOwner();
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::DIGIT"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::DIGIT::wrong_number()"
             << std::endl;
     }
 
@@ -680,7 +711,7 @@ void Map1_Digit::Unknown(AppClassContext& context)
         {
             std::ostream& str = context.getDebugStream();
 
-            str << "EXIT TRANSITION : Map1::Digit::Unknown()"
+            str << "EXIT TRANSITION : Map1::DIGIT::wrong_number()"
                 << std::endl;
         }
 
@@ -695,106 +726,7 @@ void Map1_Digit::Unknown(AppClassContext& context)
 
 }
 
-void Map1_Digit::digit(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Digit"
-                << std::endl;
-    }
-
-    context.getState().Exit(context);
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Digit::digit()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Digit::digit()"
-            << std::endl;
-    }
-
-    context.setState(Map1::Digit);
-    context.getState().Entry(context);
-
-}
-
-void Map1_Digit::number(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Digit"
-                << std::endl;
-    }
-
-    context.getState().Exit(context);
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Digit::number()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Digit::number()"
-            << std::endl;
-    }
-
-    context.setState(Map1::Number);
-    context.getState().Entry(context);
-
-}
-
-void Map1_MessageText::CorrectMessage(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::MessageText"
-                << std::endl;
-    }
-
-    context.getState().Exit(context);
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::MessageText::CorrectMessage()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::MessageText::CorrectMessage()"
-            << std::endl;
-    }
-
-    context.setState(Map1::Correct);
-    context.getState().Entry(context);
-
-}
-
-void Map1_MessageText::EOS(AppClassContext& context)
+void Map1_PLUS::digit(AppClassContext& context)
 {
     AppClass& ctxt = context.getOwner();
 
@@ -802,7 +734,7 @@ void Map1_MessageText::EOS(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::MessageText"
+        str << "LEAVING STATE   : Map1::PLUS"
                 << std::endl;
     }
 
@@ -811,7 +743,128 @@ void Map1_MessageText::EOS(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::MessageText::EOS()"
+        str << "ENTER TRANSITION: Map1::PLUS::digit()"
+            << std::endl;
+    }
+
+    context.clearState();
+    try
+    {
+        ctxt.kPlusOne();
+        if (context.getDebugFlag())
+        {
+            std::ostream& str = context.getDebugStream();
+
+            str << "EXIT TRANSITION : Map1::PLUS::digit()"
+                << std::endl;
+        }
+
+        context.setState(Map1::DIGIT);
+    }
+    catch (...)
+    {
+        context.setState(Map1::DIGIT);
+        throw;
+    }
+    context.getState().Entry(context);
+
+}
+
+void Map1_PLUS::message(AppClassContext& context)
+{
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::PLUS"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::PLUS::message()"
+            << std::endl;
+    }
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "EXIT TRANSITION : Map1::PLUS::message()"
+            << std::endl;
+    }
+
+    context.setState(Map1::MESSAGE);
+    context.getState().Entry(context);
+
+}
+
+void Map1_PLUS::wrong_number(AppClassContext& context)
+{
+    AppClass& ctxt = context.getOwner();
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::PLUS"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::PLUS::wrong_number()"
+            << std::endl;
+    }
+
+    context.clearState();
+    try
+    {
+        ctxt.Unacceptable();
+        if (context.getDebugFlag())
+        {
+            std::ostream& str = context.getDebugStream();
+
+            str << "EXIT TRANSITION : Map1::PLUS::wrong_number()"
+                << std::endl;
+        }
+
+        context.setState(Map1::Start);
+    }
+    catch (...)
+    {
+        context.setState(Map1::Start);
+        throw;
+    }
+    context.getState().Entry(context);
+
+}
+
+void Map1_MESSAGE::EOS(AppClassContext& context)
+{
+    AppClass& ctxt = context.getOwner();
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::MESSAGE"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::MESSAGE::EOS()"
             << std::endl;
     }
 
@@ -823,7 +876,7 @@ void Map1_MessageText::EOS(AppClassContext& context)
         {
             std::ostream& str = context.getDebugStream();
 
-            str << "EXIT TRANSITION : Map1::MessageText::EOS()"
+            str << "EXIT TRANSITION : Map1::MESSAGE::EOS()"
                 << std::endl;
         }
 
@@ -838,7 +891,7 @@ void Map1_MessageText::EOS(AppClassContext& context)
 
 }
 
-void Map1_MessageText::Unknown(AppClassContext& context)
+void Map1_MESSAGE::cormes(AppClassContext& context)
 {
     AppClass& ctxt = context.getOwner();
 
@@ -846,7 +899,7 @@ void Map1_MessageText::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::MessageText"
+        str << "LEAVING STATE   : Map1::MESSAGE"
                 << std::endl;
     }
 
@@ -855,7 +908,194 @@ void Map1_MessageText::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::MessageText::Unknown()"
+        str << "ENTER TRANSITION: Map1::MESSAGE::cormes()"
+            << std::endl;
+    }
+
+    context.clearState();
+    try
+    {
+        ctxt.isCorrectMess();
+        if (context.getDebugFlag())
+        {
+            std::ostream& str = context.getDebugStream();
+
+            str << "EXIT TRANSITION : Map1::MESSAGE::cormes()"
+                << std::endl;
+        }
+
+        context.setState(Map1::CORRECT);
+    }
+    catch (...)
+    {
+        context.setState(Map1::CORRECT);
+        throw;
+    }
+    context.getState().Entry(context);
+
+}
+
+void Map1_MESSAGE::digit(AppClassContext& context)
+{
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::MESSAGE"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::MESSAGE::digit()"
+            << std::endl;
+    }
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "EXIT TRANSITION : Map1::MESSAGE::digit()"
+            << std::endl;
+    }
+
+    context.setState(Map1::MESSAGE);
+    context.getState().Entry(context);
+
+}
+
+void Map1_MESSAGE::message(AppClassContext& context)
+{
+    AppClass& ctxt = context.getOwner();
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::MESSAGE"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::MESSAGE::message()"
+            << std::endl;
+    }
+
+    context.clearState();
+    try
+    {
+        ctxt.mPlusOne();
+        if (context.getDebugFlag())
+        {
+            std::ostream& str = context.getDebugStream();
+
+            str << "EXIT TRANSITION : Map1::MESSAGE::message()"
+                << std::endl;
+        }
+
+        context.setState(Map1::MESSAGE);
+    }
+    catch (...)
+    {
+        context.setState(Map1::MESSAGE);
+        throw;
+    }
+    context.getState().Entry(context);
+
+}
+
+void Map1_MESSAGE::number(AppClassContext& context)
+{
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::MESSAGE"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::MESSAGE::number()"
+            << std::endl;
+    }
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "EXIT TRANSITION : Map1::MESSAGE::number()"
+            << std::endl;
+    }
+
+    context.setState(Map1::MESSAGE);
+    context.getState().Entry(context);
+
+}
+
+void Map1_MESSAGE::plus(AppClassContext& context)
+{
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::MESSAGE"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::MESSAGE::plus()"
+            << std::endl;
+    }
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "EXIT TRANSITION : Map1::MESSAGE::plus()"
+            << std::endl;
+    }
+
+    context.setState(Map1::MESSAGE);
+    context.getState().Entry(context);
+
+}
+
+void Map1_MESSAGE::wrong_message(AppClassContext& context)
+{
+    AppClass& ctxt = context.getOwner();
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::MESSAGE"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::MESSAGE::wrong_message()"
             << std::endl;
     }
 
@@ -867,7 +1107,7 @@ void Map1_MessageText::Unknown(AppClassContext& context)
         {
             std::ostream& str = context.getDebugStream();
 
-            str << "EXIT TRANSITION : Map1::MessageText::Unknown()"
+            str << "EXIT TRANSITION : Map1::MESSAGE::wrong_message()"
                 << std::endl;
         }
 
@@ -882,40 +1122,7 @@ void Map1_MessageText::Unknown(AppClassContext& context)
 
 }
 
-void Map1_Correct::CorrectMessage(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Correct"
-                << std::endl;
-    }
-
-    context.getState().Exit(context);
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Correct::CorrectMessage()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Correct::CorrectMessage()"
-            << std::endl;
-    }
-
-    context.setState(Map1::Correct);
-    context.getState().Entry(context);
-
-}
-
-void Map1_Correct::EOS(AppClassContext& context)
+void Map1_CORRECT::EOS(AppClassContext& context)
 {
     AppClass& ctxt = context.getOwner();
 
@@ -923,7 +1130,7 @@ void Map1_Correct::EOS(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::Correct"
+        str << "LEAVING STATE   : Map1::CORRECT"
                 << std::endl;
     }
 
@@ -932,7 +1139,7 @@ void Map1_Correct::EOS(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::Correct::EOS()"
+        str << "ENTER TRANSITION: Map1::CORRECT::EOS()"
             << std::endl;
     }
 
@@ -944,7 +1151,7 @@ void Map1_Correct::EOS(AppClassContext& context)
         {
             std::ostream& str = context.getDebugStream();
 
-            str << "EXIT TRANSITION : Map1::Correct::EOS()"
+            str << "EXIT TRANSITION : Map1::CORRECT::EOS()"
                 << std::endl;
         }
 
@@ -959,15 +1166,14 @@ void Map1_Correct::EOS(AppClassContext& context)
 
 }
 
-void Map1_Correct::Unknown(AppClassContext& context)
+void Map1_CORRECT::cormes(AppClassContext& context)
 {
-    AppClass& ctxt = context.getOwner();
 
     if (context.getDebugFlag())
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "LEAVING STATE   : Map1::Correct"
+        str << "LEAVING STATE   : Map1::CORRECT"
                 << std::endl;
     }
 
@@ -976,7 +1182,41 @@ void Map1_Correct::Unknown(AppClassContext& context)
     {
         std::ostream& str = context.getDebugStream();
 
-        str << "ENTER TRANSITION: Map1::Correct::Unknown()"
+        str << "ENTER TRANSITION: Map1::CORRECT::cormes()"
+            << std::endl;
+    }
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "EXIT TRANSITION : Map1::CORRECT::cormes()"
+            << std::endl;
+    }
+
+    context.setState(Map1::CORRECT);
+    context.getState().Entry(context);
+
+}
+
+void Map1_CORRECT::wrong_message(AppClassContext& context)
+{
+    AppClass& ctxt = context.getOwner();
+
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "LEAVING STATE   : Map1::CORRECT"
+                << std::endl;
+    }
+
+    context.getState().Exit(context);
+    if (context.getDebugFlag())
+    {
+        std::ostream& str = context.getDebugStream();
+
+        str << "ENTER TRANSITION: Map1::CORRECT::wrong_message()"
             << std::endl;
     }
 
@@ -988,7 +1228,7 @@ void Map1_Correct::Unknown(AppClassContext& context)
         {
             std::ostream& str = context.getDebugStream();
 
-            str << "EXIT TRANSITION : Map1::Correct::Unknown()"
+            str << "EXIT TRANSITION : Map1::CORRECT::wrong_message()"
                 << std::endl;
         }
 
@@ -1000,200 +1240,6 @@ void Map1_Correct::Unknown(AppClassContext& context)
         throw;
     }
     context.getState().Entry(context);
-
-}
-
-void Map1_Error::CorrectMessage(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Error"
-                << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Error::CorrectMessage()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Error::CorrectMessage()"
-            << std::endl;
-    }
-
-
-}
-
-void Map1_Error::EOS(AppClassContext& context)
-{
-    AppClass& ctxt = context.getOwner();
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Error"
-                << std::endl;
-    }
-
-    context.getState().Exit(context);
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Error::EOS()"
-            << std::endl;
-    }
-
-    context.clearState();
-    try
-    {
-        ctxt.Unacceptable();
-        if (context.getDebugFlag())
-        {
-            std::ostream& str = context.getDebugStream();
-
-            str << "EXIT TRANSITION : Map1::Error::EOS()"
-                << std::endl;
-        }
-
-        context.setState(Map1::Start);
-    }
-    catch (...)
-    {
-        context.setState(Map1::Start);
-        throw;
-    }
-    context.getState().Entry(context);
-
-}
-
-void Map1_Error::Message(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Error"
-                << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Error::Message()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Error::Message()"
-            << std::endl;
-    }
-
-
-}
-
-void Map1_Error::Unknown(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Error"
-                << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Error::Unknown()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Error::Unknown()"
-            << std::endl;
-    }
-
-
-}
-
-void Map1_Error::digit(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Error"
-                << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Error::digit()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Error::digit()"
-            << std::endl;
-    }
-
-
-}
-
-void Map1_Error::number(AppClassContext& context)
-{
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "LEAVING STATE   : Map1::Error"
-                << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "ENTER TRANSITION: Map1::Error::number()"
-            << std::endl;
-    }
-
-    if (context.getDebugFlag())
-    {
-        std::ostream& str = context.getDebugStream();
-
-        str << "EXIT TRANSITION : Map1::Error::number()"
-            << std::endl;
-    }
-
 
 }
 

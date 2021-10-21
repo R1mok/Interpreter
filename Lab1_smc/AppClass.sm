@@ -49,66 +49,57 @@
 // State		Transition		End State		Action(s)
 Start
 {
-//				Zero			Zeros			{}
-//				One				Ones			{}
-//				Unknown			Error			{}
-//				EOS				OK				{Acceptable();}
 				
-				tel				Tel				{}
-				sms				Sms				{}
-				fax				Fax				{}
-				Unknown			Start			{Unacceptable();}
+				tel_fax			TEL_FAX			{notSMS();}
+				sms				SMS				{isSMS();}
+				wrong_begin		Start			{Unacceptable();}
 }
 
-Tel
+TEL_FAX
 {
-				Unknown			Start			{Unacceptable();}
-				number			Number			{}
+				wrong_number	Start			{Unacceptable();}
+				number			NUMBER			{}
 				
 }
-Sms
+SMS
 {
-				Unknown			Start			{Unacceptable();}
-				number			Number			{}
+				wrong_number	Start			{Unacceptable();}
+				number			NUMBER			{}
 }
-Fax
+NUMBER
 {
-				Unknown			Start			{Unacceptable();}
-				number			Number			{}
+				wrong_number	Start			{Unacceptable();}
+				plus			PLUS			{kIsNull();}
 }
-Number
+DIGIT
 {
-				Unknown			Start			{Unacceptable();}
-				digit			Digit			{}
-}
-Digit
-{
-				Unknown			Start			{Unacceptable();}
-				digit			Digit			{}
-				Message			MessageText		{}
+				wrong_number	Start			{Unacceptable();}
+				digit			DIGIT			{kPlusOne();}
+				message			MESSAGE 		{isCorrectNumber();}
 				EOS				Start			{Acceptable();}
-				number			Number			{}
+				number			NUMBER			{isCorrectNumber();}
 }
-MessageText
+PLUS
 {
-				Unknown			Start			{Unacceptable();}
-				CorrectMessage	Correct			{}
+				wrong_number	Start			{Unacceptable();}
+				digit			DIGIT			{kPlusOne();}
+				message			MESSAGE			{}
+}
+MESSAGE
+{
+				wrong_message	Start			{Unacceptable();}
+				cormes			CORRECT			{isCorrectMess();}
 				EOS				Start			{Acceptable();}
+				plus			MESSAGE			{}
+				digit			MESSAGE			{}
+				number			MESSAGE			{}
+				message			MESSAGE			{mPlusOne();}
 }
-Correct
+CORRECT
 {
-				Unknown			Start			{Unacceptable();}
-				CorrectMessage	Correct			{}
+				cormes			CORRECT			{}
 				EOS				Start			{Acceptable();}
-}
-Error
-{
-				number			nil				{}
-				digit			nil				{}
-				Message			nil				{}
-				CorrectMessage	nil				{}
-				Unknown			nil				{}
-				EOS				Start			{Unacceptable();}
+				wrong_message	Start			{Unacceptable();}
 }
 
 %%

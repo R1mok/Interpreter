@@ -16,14 +16,13 @@
 // Forward declarations.
 class Map1;
 class Map1_Start;
-class Map1_Tel;
-class Map1_Sms;
-class Map1_Fax;
-class Map1_Number;
-class Map1_Digit;
-class Map1_MessageText;
-class Map1_Correct;
-class Map1_Error;
+class Map1_TEL_FAX;
+class Map1_SMS;
+class Map1_NUMBER;
+class Map1_DIGIT;
+class Map1_PLUS;
+class Map1_MESSAGE;
+class Map1_CORRECT;
 class Map1_Default;
 class AppClassState;
 class AppClassContext;
@@ -41,15 +40,17 @@ public:
     virtual void Entry(AppClassContext&) {};
     virtual void Exit(AppClassContext&) {};
 
-    virtual void CorrectMessage(AppClassContext& context);
     virtual void EOS(AppClassContext& context);
-    virtual void Message(AppClassContext& context);
-    virtual void Unknown(AppClassContext& context);
+    virtual void cormes(AppClassContext& context);
     virtual void digit(AppClassContext& context);
-    virtual void fax(AppClassContext& context);
+    virtual void message(AppClassContext& context);
     virtual void number(AppClassContext& context);
+    virtual void plus(AppClassContext& context);
     virtual void sms(AppClassContext& context);
-    virtual void tel(AppClassContext& context);
+    virtual void tel_fax(AppClassContext& context);
+    virtual void wrong_begin(AppClassContext& context);
+    virtual void wrong_message(AppClassContext& context);
+    virtual void wrong_number(AppClassContext& context);
 
 protected:
 
@@ -61,14 +62,13 @@ class Map1
 public:
 
     static Map1_Start Start;
-    static Map1_Tel Tel;
-    static Map1_Sms Sms;
-    static Map1_Fax Fax;
-    static Map1_Number Number;
-    static Map1_Digit Digit;
-    static Map1_MessageText MessageText;
-    static Map1_Correct Correct;
-    static Map1_Error Error;
+    static Map1_TEL_FAX TEL_FAX;
+    static Map1_SMS SMS;
+    static Map1_NUMBER NUMBER;
+    static Map1_DIGIT DIGIT;
+    static Map1_PLUS PLUS;
+    static Map1_MESSAGE MESSAGE;
+    static Map1_CORRECT CORRECT;
 };
 
 class Map1_Default :
@@ -90,115 +90,103 @@ public:
     : Map1_Default(name, stateId)
     {};
 
-    virtual void Unknown(AppClassContext& context);
-    virtual void fax(AppClassContext& context);
     virtual void sms(AppClassContext& context);
-    virtual void tel(AppClassContext& context);
+    virtual void tel_fax(AppClassContext& context);
+    virtual void wrong_begin(AppClassContext& context);
 };
 
-class Map1_Tel :
+class Map1_TEL_FAX :
     public Map1_Default
 {
 public:
-    Map1_Tel(const char * const name, const int stateId)
+    Map1_TEL_FAX(const char * const name, const int stateId)
     : Map1_Default(name, stateId)
     {};
 
-    virtual void Unknown(AppClassContext& context);
     virtual void number(AppClassContext& context);
+    virtual void wrong_number(AppClassContext& context);
 };
 
-class Map1_Sms :
+class Map1_SMS :
     public Map1_Default
 {
 public:
-    Map1_Sms(const char * const name, const int stateId)
+    Map1_SMS(const char * const name, const int stateId)
     : Map1_Default(name, stateId)
     {};
 
-    virtual void Unknown(AppClassContext& context);
     virtual void number(AppClassContext& context);
+    virtual void wrong_number(AppClassContext& context);
 };
 
-class Map1_Fax :
+class Map1_NUMBER :
     public Map1_Default
 {
 public:
-    Map1_Fax(const char * const name, const int stateId)
+    Map1_NUMBER(const char * const name, const int stateId)
     : Map1_Default(name, stateId)
     {};
 
-    virtual void Unknown(AppClassContext& context);
-    virtual void number(AppClassContext& context);
+    virtual void plus(AppClassContext& context);
+    virtual void wrong_number(AppClassContext& context);
 };
 
-class Map1_Number :
+class Map1_DIGIT :
     public Map1_Default
 {
 public:
-    Map1_Number(const char * const name, const int stateId)
+    Map1_DIGIT(const char * const name, const int stateId)
     : Map1_Default(name, stateId)
     {};
 
-    virtual void Unknown(AppClassContext& context);
+    virtual void EOS(AppClassContext& context);
     virtual void digit(AppClassContext& context);
-};
-
-class Map1_Digit :
-    public Map1_Default
-{
-public:
-    Map1_Digit(const char * const name, const int stateId)
-    : Map1_Default(name, stateId)
-    {};
-
-    virtual void EOS(AppClassContext& context);
-    virtual void Message(AppClassContext& context);
-    virtual void Unknown(AppClassContext& context);
-    virtual void digit(AppClassContext& context);
+    virtual void message(AppClassContext& context);
     virtual void number(AppClassContext& context);
+    virtual void wrong_number(AppClassContext& context);
 };
 
-class Map1_MessageText :
+class Map1_PLUS :
     public Map1_Default
 {
 public:
-    Map1_MessageText(const char * const name, const int stateId)
+    Map1_PLUS(const char * const name, const int stateId)
     : Map1_Default(name, stateId)
     {};
 
-    virtual void CorrectMessage(AppClassContext& context);
-    virtual void EOS(AppClassContext& context);
-    virtual void Unknown(AppClassContext& context);
-};
-
-class Map1_Correct :
-    public Map1_Default
-{
-public:
-    Map1_Correct(const char * const name, const int stateId)
-    : Map1_Default(name, stateId)
-    {};
-
-    virtual void CorrectMessage(AppClassContext& context);
-    virtual void EOS(AppClassContext& context);
-    virtual void Unknown(AppClassContext& context);
-};
-
-class Map1_Error :
-    public Map1_Default
-{
-public:
-    Map1_Error(const char * const name, const int stateId)
-    : Map1_Default(name, stateId)
-    {};
-
-    virtual void CorrectMessage(AppClassContext& context);
-    virtual void EOS(AppClassContext& context);
-    virtual void Message(AppClassContext& context);
-    virtual void Unknown(AppClassContext& context);
     virtual void digit(AppClassContext& context);
+    virtual void message(AppClassContext& context);
+    virtual void wrong_number(AppClassContext& context);
+};
+
+class Map1_MESSAGE :
+    public Map1_Default
+{
+public:
+    Map1_MESSAGE(const char * const name, const int stateId)
+    : Map1_Default(name, stateId)
+    {};
+
+    virtual void EOS(AppClassContext& context);
+    virtual void cormes(AppClassContext& context);
+    virtual void digit(AppClassContext& context);
+    virtual void message(AppClassContext& context);
     virtual void number(AppClassContext& context);
+    virtual void plus(AppClassContext& context);
+    virtual void wrong_message(AppClassContext& context);
+};
+
+class Map1_CORRECT :
+    public Map1_Default
+{
+public:
+    Map1_CORRECT(const char * const name, const int stateId)
+    : Map1_Default(name, stateId)
+    {};
+
+    virtual void EOS(AppClassContext& context);
+    virtual void cormes(AppClassContext& context);
+    virtual void wrong_message(AppClassContext& context);
 };
 
 class AppClassContext :
@@ -237,13 +225,6 @@ public:
         return dynamic_cast<AppClassState&>(*_state);
     };
 
-    inline void CorrectMessage()
-    {
-        setTransition("CorrectMessage");
-        getState().CorrectMessage(*this);
-        setTransition(NULL);
-    };
-
     inline void EOS()
     {
         setTransition("EOS");
@@ -251,17 +232,10 @@ public:
         setTransition(NULL);
     };
 
-    inline void Message()
+    inline void cormes()
     {
-        setTransition("Message");
-        getState().Message(*this);
-        setTransition(NULL);
-    };
-
-    inline void Unknown()
-    {
-        setTransition("Unknown");
-        getState().Unknown(*this);
+        setTransition("cormes");
+        getState().cormes(*this);
         setTransition(NULL);
     };
 
@@ -272,10 +246,10 @@ public:
         setTransition(NULL);
     };
 
-    inline void fax()
+    inline void message()
     {
-        setTransition("fax");
-        getState().fax(*this);
+        setTransition("message");
+        getState().message(*this);
         setTransition(NULL);
     };
 
@@ -286,6 +260,13 @@ public:
         setTransition(NULL);
     };
 
+    inline void plus()
+    {
+        setTransition("plus");
+        getState().plus(*this);
+        setTransition(NULL);
+    };
+
     inline void sms()
     {
         setTransition("sms");
@@ -293,10 +274,31 @@ public:
         setTransition(NULL);
     };
 
-    inline void tel()
+    inline void tel_fax()
     {
-        setTransition("tel");
-        getState().tel(*this);
+        setTransition("tel_fax");
+        getState().tel_fax(*this);
+        setTransition(NULL);
+    };
+
+    inline void wrong_begin()
+    {
+        setTransition("wrong_begin");
+        getState().wrong_begin(*this);
+        setTransition(NULL);
+    };
+
+    inline void wrong_message()
+    {
+        setTransition("wrong_message");
+        getState().wrong_message(*this);
+        setTransition(NULL);
+    };
+
+    inline void wrong_number()
+    {
+        setTransition("wrong_number");
+        getState().wrong_number(*this);
         setTransition(NULL);
     };
 

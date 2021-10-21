@@ -62,11 +62,21 @@ private:
     AppClassContext _fsm;
 #endif
 
-    bool isAcceptable;
+    bool isAcceptable; 
+    bool sms;
+    std::string number;
+    bool correctNumber = true;
+    bool correctMess;
         // If a string is acceptable, then this variable is set to YES;
         // NO, otherwise.
 
 public:
+    std::vector<std::string> numbers;
+    int numberK = 0;
+    int numberM = 0;
+    void kIsNull() { numberK = 0; }
+    void kPlusOne() { numberK += 1; }
+    void mPlusOne() { numberM += 1; }
     AppClass();
         // Default constructor.
 
@@ -75,8 +85,33 @@ public:
 
     bool CheckString(std::string);
         // Checks if the string is acceptable.
-
+    void addNum(std::string _number) {
+        numbers.push_back(_number);
+    }
     std::map<std::string, int> m;
+    inline void isSMS()
+    { sms = true; };
+    inline void notSMS()
+    { sms = false; };
+
+    void isCorrectNumber() {
+        if (numberK == 11)
+            correctNumber = true;
+        else
+            correctNumber = false;
+    }
+    void isCorrectMess() {
+        if (numberM <= 64)
+        {
+            correctMess = true;
+            numberM = 0;
+        }
+        else
+        {
+            correctMess = false;
+            numberM = 0;
+        }
+    }
 
     inline void Acceptable()
     { isAcceptable = true; };

@@ -75,18 +75,23 @@ int main(int argc, char* argv[])
     AppClass thisContext;
     int retcode = 0;
     int n = 0;
-    FILE* fd = fopen("textfile1.txt", "r");
+    FILE* fd = fopen("textfile1700000.txt", "r");
     std::string source_string;
     std::ifstream is(fd);
+    std::vector<std::string> f;
+    while (getline(is, source_string))
+        f.push_back(source_string);
+    
     auto first = high_resolution_clock::now();
-    while (getline(is, source_string)) {
+    for(int i = 0; i < f.size(); ++i) {
         ++n;
         try {
-            if (thisContext.CheckString(source_string) == true) {
-                cout << n << ": String \\ " << source_string << " \\ is acceptable!" << endl;
+            
+            if (thisContext.CheckString(f[i]) == true) {
+                //cout << n << ": String \\ " << source_string << " \\ is acceptable!" << endl;
             }
             else {
-                cout << n << ": String \\ " << source_string << " \\ is unacceptable!" << endl;
+                //cout << n << ": String \\ " << source_string << " \\ is unacceptable!" << endl;
             }
         }
         catch (const SmcException& smcex)
@@ -103,48 +108,16 @@ int main(int argc, char* argv[])
     duration<double>diff = second - first;
     milliseconds d = duration_cast<milliseconds>(diff);
     std::cout << "------------------" << std::endl;
-    std::cout << "Correct numbers: " << std::endl;
-   for (auto elem : thisContext.m) {
+    std::cout << "Correct numbers: " << thisContext.numbers.size() << std::endl;
+    for (auto str : thisContext.numbers) {
+        if (thisContext.m.count(str))
+            thisContext.m[str] += 1;
+        else
+            thisContext.m[str] = 1;
+    }
+    /*for (auto elem : thisContext.m) {
         std::cout << elem.first << ":" << elem.second << std::endl;
-    }
+    }*/
     std::cout << "Time: " << d.count() << std::endl;
-    /*
-    if (argc < 2)
-    {
-        cerr << "No string to check." << endl;
-        retcode = 2;
-    }
-    else if (argc > 2)
-    {
-        cerr << "Only one argument is accepted." << endl;
-        retcode = 3;
-    }
-    else
-    {
-        cout << "The string \"" << argv[1] << "\" is ";
-
-        try
-        {
-            if (thisContext.CheckString(argv[1]) == false)
-            {
-                cout << "not acceptable." << endl;
-                retcode = 1;
-            }
-            else
-            {
-                cout << "acceptable." << endl;
-            }
-        }
-        catch (const SmcException &smcex)
-        {
-            cout << "not acceptable - "
-                 << smcex.what()
-                 << '.'
-                 << endl;
-
-            retcode = 1;
-        }
-    }
-    */
     return retcode;
 }
