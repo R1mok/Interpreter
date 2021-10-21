@@ -3,16 +3,18 @@
 
 import re
 import time
-regex = r"(sms\:(\+[0-9]{11})(\,\+[0-9]{11})*\;\?(body\=[a-zA-Z%?!,.0-9]{1,64})?)|((tel|fax)\:(\+[0-9]{11})(\,\+[0-9]{11})*\;\?)"
+regex = r"(sms\:(\+[0-9]{11})(\,\+[0-9]{11})*\;(\?body\=[a-zA-Z%?!,.0-9]{1,64})?)|((tel|fax)\:(\+[0-9]{11})(\,\+[0-9]{11})*\;)" # ?body
 
-fd = open("textfile1.txt", "r")
+args = input().split()
+fd = open(str(args[0]), "r")
+
 test_str = fd.read()
 fd.close()
 
 m = dict()
 
 matches = re.finditer(regex, test_str, re.MULTILINE)
-first = time.time()
+first = int(round(time.time() * 1000)) 
 for matchNum, match in enumerate(matches, start=1):
 	if match.group() != None:
 		Str = match.group(0)
@@ -28,11 +30,11 @@ for matchNum, match in enumerate(matches, start=1):
 				m[outList[i]] = m[outList[i]] + 1
 			else:
 				m[outList[i]] = 1
-second = time.time()
-for key in m:
-	print(key + ": " + str(m[key]))
+second = int(round(time.time() * 1000)) 
+#for key in m:
+	#print(key + ": " + str(m[key]))
 print("==================")
-print(second - first)
+print("Time: " + str(second - first))
 
 # Note: for Python 2.7 compatibility, use ur"" to prefix the regex and u"" to prefix the test string and substitution.
 
