@@ -2,7 +2,7 @@
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppCommon.targets(241,5): warning MSB8065: настраиваемая сборка для элемента "AppClass.sm" успешно выполнена, но указанные выходные данные "c:\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381-20210913t092731z-001\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381\examples\c++\lab1_smc\appclass_sm.h appclass_sm.cpp" не созданы. Это может привести к неправильной работе инкрементной сборки.
   AppClass.cpp
 C:\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381-20210913T092731Z-001\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381\lib\C++\statemap.h(103,25): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381-20210913T092731Z-001\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381\examples\C++\Lab1_smc\AppClass.cpp(270,27): warning C4018: <: несоответствие типов со знаком и без знака
+C:\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381-20210913T092731Z-001\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381\examples\C++\Lab1_smc\AppClass.cpp(189,23): warning C4018: <: несоответствие типов со знаком и без знака
   AppClass_sm.cpp
 C:\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381-20210913T092731Z-001\smc-git-code-b058839dba1b0c62de2a6ea5f31c54d57f075381\lib\C++\statemap.h(103,25): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   main.cpp

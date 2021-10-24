@@ -46,60 +46,72 @@
 
 %map Map1
 %%
-// State		Transition		End State		Action(s)
+// State		Transition															End State		Action(s)
 Start
 {
-				
-				tel_fax			TEL_FAX			{notSMS();}
-				sms				SMS				{isSMS();}
-				wrong_begin		Start			{Unacceptable();}
-}
-
-TEL_FAX
-{
-				wrong_number	Start			{Unacceptable();}
-				number			NUMBER			{}
-				
-}
-SMS
-{
-				wrong_number	Start			{Unacceptable();}
-				number			NUMBER			{}
+				next_state(str: std::string) [ctxt.prefixFaxTel(str) == true]		NUMBER			{notSMS();}
+				next_state(str: std::string) [ctxt.prefixSMS(str) == true]			NUMBER			{isSMS();}
+				next_state(str: std::string) [ctxt.prefixSMS(str) == false && ctxt.prefixFaxTel(str) == false]		Start		{Unacceptable(); falseStream();}
+				EOS		Start	{startAuto();}
 }
 NUMBER
 {
-				wrong_number	Start			{Unacceptable();}
-				plus			PLUS			{kIsNull();}
-}
-DIGIT
-{
-				wrong_number	Start			{Unacceptable();}
-				digit			DIGIT			{kPlusOne();}
-				message			MESSAGE 		{isCorrectNumber();}
-				EOS				Start			{Acceptable();}
-				number			NUMBER			{isCorrectNumber();}
+				digit(symbol: char) [symbol != '+' && symbol != ';']			Start			{Unacceptable(); falseStream();}
+				digit(symbol: char) [symbol == '+']								PLUS			{addChar(symbol); kIsNull();}
+				digit(symbol: char) [symbol == ';']								NUMBER			{addNumber();}
 }
 PLUS
 {
-				wrong_number	Start			{Unacceptable();}
-				digit			DIGIT			{kPlusOne();}
-				message			MESSAGE			{}
+				digit(symbol: char) [symbol >= '0' && symbol <= '9']			DIGIT			{addChar(symbol); kPlusOne();}
+				digit(symbol: char) [symbol < '0' || symbol > '9']				Start			{Unacceptable(); falseStream();} 
+}
+DIGIT
+{
+				digit(symbol: char) [symbol >= '0' && symbol <= '9']			DIGIT			{addChar(symbol); kPlusOne();}
+				digit(symbol: char) [symbol == ',' && ctxt.isCorrectNumber() == true]		NUMBER			{addNumber();}
+				digit(symbol: char) [symbol == ';' && ctxt.isCorrectNumber() == true]		MESSAGE			{addNumber();}
+				digit(symbol: char) [((symbol == ';' || symbol == ',') && ctxt.isCorrectNumber() == false)
+				|| ((symbol < '0' && symbol != ',') || (symbol > '9' && symbol != ';'))]	Start  {Unacceptable(); falseStream();}
 }
 MESSAGE
 {
-				wrong_message	Start			{Unacceptable();}
-				cormes			CORRECT			{isCorrectMess();}
-				EOS				Start			{Acceptable();}
-				plus			MESSAGE			{}
-				digit			MESSAGE			{}
-				number			MESSAGE			{}
-				message			MESSAGE			{mPlusOne();}
-}
-CORRECT
-{
-				cormes			CORRECT			{}
-				EOS				Start			{Acceptable();}
-				wrong_message	Start			{Unacceptable();}
+				EOS			Start			{Acceptable(); startAuto();}
+				digit(symbol: char) [symbol == '?' && ctxt.sms == true]		SMS_MESSAGE		{}
+				digit(symbol: char) [(symbol == '?' && ctxt.sms == false) || symbol != '?']		Start			{Unacceptable(); falseStream();}
 }
 
+SMS_MESSAGE
+{
+				digit(symbol: char) [symbol == 'b']		SMS_MESSAGE_b	{}
+				digit(symbol: char) [symbol != 'b']		Start			{Unacceptable(); falseStream();}
+}
+SMS_MESSAGE_b
+{
+				digit(symbol: char) [symbol == 'o']		SMS_MESSAGE_o	{}
+				digit(symbol: char) [symbol != 'o']		Start			{Unacceptable(); falseStream();}
+}
+SMS_MESSAGE_o
+{
+				digit(symbol: char) [symbol == 'd']		SMS_MESSAGE_d	{}
+				digit(symbol: char) [symbol != 'd']		Start			{Unacceptable(); falseStream();}
+}
+SMS_MESSAGE_d
+{
+				digit(symbol: char) [symbol == 'y']		SMS_MESSAGE_y	{}
+				digit(symbol: char) [symbol != 'y']		Start			{Unacceptable(); falseStream();}
+}
+SMS_MESSAGE_y
+{
+				digit(symbol: char) [symbol == '=']		SMS_TEXT		{}
+				digit(symbol: char) [symbol != '=']		Start			{Unacceptable(); falseStream();}
+}
+SMS_TEXT
+{
+				digit(symbol: char) [(symbol >= 'A' && symbol <= 'Z') || (symbol >= 'a' && symbol <= 'z') ||
+				(symbol <= '9' && symbol >= '0') || (symbol == '%' || symbol == ',' || symbol == '.' || symbol == '!' || symbol == '?')]
+				SMS_TEXT			{mPlusOne();}
+				EOS[ctxt.isCorrectMess() == true]		Start	{Acceptable(); startAuto();}
+				EOS[ctxt.isCorrectMess() == false]		Start	{Unacceptable(); falseStream();}
+
+}
 %%

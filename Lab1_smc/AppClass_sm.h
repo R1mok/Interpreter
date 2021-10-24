@@ -16,13 +16,16 @@
 // Forward declarations.
 class Map1;
 class Map1_Start;
-class Map1_TEL_FAX;
-class Map1_SMS;
 class Map1_NUMBER;
-class Map1_DIGIT;
 class Map1_PLUS;
+class Map1_DIGIT;
 class Map1_MESSAGE;
-class Map1_CORRECT;
+class Map1_SMS_MESSAGE;
+class Map1_SMS_MESSAGE_b;
+class Map1_SMS_MESSAGE_o;
+class Map1_SMS_MESSAGE_d;
+class Map1_SMS_MESSAGE_y;
+class Map1_SMS_TEXT;
 class Map1_Default;
 class AppClassState;
 class AppClassContext;
@@ -41,16 +44,8 @@ public:
     virtual void Exit(AppClassContext&) {};
 
     virtual void EOS(AppClassContext& context);
-    virtual void cormes(AppClassContext& context);
-    virtual void digit(AppClassContext& context);
-    virtual void message(AppClassContext& context);
-    virtual void number(AppClassContext& context);
-    virtual void plus(AppClassContext& context);
-    virtual void sms(AppClassContext& context);
-    virtual void tel_fax(AppClassContext& context);
-    virtual void wrong_begin(AppClassContext& context);
-    virtual void wrong_message(AppClassContext& context);
-    virtual void wrong_number(AppClassContext& context);
+    virtual void digit(AppClassContext& context, char symbol);
+    virtual void next_state(AppClassContext& context, std::string str);
 
 protected:
 
@@ -62,13 +57,16 @@ class Map1
 public:
 
     static Map1_Start Start;
-    static Map1_TEL_FAX TEL_FAX;
-    static Map1_SMS SMS;
     static Map1_NUMBER NUMBER;
-    static Map1_DIGIT DIGIT;
     static Map1_PLUS PLUS;
+    static Map1_DIGIT DIGIT;
     static Map1_MESSAGE MESSAGE;
-    static Map1_CORRECT CORRECT;
+    static Map1_SMS_MESSAGE SMS_MESSAGE;
+    static Map1_SMS_MESSAGE_b SMS_MESSAGE_b;
+    static Map1_SMS_MESSAGE_o SMS_MESSAGE_o;
+    static Map1_SMS_MESSAGE_d SMS_MESSAGE_d;
+    static Map1_SMS_MESSAGE_y SMS_MESSAGE_y;
+    static Map1_SMS_TEXT SMS_TEXT;
 };
 
 class Map1_Default :
@@ -90,33 +88,8 @@ public:
     : Map1_Default(name, stateId)
     {};
 
-    virtual void sms(AppClassContext& context);
-    virtual void tel_fax(AppClassContext& context);
-    virtual void wrong_begin(AppClassContext& context);
-};
-
-class Map1_TEL_FAX :
-    public Map1_Default
-{
-public:
-    Map1_TEL_FAX(const char * const name, const int stateId)
-    : Map1_Default(name, stateId)
-    {};
-
-    virtual void number(AppClassContext& context);
-    virtual void wrong_number(AppClassContext& context);
-};
-
-class Map1_SMS :
-    public Map1_Default
-{
-public:
-    Map1_SMS(const char * const name, const int stateId)
-    : Map1_Default(name, stateId)
-    {};
-
-    virtual void number(AppClassContext& context);
-    virtual void wrong_number(AppClassContext& context);
+    virtual void EOS(AppClassContext& context);
+    virtual void next_state(AppClassContext& context, std::string str);
 };
 
 class Map1_NUMBER :
@@ -127,23 +100,7 @@ public:
     : Map1_Default(name, stateId)
     {};
 
-    virtual void plus(AppClassContext& context);
-    virtual void wrong_number(AppClassContext& context);
-};
-
-class Map1_DIGIT :
-    public Map1_Default
-{
-public:
-    Map1_DIGIT(const char * const name, const int stateId)
-    : Map1_Default(name, stateId)
-    {};
-
-    virtual void EOS(AppClassContext& context);
-    virtual void digit(AppClassContext& context);
-    virtual void message(AppClassContext& context);
-    virtual void number(AppClassContext& context);
-    virtual void wrong_number(AppClassContext& context);
+    virtual void digit(AppClassContext& context, char symbol);
 };
 
 class Map1_PLUS :
@@ -154,9 +111,18 @@ public:
     : Map1_Default(name, stateId)
     {};
 
-    virtual void digit(AppClassContext& context);
-    virtual void message(AppClassContext& context);
-    virtual void wrong_number(AppClassContext& context);
+    virtual void digit(AppClassContext& context, char symbol);
+};
+
+class Map1_DIGIT :
+    public Map1_Default
+{
+public:
+    Map1_DIGIT(const char * const name, const int stateId)
+    : Map1_Default(name, stateId)
+    {};
+
+    virtual void digit(AppClassContext& context, char symbol);
 };
 
 class Map1_MESSAGE :
@@ -168,25 +134,74 @@ public:
     {};
 
     virtual void EOS(AppClassContext& context);
-    virtual void cormes(AppClassContext& context);
-    virtual void digit(AppClassContext& context);
-    virtual void message(AppClassContext& context);
-    virtual void number(AppClassContext& context);
-    virtual void plus(AppClassContext& context);
-    virtual void wrong_message(AppClassContext& context);
+    virtual void digit(AppClassContext& context, char symbol);
 };
 
-class Map1_CORRECT :
+class Map1_SMS_MESSAGE :
     public Map1_Default
 {
 public:
-    Map1_CORRECT(const char * const name, const int stateId)
+    Map1_SMS_MESSAGE(const char * const name, const int stateId)
+    : Map1_Default(name, stateId)
+    {};
+
+    virtual void digit(AppClassContext& context, char symbol);
+};
+
+class Map1_SMS_MESSAGE_b :
+    public Map1_Default
+{
+public:
+    Map1_SMS_MESSAGE_b(const char * const name, const int stateId)
+    : Map1_Default(name, stateId)
+    {};
+
+    virtual void digit(AppClassContext& context, char symbol);
+};
+
+class Map1_SMS_MESSAGE_o :
+    public Map1_Default
+{
+public:
+    Map1_SMS_MESSAGE_o(const char * const name, const int stateId)
+    : Map1_Default(name, stateId)
+    {};
+
+    virtual void digit(AppClassContext& context, char symbol);
+};
+
+class Map1_SMS_MESSAGE_d :
+    public Map1_Default
+{
+public:
+    Map1_SMS_MESSAGE_d(const char * const name, const int stateId)
+    : Map1_Default(name, stateId)
+    {};
+
+    virtual void digit(AppClassContext& context, char symbol);
+};
+
+class Map1_SMS_MESSAGE_y :
+    public Map1_Default
+{
+public:
+    Map1_SMS_MESSAGE_y(const char * const name, const int stateId)
+    : Map1_Default(name, stateId)
+    {};
+
+    virtual void digit(AppClassContext& context, char symbol);
+};
+
+class Map1_SMS_TEXT :
+    public Map1_Default
+{
+public:
+    Map1_SMS_TEXT(const char * const name, const int stateId)
     : Map1_Default(name, stateId)
     {};
 
     virtual void EOS(AppClassContext& context);
-    virtual void cormes(AppClassContext& context);
-    virtual void wrong_message(AppClassContext& context);
+    virtual void digit(AppClassContext& context, char symbol);
 };
 
 class AppClassContext :
@@ -232,73 +247,17 @@ public:
         setTransition(NULL);
     };
 
-    inline void cormes()
-    {
-        setTransition("cormes");
-        getState().cormes(*this);
-        setTransition(NULL);
-    };
-
-    inline void digit()
+    inline void digit(char symbol)
     {
         setTransition("digit");
-        getState().digit(*this);
+        getState().digit(*this, symbol);
         setTransition(NULL);
     };
 
-    inline void message()
+    inline void next_state(std::string str)
     {
-        setTransition("message");
-        getState().message(*this);
-        setTransition(NULL);
-    };
-
-    inline void number()
-    {
-        setTransition("number");
-        getState().number(*this);
-        setTransition(NULL);
-    };
-
-    inline void plus()
-    {
-        setTransition("plus");
-        getState().plus(*this);
-        setTransition(NULL);
-    };
-
-    inline void sms()
-    {
-        setTransition("sms");
-        getState().sms(*this);
-        setTransition(NULL);
-    };
-
-    inline void tel_fax()
-    {
-        setTransition("tel_fax");
-        getState().tel_fax(*this);
-        setTransition(NULL);
-    };
-
-    inline void wrong_begin()
-    {
-        setTransition("wrong_begin");
-        getState().wrong_begin(*this);
-        setTransition(NULL);
-    };
-
-    inline void wrong_message()
-    {
-        setTransition("wrong_message");
-        getState().wrong_message(*this);
-        setTransition(NULL);
-    };
-
-    inline void wrong_number()
-    {
-        setTransition("wrong_number");
-        getState().wrong_number(*this);
+        setTransition("next_state");
+        getState().next_state(*this, str);
         setTransition(NULL);
     };
 

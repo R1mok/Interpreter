@@ -62,21 +62,41 @@ private:
     AppClassContext _fsm;
 #endif
 
-    bool isAcceptable; 
-    bool sms;
+    bool isAcceptable = true;
     std::string number;
     bool correctNumber = true;
-    bool correctMess;
         // If a string is acceptable, then this variable is set to YES;
         // NO, otherwise.
 
 public:
+    bool sms;
+    bool correctStream = true;
+    void falseStream() {
+        correctStream = false;
+    }
+    void startAuto() {
+        correctStream = true;
+        number = "";
+        isAcceptable = true;
+        numberM = 0;
+        numbers.clear();
+    }
     std::vector<std::string> numbers;
     int numberK = 0;
     int numberM = 0;
     void kIsNull() { numberK = 0; }
     void kPlusOne() { numberK += 1; }
     void mPlusOne() { numberM += 1; }
+    bool prefixFaxTel(std::string str) { return (str == "tel:" || str == "fax:"); }
+    bool prefixSMS(std::string str) {
+        return str == "sms:";
+    }
+    bool prefixBody(std::string str) {
+        return str == "?body=";
+    }
+    bool prefixEmpty(std::string str) {
+        return str == "";
+    }
     AppClass();
         // Default constructor.
 
@@ -85,8 +105,12 @@ public:
 
     bool CheckString(std::string);
         // Checks if the string is acceptable.
-    void addNum(std::string _number) {
-        numbers.push_back(_number);
+    void addChar(char _symbol) {
+        number += _symbol;
+    }
+    void addNumber() {
+        numbers.push_back(number);
+        number = "";
     }
     std::map<std::string, int> m;
     inline void isSMS()
@@ -94,28 +118,39 @@ public:
     inline void notSMS()
     { sms = false; };
 
-    void isCorrectNumber() {
-        if (numberK == 11)
+    bool isCorrectNumber() {
+        if (numberK == 11) {
             correctNumber = true;
-        else
+            return true;
+        }
+        else {
             correctNumber = false;
+            return false;
+        }
     }
-    void isCorrectMess() {
+    bool isCorrectMess() {
         if (numberM <= 64)
         {
-            correctMess = true;
             numberM = 0;
+            return true;
         }
         else
         {
-            correctMess = false;
             numberM = 0;
+            return false;
         }
     }
 
-    inline void Acceptable()
-    { isAcceptable = true; };
-    inline void Unacceptable()
+    void Acceptable()
+    { isAcceptable = true; 
+    for (auto str : numbers) {
+        if (m.count(str))
+            m[str] += 1;
+        else
+            m[str] = 1;
+    }
+    };
+    void Unacceptable()
     { isAcceptable = false; };
         // State map actions.
 };

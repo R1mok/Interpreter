@@ -182,120 +182,15 @@ bool AppClass::CheckString(std::string theString)
     //EOS();
 #else
     _fsm.enterStartState();
-
-    /*while (*theString != '\0')
-    {
-        switch(*theString)
-        {
-        case '0':
-            _fsm.Zero();
-            break;
-
-        case '1':
-            _fsm.One();
-            break;
-
-        default:
-            _fsm.Unknown();
-            break;
-        }
-        ++theString;
-    }
-    */
-    std::string prefixStr(theString, 0, 3);
-    if (prefixStr == "tel" || prefixStr == "fax") {
-        _fsm.tel_fax();
-    }
-    else if (prefixStr == "sms") {
-        _fsm.sms();
-    }
-    else {
-        _fsm.wrong_begin();
-        return isAcceptable;
-    }
-    if (theString[3] != ':') {
-        _fsm.wrong_begin();
-        return isAcceptable;
-    }
-    else {
-        _fsm.number();
-    }
-    std::string curString(theString, 4, theString.size() - 4);
-    std::string curstr;
-    int i = 0;
-    for (; curString[i] != ';' || i == curString.size(); ++i) {
-        if (curString[i] == '+') {
-            _fsm.plus();
-            curstr += curString[i];
-        }
-        else if (curString[i] == ',') {
-            if (!this->correctNumber) {
-                _fsm.wrong_number();
-                return isAcceptable;
-            }
-            else _fsm.number();
-            this->addNum(curstr);
-            curstr = "";
-        }
-        else if (curString[i] >= '0' && curString[i] <= '9') {
-            _fsm.digit();
-            curstr += curString[i];
-        }
-        else {
-            _fsm.wrong_number();
-            return isAcceptable;
-        }
-    }
-    if (curString[i] == ';') {
-        this->addNum(curstr);
-        if (!correctNumber) {
-            _fsm.wrong_number();
-            return isAcceptable;
-        }
-        else {
-            _fsm.message();
-        }
-    }
-    else {
-        _fsm.wrong_message();
-        return isAcceptable;
-    }
-    curString = curString.substr(i+1, curString.size());
-    prefixStr = curString.substr(0, 6);
-    if (prefixStr == "") {
-        _fsm.EOS();
-        return isAcceptable;
-    } else if (prefixStr == "?body=" && sms) {
-        curString = curString.substr(6, curString.size());
-        for (int i = 0; i < curString.size(); ++i) {
-            if ((curString[i] >= 'A' && curString[i] <= 'Z') || (curString[i] >= 'a' && curString[i] <= 'z') ||
-                (curString[i] <= '9' && curString[i] >= '0') || (curString[i] == '%' || curString[i] == ',' || curString[i] == '.')
-                || curString[i] == '!' || curString[i] == '?') {
-                _fsm.message();
-            }
-            else {
-                _fsm.wrong_message();
-                return isAcceptable;
-
-            }
-        }
-        _fsm.cormes();
-        if (correctMess) {
-            _fsm.EOS();
-            return isAcceptable;
-        }
-        else {
-            _fsm.wrong_message();
-            return isAcceptable;
-        }
-    }
-    else {
-        _fsm.wrong_message();
-        return isAcceptable; 
-    }
     _fsm.EOS();
-    // end of string has been reached - send the EOS transition
-#endif
-
+    std::string prefixStr(theString, 0, 4); 
+    _fsm.next_state(prefixStr);
+    std::string curString = theString.substr(4, theString.size() - 4);
+    for (int i = 0; i < curString.size(); ++i) {
+        if (correctStream)
+            _fsm.digit(curString[i]);
+        else break;
+    }
     return isAcceptable;
+#endif
 }

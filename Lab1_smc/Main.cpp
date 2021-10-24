@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     AppClass thisContext;
     int retcode = 0;
     int n = 0;
-    FILE* fd = fopen("textfile1700000.txt", "r");
+    FILE* fd = fopen("textfile020.txt", "r");
     std::string source_string;
     std::ifstream is(fd);
     std::vector<std::string> f;
@@ -88,10 +88,10 @@ int main(int argc, char* argv[])
         try {
             
             if (thisContext.CheckString(f[i]) == true) {
-                //cout << n << ": String \\ " << source_string << " \\ is acceptable!" << endl;
+                cout << n << ": String \\ " << f[i] << " \\ is acceptable!" << endl;
             }
             else {
-                //cout << n << ": String \\ " << source_string << " \\ is unacceptable!" << endl;
+                cout << n << ": String \\ " << f[i] << " \\ is unacceptable!" << endl;
             }
         }
         catch (const SmcException& smcex)
@@ -107,17 +107,10 @@ int main(int argc, char* argv[])
     auto second = high_resolution_clock::now();
     duration<double>diff = second - first;
     milliseconds d = duration_cast<milliseconds>(diff);
-    std::cout << "------------------" << std::endl;
-    std::cout << "Correct numbers: " << thisContext.numbers.size() << std::endl;
-    for (auto str : thisContext.numbers) {
-        if (thisContext.m.count(str))
-            thisContext.m[str] += 1;
-        else
-            thisContext.m[str] = 1;
-    }
-    /*for (auto elem : thisContext.m) {
+    std::cout << "------------------" << std::endl;    
+    for (auto elem : thisContext.m) {
         std::cout << elem.first << ":" << elem.second << std::endl;
-    }*/
-    std::cout << "Time: " << d.count() << std::endl;
+    }
+    //std::cout << "Time: " << d.count() << std::endl;
     return retcode;
 }
