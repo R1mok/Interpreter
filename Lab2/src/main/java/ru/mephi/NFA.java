@@ -40,7 +40,7 @@ public class NFA {
             SoftReference<Node> left = new SoftReference<>((Node) v.getLeftChild());
             SoftReference<Node> right = new SoftReference<>((Node) v.getRightChild());
 
-            if (v.getValue().equals(Metasymbols.KLINI)) { // klini в правом дереве
+            if (v.getValue().equals(Metasymbols.CIRCUIT)) { // klini в правом дереве
                 SoftReference<NFA> predNFA = new SoftReference<>(((Node) v.getRightChild()).auto.get());
                 tmpNFA.countNodes = predNFA.get().countNodes + 2;
                 NFANode[] newNodes = new NFANode[tmpNFA.countNodes];
@@ -99,7 +99,7 @@ public class NFA {
                     newNodes[i].setId(i);
                 }
                 Node crossNode = new Node();
-                if (right.get().getValue().equals(Metasymbols.AND) || right.get().getValue().equals(Metasymbols.OR) || right.get().getValue().equals(Metasymbols.KLINI)) {
+                if (right.get().getValue().equals(Metasymbols.AND) || right.get().getValue().equals(Metasymbols.OR) || right.get().getValue().equals(Metasymbols.CIRCUIT)) {
                     crossNode.setValue(Metasymbols.CIRCUMFLEXUS);
                 } else {
                     crossNode.setValue(right.get());

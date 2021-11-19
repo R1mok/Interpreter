@@ -30,15 +30,17 @@ public class AbstractSyntaxTree {
             order((Node) v.getLeftChild(), n + 7);
         }
     }
-    private void setParents(Node rootNode){
+
+    private void setParents(Node rootNode) {
         parents(rootNode);
     }
-    private void parents(Node v){
-        if (v != null){
-            if (v.getRightChild() instanceof Node){
+
+    private void parents(Node v) {
+        if (v != null) {
+            if (v.getRightChild() instanceof Node) {
                 ((Node) v.getRightChild()).parent = new SoftReference<>(v);
             }
-            if (v.getLeftChild() instanceof Node){
+            if (v.getLeftChild() instanceof Node) {
                 ((Node) v.getLeftChild()).parent = new SoftReference<>(v);
             }
             parents((Node) v.getRightChild());
@@ -89,7 +91,7 @@ public class AbstractSyntaxTree {
                     a[i] = aNode;
                     Object[] a1 = new Object[a.length - 1];
                     System.arraycopy(a, 0, a1, 0, i + 1);
-                    System.arraycopy(a, i+2, a1, i+1, a.length - i - 2);
+                    System.arraycopy(a, i + 2, a1, i + 1, a.length - i - 2);
                     a = a1;
                     k = 1;
                     break;
@@ -100,15 +102,107 @@ public class AbstractSyntaxTree {
                 continue;
             for (int i = first; i < last; ++i) {
                 if (!a[i].equals('+') && !a[i].equals('.') && !a[i].equals('|') && !a[i].equals('(') && !a[i].equals(')') &&
-                        !(a[i] instanceof Node)) {
+                        !a[i].equals('{') && !a[i].equals('}') && !a[i].equals(',') && !(a[i] instanceof Node)) {
                     Node aNode = new Node(String.valueOf(a[i]));
                     a[i] = aNode;
                 }
 
             }
+            int x = 0, y = 0;
+            String strX = "";
+            String strY = "";
+            for (int i = first; i < last; ++i) { // r = a[i-1]
+                if (a[i].equals('{')) {
+                    Object predR = a[i - 1];
+                    int m = i + 1;
+                    for (; !a[m].equals(',') && !(a[m].equals('}')); ++m) {
+                        strX += ((Node) a[m]).getValue();
+                    }
+                    x = Integer.parseInt(strX);
+                    if (a[m].equals(',')) {
+                        for (; !a[m + 1].equals('}'); ++m) {
+                            strY += ((Node) a[m + 1]).getValue();
+                        }
+                        y = Integer.parseInt(strY);
+                        int len = 0;
+                        Object[] newR;
+                        if (x == y) {
+                            len = x;
+                            newR = new Object[len + 2];
+                            newR[0] = '(';
+                            int j = 1;
+                            for (; j < x + 1; ++j) {
+                                newR[j] = predR;
+                            }
+                            newR[j] = ')';
+                        } else {
+                            len = 2 + x + y - x + 1 + (y - x) * (y - x + 1) / 2 + 2 * (y - x - 1);
+                            newR = new Object[len + 2];
+                            newR[0] = '(';
+                            int j = 1;
+                            for (; j < x + 1; ++j) {
+                                newR[j] = predR;
+                            }
+                            newR[j] = '(';
+                            newR[j + 1] = Metasymbols.CIRCUMFLEXUS;
+                            j += 2;
+                            int c = 1;
+                            int l;
+                            while (c <= y - x) {
+                                l = c;
+                                newR[j] = '|';
+                                ++j;
+                                if (c >= 2) {
+                                    newR[j] = '(';
+                                    ++j;
+                                }
+                                while (l > 0) {
+                                    newR[j] = predR;
+                                    ++j;
+                                    l -= 1;
+                                }
+                                if (c >= 2) {
+                                    newR[j] = ')';
+                                    ++j;
+                                }
+                                c = c + 1;
+                            }
+                            newR[j] = ')';
+                            newR[j + 1] = ')';
+                        }
+                        Object[] a1 = new Object[a.length - 4 - strX.length() - strY.length() + newR.length];
+                        System.arraycopy(a, 0, a1, 0, i - 1);
+                        System.arraycopy(newR, 0, a1, i - 1, newR.length);
+                        System.arraycopy(a, i + strX.length() + strY.length() + 3, a1, i - 1 + newR.length, a.length - i - 3 - strX.length() - strY.length());
+                        a = a1;
+                        k = 1;
+                        break;
+                    }
+                    else if (a[m].equals('}')){
+                        Object[] newR = new Object[x + 3];
+                        newR[0] = '(';
+                        for (int j = 1; j <= x; ++j){
+                            newR[j] = predR;
+                        }
+                        newR[newR.length - 2] = Metasymbols.CIRCUIT;
+                        newR[newR.length - 1] = ')';
+                        Object[] a1 = new Object[a.length - 3 - strX.length() + newR.length];
+                        System.arraycopy(a, 0, a1, 0, i-1);
+                        System.arraycopy(newR, 0, a1, i-1, newR.length);
+                        System.arraycopy(a, i+strX.length() + 2, a1, i - 1 + newR.length, a.length - i - 2 - strX.length());
+                        a = a1;
+                        k = 1;
+                        break;
+                    }
+                }
+            }
+
+            if (k == 1) {
+                continue;
+            }
             for (int i = first; i < last; ++i) { // found +
                 if (a[i].equals('+')) {
-                    Node plusNode = new Node(Metasymbols.KLINI);
+                    Node plusNode = new Node(Metasymbols.CIRCUIT);
                     plusNode.setRightChild(a[i - 1]);
                     a[i - 1] = plusNode;
                 }
