@@ -60,7 +60,6 @@ public class NFA {
                 tmpNFA.end = new SoftReference<>(newNodes[tmpNFA.countNodes - 1]);
                 Node newBackTrans = new Node(Metasymbols.CIRCUMFLEXUS);
                 newNodes[tmpNFA.countNodes - 2].listNodes.add(new Pair<>(new SoftReference<>(newNodes[1]), newBackTrans));
-                newNodes[0].listNodes.add(new Pair<>(new SoftReference<>(newNodes[newNodes.length - 1]), newBackTrans));
                 tmpNFA.nodes = newNodes;
             }
             if (v.getValue().equals(Metasymbols.OR)) {

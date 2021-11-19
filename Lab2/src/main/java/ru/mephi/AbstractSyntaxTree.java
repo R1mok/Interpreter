@@ -3,11 +3,13 @@ package ru.mephi;
 import lombok.*;
 
 import java.lang.ref.SoftReference;
+import java.util.HashMap;
 
 @Data
 public class AbstractSyntaxTree {
     private String r;
     private Node rootNode = new Node();
+    HashMap<Integer, Node> capGroup = new HashMap<>(); // группы захвата
 
     // new Tree
     AbstractSyntaxTree(String r) {
@@ -102,11 +104,33 @@ public class AbstractSyntaxTree {
                 continue;
             for (int i = first; i < last; ++i) {
                 if (!a[i].equals('+') && !a[i].equals('.') && !a[i].equals('|') && !a[i].equals('(') && !a[i].equals(')') &&
-                        !a[i].equals('{') && !a[i].equals('}') && !a[i].equals(',') && !(a[i] instanceof Node)) {
+                        !a[i].equals('{') && !a[i].equals('}') && !a[i].equals(',') && !a[i].equals(':') && !(a[i] instanceof Node)) {
                     Node aNode = new Node(String.valueOf(a[i]));
                     a[i] = aNode;
                 }
 
+            }
+            for (int i = first; i < last; ++i){
+                if ( a[i].equals(':')){
+                    StringBuilder strN = new StringBuilder();
+                    int n = 0;
+                    for (int j = i-1; !a[j].equals('('); --j) {
+                        strN.append(((Node) a[j]).getValue());
+                    }
+                    strN.reverse();
+                    n = Integer.parseInt(strN.toString());
+                    capGroup.put(n, (Node)a[i+1]);
+                    Object[] a1 = new Object[a.length - strN.length() - 1];
+                    System.arraycopy(a, 0, a1, 0, i - strN.length());
+                    a1[i-strN.length()] = a[i+1];
+                    System.arraycopy(a, i+2, a1, i-strN.length() + 1, a.length - i - 2);
+                    a = a1;
+                    k = 1;
+                    break;
+                }
+            }
+            if (k == 1){
+                continue;
             }
             int x = 0, y = 0;
             String strX = "";
