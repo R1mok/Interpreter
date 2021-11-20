@@ -87,14 +87,14 @@ public class AbstractSyntaxTreeTest {
         Assert.assertThat(((Node)((Node)rootNode2.getLeftChild()).getRightChild()).getValue(), is(new Node("b").getValue()));
 
         Assert.assertThat(rootNode3.getValue(), is(new Node(Metasymbols.AND).getValue()));
-        Assert.assertThat(((Node)rootNode3.getRightChild()).getValue(), is(new Node(Metasymbols.CIRCUIT).getValue().toString()));
+        Assert.assertThat(((Node)rootNode3.getRightChild()).getValue(), is(new Node(Metasymbols.CIRCUIT).getValue()));
         Assert.assertThat(((Node)rootNode3.getLeftChild()).getValue(), is(new Node(Metasymbols.AND).getValue()));
-        Assert.assertThat(((Node)((Node)rootNode3.getLeftChild()).getLeftChild()).getValue(), is(new Node(Metasymbols.AND).getValue()));
-        Assert.assertThat(((Node)((Node)rootNode3.getLeftChild()).getRightChild()).getValue(), is(new Node("c").getValue()));
-        Assert.assertThat(((Node)((Node)((Node)rootNode3.getLeftChild()).getLeftChild()).getLeftChild()).getValue(), is(new Node("c").getValue()));
-        Assert.assertThat(((Node)((Node)((Node)rootNode3.getLeftChild()).getLeftChild()).getRightChild()).getValue(), is(new Node("c").getValue()));
+        Assert.assertThat(((Node)((Node)rootNode3.getRightChild()).getRightChild()).getValue(), is(new Node("c").getValue()));
+        Assert.assertThat(((Node)(((Node)rootNode3.getLeftChild()).getLeftChild())).getValue(), is(new Node("c").getValue()));
+        Assert.assertThat(((Node)(((Node)rootNode3.getLeftChild()).getLeftChild())).getValue(), is(new Node("c").getValue()));
     }
     @Test
     public void getCapGroup() {
+
     }
 }

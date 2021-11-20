@@ -4,11 +4,14 @@ import lombok.*;
 
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class AbstractSyntaxTree {
     private String r;
     private Node rootNode = new Node();
+    private Set<String> alphabet = new HashSet<>();
     HashMap<Integer, Node> capGroup = new HashMap<>(); // группы захвата
 
     // new Tree
@@ -24,6 +27,9 @@ public class AbstractSyntaxTree {
 
     public void order(Node v, int n) {
         int i;
+        if (v != null && v.getRightChild() == null && v.getLeftChild() == null) {
+            alphabet.add((String) v.getValue());
+        }
         if (v != null) {
             order((Node) v.getRightChild(), n + 7);
             for (i = 0; i < n; ++i)
@@ -110,26 +116,26 @@ public class AbstractSyntaxTree {
                 }
 
             }
-            for (int i = first; i < last; ++i){
-                if ( a[i].equals(':')){
+            for (int i = first; i < last; ++i) {
+                if (a[i].equals(':')) {
                     StringBuilder strN = new StringBuilder();
                     int n = 0;
-                    for (int j = i-1; !a[j].equals('('); --j) {
+                    for (int j = i - 1; !a[j].equals('('); --j) {
                         strN.append(((Node) a[j]).getValue());
                     }
                     strN.reverse();
                     n = Integer.parseInt(strN.toString());
-                    capGroup.put(n, (Node)a[i+1]);
+                    capGroup.put(n, (Node) a[i + 1]);
                     Object[] a1 = new Object[a.length - strN.length() - 1];
                     System.arraycopy(a, 0, a1, 0, i - strN.length());
-                    a1[i-strN.length()] = a[i+1];
-                    System.arraycopy(a, i+2, a1, i-strN.length() + 1, a.length - i - 2);
+                    a1[i - strN.length()] = a[i + 1];
+                    System.arraycopy(a, i + 2, a1, i - strN.length() + 1, a.length - i - 2);
                     a = a1;
                     k = 1;
                     break;
                 }
             }
-            if (k == 1){
+            if (k == 1) {
                 continue;
             }
             int x = 0, y = 0;
@@ -201,19 +207,18 @@ public class AbstractSyntaxTree {
                         a = a1;
                         k = 1;
                         break;
-                    }
-                    else if (a[m].equals('}')){
+                    } else if (a[m].equals('}')) {
                         Object[] newR = new Object[x + 3];
                         newR[0] = '(';
-                        for (int j = 1; j <= x; ++j){
+                        for (int j = 1; j <= x; ++j) {
                             newR[j] = predR;
                         }
-                        newR[newR.length - 2] = Metasymbols.CIRCUIT;
+                        newR[newR.length - 2] = '+';
                         newR[newR.length - 1] = ')';
                         Object[] a1 = new Object[a.length - 3 - strX.length() + newR.length];
-                        System.arraycopy(a, 0, a1, 0, i-1);
-                        System.arraycopy(newR, 0, a1, i-1, newR.length);
-                        System.arraycopy(a, i+strX.length() + 2, a1, i - 1 + newR.length, a.length - i - 2 - strX.length());
+                        System.arraycopy(a, 0, a1, 0, i - 1);
+                        System.arraycopy(newR, 0, a1, i - 1, newR.length);
+                        System.arraycopy(a, i + strX.length() + 2, a1, i - 1 + newR.length, a.length - i - 2 - strX.length());
                         a = a1;
                         k = 1;
                         break;

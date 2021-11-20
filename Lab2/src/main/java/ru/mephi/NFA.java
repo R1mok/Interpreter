@@ -4,27 +4,45 @@ import javafx.util.Pair;
 import lombok.Data;
 
 import java.lang.ref.SoftReference;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class NFA {
     private SoftReference<NFANode> start; // указатель на начало автомата
     private SoftReference<NFANode> end; // указатель на принимающее состояние
     private int countNodes = 0; // количество вершин в автомате
-    NFANode[] nodes = new NFANode[2]; // массив вершин (изначально начало и конец)
+    protected NFANode[] nodes = new NFANode[2]; // массив вершин (изначально начало и конец)
+    protected Set<String> alphabet = new HashSet<>();
 
-    public void doOrder(Node rootNode) {
-        order(rootNode);
+    public NFA(Node rootNode) {
+        NFA newNFA = doOrder(rootNode);
+        this.countNodes = newNFA.countNodes;
+        this.end = newNFA.end;
+        this.start = newNFA.start;
+        this.nodes = newNFA.nodes;
     }
 
-    private void order(Node v) {
+    public NFA() {
+    }
+
+    public NFA doOrder(Node rootNode) {
+        return order(rootNode);
+    }
+
+    private NFA order(Node v) {
+        if (v != null && v.getRightChild() == null && v.getLeftChild() == null) {
+            alphabet.add((String) v.getValue());
+        }
         if (v != null) {
             order((Node) v.getLeftChild());
             order((Node) v.getRightChild());
-            createNFA(v);
+            return createNFA(v);
         }
+        return null;
     }
 
-    public NFA createNFA(Node v) {
+    public static NFA createNFA(Node v) {
         NFA tmpNFA = new NFA();
         if (!(v.getValue() instanceof Metasymbols)) {
             tmpNFA.countNodes = 2;
