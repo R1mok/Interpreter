@@ -50,15 +50,15 @@ public class NFA {
                 }
                 NFANode startNode = new NFANode(0);
                 newNodes[0] = startNode;
-                Node newStartNode = new Node(Metasymbols.CIRCUMFLEXUS);
+                Node newStartNode = new Node(Metasymbols.EPSILON);
                 newNodes[0].listNodes.add(new Pair<>(new SoftReference<>(predNFA.get().start.get()), newStartNode));
                 tmpNFA.start = new SoftReference<>(newNodes[0]);
-                Node newEndNode = new Node(Metasymbols.CIRCUMFLEXUS);
+                Node newEndNode = new Node(Metasymbols.EPSILON);
                 NFANode endNode = new NFANode(tmpNFA.countNodes - 1);
                 newNodes[tmpNFA.countNodes - 1] = endNode;
                 newNodes[tmpNFA.countNodes - 2].listNodes.add(new Pair<>(new SoftReference<>(newNodes[tmpNFA.countNodes - 1]), newEndNode));
                 tmpNFA.end = new SoftReference<>(newNodes[tmpNFA.countNodes - 1]);
-                Node newBackTrans = new Node(Metasymbols.CIRCUMFLEXUS);
+                Node newBackTrans = new Node(Metasymbols.EPSILON);
                 newNodes[tmpNFA.countNodes - 2].listNodes.add(new Pair<>(new SoftReference<>(newNodes[1]), newBackTrans));
                 tmpNFA.nodes = newNodes;
             }
@@ -70,7 +70,7 @@ public class NFA {
                     newNodes[i].setId(i);
                 }
                 newNodes[0] = startNode;
-                Node newStartNode = new Node(Metasymbols.CIRCUMFLEXUS);
+                Node newStartNode = new Node(Metasymbols.EPSILON);
                 newNodes[0].listNodes.add(new Pair<>(new SoftReference<>(newNodes[1]), newStartNode));
                 System.arraycopy(right.get().getAuto().get().nodes, 0, newNodes, left.get().getAuto().get().getCountNodes() + 1, right.get().getAuto().get().getCountNodes());
                 for (int i = 1 + left.get().getAuto().get().getCountNodes(); i < newNodes.length - 1; ++i) {
@@ -79,7 +79,7 @@ public class NFA {
                 newNodes[0].listNodes.add(new Pair<>(new SoftReference<>(newNodes[1 + left.get().getAuto().get().getCountNodes()]), newStartNode));
                 NFANode endNode = new NFANode(newNodes.length - 1);
                 newNodes[newNodes.length - 1] = endNode;
-                Node newEndNode = new Node(Metasymbols.CIRCUMFLEXUS);
+                Node newEndNode = new Node(Metasymbols.EPSILON);
                 newNodes[left.get().getAuto().get().getCountNodes()].listNodes.add(new Pair<>(new SoftReference<>(newNodes[newNodes.length - 1]), newEndNode));
                 newNodes[newNodes.length - 2].listNodes.add(new Pair<>(new SoftReference<>(newNodes[newNodes.length - 1]), newEndNode));
                 tmpNFA.start = new SoftReference<>(newNodes[0]);
@@ -99,7 +99,7 @@ public class NFA {
                 }
                 Node crossNode = new Node();
                 if (right.get().getValue().equals(Metasymbols.AND) || right.get().getValue().equals(Metasymbols.OR) || right.get().getValue().equals(Metasymbols.CIRCUIT)) {
-                    crossNode.setValue(Metasymbols.CIRCUMFLEXUS);
+                    crossNode.setValue(Metasymbols.EPSILON);
                 } else {
                     crossNode.setValue(right.get());
                 }
