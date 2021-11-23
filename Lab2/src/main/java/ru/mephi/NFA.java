@@ -50,7 +50,7 @@ public class NFA {
             tmpNFA.nodes[first] = new NFANode(first);
             int second = 1;
             tmpNFA.nodes[second] = new NFANode(second);
-            tmpNFA.nodes[first].listNodes.add(new Pair<>(new SoftReference<>(tmpNFA.nodes[second]), v));
+            tmpNFA.nodes[first].listNodes.add(new Pair<>(new SoftReference<>(tmpNFA.nodes[second]), new Node(v)));
             tmpNFA.start = new SoftReference<>(tmpNFA.nodes[first]);
             tmpNFA.end = new SoftReference<>(tmpNFA.nodes[second]);
         }

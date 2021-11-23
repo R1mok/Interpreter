@@ -3,6 +3,8 @@ package ru.mephi;
 import javafx.util.Pair;
 import lombok.Data;
 
+import javax.print.attribute.SetOfIntegerSyntax;
+import java.awt.*;
 import java.lang.ref.SoftReference;
 import java.util.*;
 
@@ -13,28 +15,28 @@ public class DFA {
     private SoftReference<DFANode> start; // указатель на начальное состояние
     private SoftReference<DFANode>[] end; // массив принимающих вершин
 
-    private DFANode epsCircuits(NFA nfa, DFANode nodes) {
-        Set<NFANode> curSet = new HashSet<>();
-        for (NFANode elem : nodes.getValue()) {
-            Set<NFANode> tmpSet = epsCircuits(nfa, elem);
+    private Set<SoftReference<NFANode>> epsCircuitsByDFANode(SoftReference<NFA> nfa, SoftReference<DFANode> nodes) {
+        Set<SoftReference<NFANode>> curSet = new HashSet<>();
+        for (SoftReference<NFANode> elem : nodes.get().getValue()) {
+            Set<SoftReference<NFANode>> tmpSet = epsCircuits(nfa, elem);
             curSet.addAll(tmpSet);
         }
-        return new DFANode(curSet);
+        return curSet;
     }
 
-    private Set<NFANode> epsCircuits(NFA nfa, NFANode node) {
-        Queue<NFANode> q = new ArrayDeque<>();
-        Set<NFANode> set = new HashSet<>();
+    private Set<SoftReference<NFANode>> epsCircuits(SoftReference<NFA> nfa, SoftReference<NFANode> node) {
+        Queue<SoftReference<NFANode>> q = new ArrayDeque<>();
+        Set<SoftReference<NFANode>> set = new HashSet<>();
         q.offer(node);
-        int[] visited = new int[nfa.getCountNodes()];
-        visited[node.getId()] = 1;
+        int[] visited = new int[nfa.get().getCountNodes()];
+        visited[node.get().getId()] = 1;
         while (!q.isEmpty()) {
-            NFANode tmpNode = q.poll();
+            SoftReference<NFANode> tmpNode = q.poll();
             set.add(tmpNode);
-            for (Pair<SoftReference<NFANode>, Node> nodes : tmpNode.listNodes) {
+            for (Pair<SoftReference<NFANode>, Node> nodes : tmpNode.get().listNodes) {
                 if (visited[nodes.getKey().get().getId()] == 0 && nodes.getValue().equals(Metasymbols.EPSILON)) {
-                    q.offer(nodes.getKey().get());
-                    set.add(nodes.getKey().get());
+                    q.offer(nodes.getKey());
+                    set.add(nodes.getKey());
                     visited[nodes.getKey().get().getId()] = 1;
                 }
             }
@@ -42,38 +44,44 @@ public class DFA {
         return set;
     }
 
-    private DFANode trans(DFANode DFAset, String symbol) {
-        Set<NFANode> newSet = new HashSet<>();
-        for (NFANode elem : DFAset.getValue()) {
+    private SoftReference<DFANode> trans(SoftReference<DFANode> DFAset, String symbol) {
+        Set<SoftReference<NFANode>> newSet = new HashSet<>();
+        for (SoftReference<NFANode> elem : DFAset.get().getValue()) {
             newSet.add(elem);
-            for (Pair<SoftReference<NFANode>, Node> nodes : elem.listNodes) {
-                if (nodes.getValue().equals(symbol)) {
-                    newSet.add(nodes.getKey().get());
+            for (Pair<SoftReference<NFANode>, Node> nodes : elem.get().listNodes) {
+                if (((Node)nodes.getValue().getValue()).getValue().equals(symbol)) {
+                    newSet.add(nodes.getKey());
                 }
             }
         }
-        return new DFANode(newSet);
+        return new SoftReference<>(new DFANode(newSet));
     }
 
-    public DFA makeDFA(NFA nfa) { // изменить epsCircuits and trans чтобы была работа с ссылками
+    public DFA makeDFA(SoftReference<NFA> nfa) { // изменить epsCircuits and trans чтобы была работа с ссылками
         DFA dfa = new DFA();
-        Set<NFANode> startSet = epsCircuits(nfa, nfa.getStart().get());
+        Set<SoftReference<NFANode>> startSet = epsCircuits(nfa, nfa.get().getStart());
         DFANode startNode = new DFANode(startSet);
-        dfa.q.add(new SoftReference<>(startNode));
-        dfa.sets.add(new SoftReference<>(startNode));
-        dfa.start = new SoftReference<>(startNode);
+        SoftReference<DFANode> startDFANode = new SoftReference<>(startNode);
+        dfa.q.add(startDFANode);
+        dfa.sets.add(startDFANode);
+        dfa.start = startDFANode;
         while (!dfa.q.isEmpty()) {
             SoftReference<DFANode> tmpSet = dfa.q.poll();
-            for (String symbol : nfa.alphabet) {
-                DFANode curSet = epsCircuits(nfa, trans(tmpSet.get(), symbol));
-                if (!dfa.sets.contains(curSet)) {
+            for (String symbol : nfa.get().alphabet) {
+                DFANode curSet = new DFANode(epsCircuitsByDFANode(nfa, trans(tmpSet, symbol)));
+                int k = 0;
+                for (SoftReference<DFANode> setElem : dfa.sets) {
+                    if ((curSet.getValue().equals(setElem.get().getValue()))) { // сравнить кол-во эл-тов из множеств
+                        k++;
+                    }
+                }
+                if (k == 0) {
                     dfa.q.add(new SoftReference<>(curSet));
-                    tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
+                    //tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
                     dfa.sets.add(new SoftReference<>(curSet));
                 }
             }
         }
         return dfa;
     }
-
 }

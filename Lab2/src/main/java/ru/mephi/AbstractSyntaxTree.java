@@ -114,7 +114,6 @@ public class AbstractSyntaxTree {
                     Node aNode = new Node(String.valueOf(a[i]));
                     a[i] = aNode;
                 }
-
             }
             for (int i = first; i < last; ++i) {
                 if (a[i].equals(':')) {

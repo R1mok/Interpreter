@@ -1,12 +1,18 @@
 package ru.mephi;
 
+import java.lang.ref.SoftReference;
+
 public class Main {
     public static void main(String[] args) {
-        String str = "c{3}";
+        String str = "ab";
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
-        NFA Automato = new NFA();
-        Automato.doOrder(rootNode);
+        NFA nfa = new NFA(rootNode);
+        SoftReference<NFA> nfaSR= new SoftReference<>(nfa);
+        System.out.println(tree.getAlphabet());
+        DFA dfa = new DFA();
+        dfa.makeDFA(nfaSR);
     }
+    // ВРОДЕ ПОЛУЧИЛОСЬ надо проверить правильность + с эпсилонами
 }

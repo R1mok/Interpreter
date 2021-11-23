@@ -10,8 +10,8 @@ import java.util.Set;
 @Data
 public class DFANode {
     protected HashSet<Pair<SoftReference<DFANode>, String>> listNodes = new HashSet<>(); // переходы по вершинам DFA
-    private Set<NFANode> value; // множество вершин из NFA или вершина из DFA
-    DFANode(Set<NFANode> value){
+    private Set<SoftReference<NFANode>> value; // множество вершин из NFA или вершина из DFA
+    DFANode(Set<SoftReference<NFANode>> value){
         this.value = value;
     }
 }
