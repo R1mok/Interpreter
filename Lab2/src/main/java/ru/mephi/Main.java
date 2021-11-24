@@ -14,5 +14,4 @@ public class Main {
         DFA dfa = new DFA();
         dfa = dfa.makeDFA(nfaSR);
     }
-    // ВРОДЕ ПОЛУЧИЛОСЬ надо проверить правильность + с эпсилонами
 }

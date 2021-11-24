@@ -13,7 +13,7 @@ public class DFA {
     private Queue<SoftReference<DFANode>> q = new ArrayDeque<>(); // очередь множеств из NFA
     private Set<SoftReference<DFANode>> sets = new HashSet<>(); // сет множеств, которые уже были в очереди
     private SoftReference<DFANode> start; // указатель на начальное состояние
-    private SoftReference<DFANode>[] end; // массив принимающих вершин
+    private Set<SoftReference<DFANode>> end = new HashSet<>(); // массив принимающих вершин
 
     private Set<SoftReference<NFANode>> epsCircuitsByDFANode(SoftReference<NFA> nfa, SoftReference<DFANode> nodes) {
         Set<SoftReference<NFANode>> curSet = new HashSet<>();
@@ -54,7 +54,7 @@ public class DFA {
                         newSet.add(nodes.getKey());
                     }
                 } else {
-                    if (nodes.getValue().getValue().equals(symbol)){
+                    if (nodes.getValue().getValue().equals(symbol)) {
                         newSet.add(nodes.getKey());
                     }
                 }
@@ -85,6 +85,14 @@ public class DFA {
                     dfa.q.add(new SoftReference<>(curSet));
                     tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
                     dfa.sets.add(new SoftReference<>(curSet));
+                }
+            }
+        }
+        SoftReference<NFANode> endNode = nfa.get().getEnd();
+        for (SoftReference<DFANode> dfaNode : dfa.sets) {
+            for (SoftReference<NFANode> nfaNode : dfaNode.get().getValue()) {
+                if (nfaNode.get().equals(endNode.get())) {
+                    dfa.end.add(dfaNode);
                 }
             }
         }
