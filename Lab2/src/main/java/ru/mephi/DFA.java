@@ -34,7 +34,7 @@ public class DFA {
             SoftReference<NFANode> tmpNode = q.poll();
             set.add(tmpNode);
             for (Pair<SoftReference<NFANode>, Node> nodes : tmpNode.get().listNodes) {
-                if (visited[nodes.getKey().get().getId()] == 0 && nodes.getValue().equals(Metasymbols.EPSILON)) {
+                if (visited[nodes.getKey().get().getId()] == 0 && nodes.getValue().equals(new Node(Metasymbols.EPSILON))) {
                     q.offer(nodes.getKey());
                     set.add(nodes.getKey());
                     visited[nodes.getKey().get().getId()] = 1;
@@ -47,10 +47,16 @@ public class DFA {
     private SoftReference<DFANode> trans(SoftReference<DFANode> DFAset, String symbol) {
         Set<SoftReference<NFANode>> newSet = new HashSet<>();
         for (SoftReference<NFANode> elem : DFAset.get().getValue()) {
-            newSet.add(elem);
+            // newSet.add(elem);
             for (Pair<SoftReference<NFANode>, Node> nodes : elem.get().listNodes) {
-                if (((Node)nodes.getValue().getValue()).getValue().equals(symbol)) {
-                    newSet.add(nodes.getKey());
+                if (nodes.getValue().getValue() instanceof Node) {
+                    if (((Node) nodes.getValue().getValue()).getValue().equals(symbol)) {
+                        newSet.add(nodes.getKey());
+                    }
+                } else {
+                    if (nodes.getValue().getValue().equals(symbol)){
+                        newSet.add(nodes.getKey());
+                    }
                 }
             }
         }
@@ -77,7 +83,7 @@ public class DFA {
                 }
                 if (k == 0) {
                     dfa.q.add(new SoftReference<>(curSet));
-                    //tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
+                    tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
                     dfa.sets.add(new SoftReference<>(curSet));
                 }
             }

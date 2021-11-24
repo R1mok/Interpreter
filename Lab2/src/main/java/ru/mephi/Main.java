@@ -4,7 +4,7 @@ import java.lang.ref.SoftReference;
 
 public class Main {
     public static void main(String[] args) {
-        String str = "ab";
+        String str = "l(l|d)+";
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
@@ -12,7 +12,7 @@ public class Main {
         SoftReference<NFA> nfaSR= new SoftReference<>(nfa);
         System.out.println(tree.getAlphabet());
         DFA dfa = new DFA();
-        dfa.makeDFA(nfaSR);
+        dfa = dfa.makeDFA(nfaSR);
     }
     // ВРОДЕ ПОЛУЧИЛОСЬ надо проверить правильность + с эпсилонами
 }
