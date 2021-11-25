@@ -85,7 +85,15 @@ public class DFA {
                     dfa.q.add(new SoftReference<>(curSet));
                     tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
                     dfa.sets.add(new SoftReference<>(curSet));
+                } else {
+                    for (SoftReference<DFANode> set : dfa.sets){
+                        if (set.get().equals(tmpSet.get()));
+                        {
+                            tmpSet.get().listNodes.add(new Pair<>(tmpSet, symbol));
+                        }
+                    }
                 }
+                //tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
             }
         }
         SoftReference<NFANode> endNode = nfa.get().getEnd();

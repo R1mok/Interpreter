@@ -122,8 +122,10 @@ public class NFA {
                     crossNode.setValue(right.get());
                 }
 
-                newNodes[left.get().getAuto().get().countNodes - 1].listNodes.add(new Pair<>
-                        (new SoftReference<>(newNodes[left.get().getAuto().get().countNodes]), crossNode));
+                for (Pair<SoftReference<NFANode>, Node> startElem : right.get().getAuto().get().start.get().listNodes) {
+                    newNodes[left.get().getAuto().get().countNodes - 1].listNodes.add(new Pair<>
+                            (new SoftReference<>(newNodes[startElem.getKey().get().getId()]), crossNode));
+                }
                 tmpNFA.start = left.get().getAuto().get().getStart();
                 tmpNFA.end = right.get().getAuto().get().end;
                 tmpNFA.nodes = newNodes;

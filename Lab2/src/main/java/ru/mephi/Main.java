@@ -4,7 +4,7 @@ import java.lang.ref.SoftReference;
 
 public class Main {
     public static void main(String[] args) {
-        String str = "l(l|d)+";
+        String str = "ab|c";
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
