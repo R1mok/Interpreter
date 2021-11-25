@@ -85,7 +85,7 @@ public class DFA {
                     dfa.q.add(new SoftReference<>(curSet));
                     tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
                     dfa.sets.add(new SoftReference<>(curSet));
-                } else {
+                } else { // для терминального состояния убрать переходы
                     for (SoftReference<DFANode> set : dfa.sets){
                         if (set.get().equals(tmpSet.get()));
                         {

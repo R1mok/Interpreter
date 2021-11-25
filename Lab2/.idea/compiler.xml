@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="RegexExpression" />
         <module name="RegularExpression" />
+        <module name="Lab2" />
       </profile>
     </annotationProcessing>
   </component>
