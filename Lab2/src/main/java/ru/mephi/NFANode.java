@@ -15,4 +15,8 @@ public class NFANode {
     NFANode(int id){
         this.id = id;
     }
+
+    public NFANode() {
+
+    }
 }

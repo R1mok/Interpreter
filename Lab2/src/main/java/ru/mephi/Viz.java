@@ -5,6 +5,7 @@ import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.util.mxCellRenderer;
 import javafx.util.Pair;
 import org.antlr.v4.runtime.misc.OrderedHashSet;
+import org.jgraph.graph.Edge;
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.DirectedWeightedPseudograph;
@@ -139,9 +140,41 @@ public class Viz {
         ImageIO.write(image, "PNG", imgFile);
     }
 
+    public static DirectedWeightedPseudograph<String, MyEdge> createMinDFAGraph(SoftReference<minDFA> mindfa) throws IOException {
+        File imgFile = new File("minDFAgraph.png");
+        imgFile.createNewFile();
+        DirectedWeightedPseudograph<String, MyEdge> g =
+                new DirectedWeightedPseudograph<>(MyEdge.class);
+        for (int i = 0; i < mindfa.get().nodesArray.length; ++i) {
+            g.addVertex(String.valueOf(i));
+        }
+        for (int i = 0; i < mindfa.get().nodesArray.length; ++i) {
+            String sourceVertex = String.valueOf(mindfa.get().nodesArray[i].get().getValue().stream().findAny().get().get().getId());
+            for (Pair<SoftReference<DFANode>, String> listNode : mindfa.get().nodesArray[i].get().listNodes) {
+                String destVertex = String.valueOf(listNode.getKey().get().getValue().stream().findAny().get().get().getId());
+                String curEdge = listNode.getValue();
+                MyEdge edge = new MyEdge();
+                edge.edgeName = curEdge;
+                g.addEdge(sourceVertex, destVertex, edge);
+            }
+        }
+        return g;
+    }
+
+    public static void VizMinDFA(SoftReference<minDFA> mindfa) throws IOException {
+        JGraphXAdapter<String, MyEdge> graphAdapter =
+                new JGraphXAdapter<String, MyEdge>(createMinDFAGraph(mindfa));
+        mxIGraphLayout layout = new mxHierarchicalLayout(graphAdapter); // mxHierarchicalLayout
+        layout.execute(graphAdapter.getDefaultParent());
+        BufferedImage image =
+                mxCellRenderer.createBufferedImage(graphAdapter, null, 2, Color.WHITE, true, null);
+        File imgFile = new File("minDFAgraph.png");
+        ImageIO.write(image, "PNG", imgFile);
+    }
+
     public static void main(String[] args) throws IOException {
         String str1 = "a{3,4}"; // aaa(^|a) a{3}
-        String str = "(aaa)(^|a)"; // (aaa)|(aaaa)
+        String str = "(abc)+"; // (aaa)(^|a) -> (aaa)|(aaaa)
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
@@ -177,6 +210,16 @@ public class Viz {
             System.out.print(" ");
         }
         VizDFA(dfaSR);
-
+        minDFA mindfa = new minDFA();
+        mindfa.makeMinDFA(dfa);
+        SoftReference<minDFA> mindfaSR = new SoftReference<>(mindfa);
+        VizMinDFA(mindfaSR);
+        System.out.println("\nminDFA nodes");
+        System.out.print("Start node: " + mindfa.startNode.get().getValue().stream().findFirst().get().get().getId() + "\n");
+        System.out.print("End nodes: ");
+        for (SoftReference<DFANode> endNode : mindfa.endNodes){
+            System.out.print(endNode.get().getValue().stream().findFirst().get().get().getId() + " ");
+        }
+        System.out.println("");
     }
 }

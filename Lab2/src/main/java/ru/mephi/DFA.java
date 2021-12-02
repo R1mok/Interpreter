@@ -11,9 +11,18 @@ import java.util.*;
 @Data
 public class DFA {
     private Queue<SoftReference<DFANode>> q = new ArrayDeque<>(); // очередь множеств из NFA
-    private Set<SoftReference<DFANode>> sets = new HashSet<>(); // сет множеств, которые уже были в очереди
+    protected Set<SoftReference<DFANode>> sets = new HashSet<>(); // сет множеств, которые уже были в очереди
     private SoftReference<DFANode> start; // указатель на начальное состояние
     private Set<SoftReference<DFANode>> end = new HashSet<>(); // массив принимающих вершин
+    protected Set<String> alphabet = new HashSet<>();
+    protected SoftReference<DFANode> terminalNode;
+
+    public DFA(SoftReference<NFA> nfa) {
+        this.alphabet.addAll(nfa.get().alphabet);
+    }
+
+    public DFA() {
+    }
 
     private Set<SoftReference<NFANode>> epsCircuitsByDFANode(SoftReference<NFA> nfa, SoftReference<DFANode> nodes) {
         Set<SoftReference<NFANode>> curSet = new HashSet<>();
@@ -65,6 +74,7 @@ public class DFA {
 
     public DFA makeDFA(SoftReference<NFA> nfa) { // изменить epsCircuits and trans чтобы была работа с ссылками
         DFA dfa = new DFA();
+        dfa.alphabet.addAll(nfa.get().alphabet);
         Set<SoftReference<NFANode>> startSet = epsCircuits(nfa, nfa.get().getStart());
         DFANode startNode = new DFANode(startSet);
         SoftReference<DFANode> startDFANode = new SoftReference<>(startNode);
@@ -82,18 +92,24 @@ public class DFA {
                     }
                 }
                 if (k == 0) {
-                    dfa.q.add(new SoftReference<>(curSet));
+                    SoftReference<DFANode> curSetSR = new SoftReference<>(curSet);
+                    dfa.q.add(curSetSR);
                     tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
+                    if (curSet.getValue().size() == 0){
+                        dfa.terminalNode = curSetSR;
+                    }
                     dfa.sets.add(new SoftReference<>(curSet));
                 } else { // для терминального состояния убрать переходы
-                    for (SoftReference<DFANode> set : dfa.sets){
-                        if (set.get().equals(tmpSet.get()));
-                        {
-                            tmpSet.get().listNodes.add(new Pair<>(tmpSet, symbol));
+                    for (SoftReference<DFANode> set : dfa.sets) {
+                        if (set.get().equals(tmpSet.get())) {
+                            tmpSet.get().listNodes.add(new Pair<>(dfa.terminalNode, symbol));
                         }
                     }
                 }
-                //tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
+                /*for (Pair<SoftReference<DFANode>, String> pair : tmpSet.get().listNodes) {
+                    if (!pair.getValue().equals(symbol))
+                        tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol)); // делаем переход из неиспользуемых символов
+                } // в терминальный состояние */
             }
         }
         SoftReference<NFANode> endNode = nfa.get().getEnd();
@@ -104,6 +120,20 @@ public class DFA {
                 }
             }
         }
+
+        /*
+        for (SoftReference<DFANode> nodes : dfa.getSets()) {
+            for (String symbol : dfa.alphabet) {
+                SoftReference<DFANode> nullNode = nodes.get().getTransBySymbol(symbol);
+                if (nullNode == null || nullNode.get().getValue().size() == 0) {
+                    Pair<SoftReference<DFANode>, String> pair = new Pair(nullNode, symbol);
+                    nodes.get().listNodes.remove(pair);
+                    nodes.get().listNodes.add(new Pair<>(nodes, symbol));
+                }
+            }
+        }
+        dfa.getSets().removeIf(nodes -> nodes.get().getValue().size() == 0);
+        */
         return dfa;
     }
 }

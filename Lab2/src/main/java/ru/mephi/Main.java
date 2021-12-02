@@ -5,7 +5,7 @@ import java.lang.ref.SoftReference;
 public class Main {
 
     public static void main(String[] args) {
-        String str = "a(a|b)+";
+        String str = "ab|c";
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
@@ -14,5 +14,7 @@ public class Main {
         System.out.println(tree.getAlphabet());
         DFA dfa = new DFA();
         dfa = dfa.makeDFA(nfaSR);
+        minDFA mindfa = new minDFA();
+        mindfa.makeMinDFA(dfa);
     }
 }
