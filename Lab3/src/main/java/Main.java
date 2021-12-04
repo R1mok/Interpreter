@@ -17,8 +17,8 @@
   > javac Main.java
   
   To Run: 
-  > java Main test.txt
-  where test.txt is an test input file for the calculator.
+  > java Main test.my
+  where test.my is an test input file for the calculator.
 */
    
 import java.io.*;
