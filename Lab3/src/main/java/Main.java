@@ -31,6 +31,7 @@ public class Main {
       Object result = p.parse().value;
     } catch (Exception e) {
       /* do cleanup here -- possibly rethrow e */
+      System.out.println("");
       e.printStackTrace();
     }
   }

@@ -20,11 +20,16 @@
    
 /* Import the class java_cup.runtime.*  */
 import java_cup.runtime.*;
-   
+import javafx.util.Pair;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Objects;
+
 /* Parser code to change the way the parser reports errors (include
    line and column number of the error). */
 parser code {:
-    
+
+    Set<Pair<String, Integer>> varArray = new HashSet();
     /* Change the method report_error so it will display the line and
        column of where the error occurred in the input as well as the
        reason for the error which is passed into the method in the
@@ -86,18 +91,20 @@ parser code {:
    Terminals that have no value are listed first and then terminals
    that do have an value, in this case an integer value, are listed on
    the next line down. */
-terminal           SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN;
-terminal Integer   NUMBER, ID;
-   
+terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, SPACE, EQUALS, LT;
+terminal Integer NUMBER, ID;
+terminal String VALUE, WORD;
+
 /* Non terminals used in the grammar section.  
 
    Non terminals that have an object value are listed first and then
    non terminals that have an integer value are listed.  An object
    value means that it can be any type, it isn't set to a specific
    type.  So it could be an Integer or a String or whatever. */
-non terminal Object     expr_list, expr_part;
+non terminal Object     expr_list, expr_part, initialize_part, initialize;
 non terminal Integer    expr, factor, term;
-   
+non terminal String     defenition;
+non terminal Pair<String, Integer> var;
 
 /* -------------Precedence and Associatively of Terminals Section----------- */
    
@@ -130,7 +137,7 @@ non terminal Integer    expr, factor, term;
                  | term
    term     ::=    LPAREN expr RPAREN
                  | NUMBER
-                 | ID     
+                 | ID
 */
    
 /* 'expr_list' is the start of our grammar.  It can lead to another
@@ -144,11 +151,42 @@ non terminal Integer    expr, factor, term;
    keeps continuing until only terminals are found in the rhs of a
    production.  Then we can work our way back up the grammar bringing
    any values that might have been assigned from a terminal. */
-   
-   expr_list ::= expr_list expr_part
+   expr_list ::= expr_list initialize
                  |
-                 expr_part;
-   
+                 initialize
+                 |
+                 expr_list expr_part
+                 |
+                 expr_part
+                 ;
+   initialize ::=  initialize_part SEMI LT
+                  {: System.out.print(";\n");:}
+                  | initialize_part SEMI
+                  {: System.out.print(";");:}
+                  ;
+   initialize_part ::= defenition:e SPACE EQUALS SPACE expr:n
+                     {:
+                     System.out.print(" = " + n);
+                     for (Pair<String, Integer> el : varArray) {
+                         if (Objects.equals(el.getKey(), e)){
+                              Pair<String, Integer> elem;
+                              elem = new Pair<>(e, n);
+                              varArray.remove(el);
+                              varArray.add(elem);
+                              break;
+                         }
+                     }
+                     :}
+                     |
+                     defenition:e
+                   ;
+   defenition ::= VALUE:v SPACE WORD:w
+                     {: Pair<String, Integer> p = new Pair(w, 0);
+                     varArray.add(p);
+                     System.out.print(v + " " + w);
+                     RESULT = w;
+                     :}
+                     ;
 /* 'expr_part' is an 'expr' followed by the terminal 'SEMI'.  The ':e'
    after the non terminal 'expr' is a label an is used to access the
    value of 'expr' which will be an integer.  The action for the
@@ -183,16 +221,15 @@ non terminal Integer    expr, factor, term;
    'intValue'.  The values will be added or subtracted and then the
    new integer will be stored in 'RESULT'.*/
    
-   expr      ::= expr:e PLUS factor:f
+   expr      ::= expr:e SPACE PLUS SPACE factor:f
                  {: RESULT = new Integer(e.intValue() + f.intValue()); :}
                  |
-                 expr:e MINUS factor:f
+                 expr:e SPACE MINUS SPACE factor:f
                  {: RESULT = new Integer(e.intValue() - f.intValue()); :}
                  |
                  factor:f
                  {: RESULT = new Integer(f.intValue()); :}
                  ;
-   
 /* 'factor' can lead to 'factor TIMES term', 'factor DIVIDE term', or
    'term'.  Since the productions for TIMES and DIVIDE are lower in
    the grammar than 'PLUS' and 'MINUS' they will have higher
@@ -222,7 +259,7 @@ non terminal Integer    expr, factor, term;
    used to refer to 'ID'.  'ID' is also the only thing on the rhs of
    the production.  And since 'ID' is a terminal the grammar will end
    here and go back up. */
-   
+
    term      ::= LPAREN expr:e RPAREN
                  {: RESULT = e; :}
                  |
@@ -231,4 +268,15 @@ non terminal Integer    expr, factor, term;
                  |
                  ID:i
                  {: RESULT = i; :}
+                 |
+                 WORD:w
+                 {:
+                 for (Pair<String, Integer> el : varArray) {
+                    if (Objects.equals(el.getKey(), w)){
+                    RESULT = el.getValue();
+                    break;
+                    }
+                 }
+                 :}
                  ;
+

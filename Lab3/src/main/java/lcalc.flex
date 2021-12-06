@@ -79,7 +79,7 @@ import java_cup.runtime.*;
 /* A line terminator is a \r (carriage return), \n (line feed), or
    \r\n. */
 LineTerminator = \r|\n|\r\n
-   
+LineTrans = \n
 /* White space is a line terminator, space, tab, or line feed. */
 WhiteSpace     = {LineTerminator} | [ \t\f]
    
@@ -91,8 +91,7 @@ dec_int_lit = 0 | [1-9][0-9]*
 /* A identifier integer is a word beginning a letter between A and
    Z, a and z, or an underscore followed by zero or more letters
    between A and Z, a and z, zero and nine, or an underscore. */
-dec_int_id = [A-Za-z_][A-Za-z_0-9]*
-
+word = [A-Za-z_]*
 
    
 %%
@@ -114,31 +113,30 @@ dec_int_id = [A-Za-z_][A-Za-z_0-9]*
    
     /* Print the token found that was declared in the class sym and then
        return it. */
-    "+"                { System.out.print(" + "); return symbol(sym.PLUS); }
-    "-"                { System.out.print(" - "); return symbol(sym.MINUS); }
-    "*"                { System.out.print(" * "); return symbol(sym.TIMES); }
-    "/"                { System.out.print(" / "); return symbol(sym.DIVIDE); }
-    "("                { System.out.print(" ( "); return symbol(sym.LPAREN); }
-    ")"                { System.out.print(" ) "); return symbol(sym.RPAREN); }
+    "+"                { return symbol(sym.PLUS); }
+    "-"                { return symbol(sym.MINUS); }
+    "*"                { return symbol(sym.TIMES); }
+    "/"                { return symbol(sym.DIVIDE); }
+    "("                { return symbol(sym.LPAREN); }
+    ")"                { return symbol(sym.RPAREN); }
+    " "                { return symbol(sym.SPACE); }
+    "value"            { return symbol(sym.VALUE, new String(yytext()));}
+    "="                 { return symbol(sym.EQUALS);}
    
     /* If an integer is found print it out, return the token NUMBER
        that represents an integer and the value of the integer that is
        held in the string yytext which will get turned into an integer
        before returning */
-    {dec_int_lit}      { System.out.print(yytext());
-                         return symbol(sym.NUMBER, new Integer(yytext())); }
+    {dec_int_lit}      { return symbol(sym.NUMBER, new Integer(yytext())); }
+    {LineTerminator}        { return symbol(sym.LT);}
    
     /* If an identifier is found print it out, return the token ID
        that represents an identifier and the default value one that is
        given to all identifiers. */
-    {dec_int_id}       { System.out.print(yytext());
-                         return symbol(sym.ID, new Integer(1));}
-   
-    /* Don't do anything if whitespace is found */
-    {WhiteSpace}       { /* just skip what was found, do nothing */ }   
+    {word}       { return symbol(sym.WORD, new String(yytext())); }
 }
 
 
 /* No token was found for the input so through an error.  Print out an
    Illegal character message with the illegal character that was found. */
-[^]                    { throw new Error("Illegal character <"+yytext()+">"); }
+[^]              { throw new Error("Illegal character <"+yytext()+">"); }

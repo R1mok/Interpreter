@@ -1,1 +1,4 @@
-2+4;
+value a;
+value b = 10;
+value c = 3 + 5*2;
+value d = b + c;

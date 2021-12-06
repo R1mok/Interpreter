@@ -8,15 +8,20 @@ public class sym {
   /* terminals */
   public static final int MINUS = 4;
   public static final int DIVIDE = 6;
-  public static final int NUMBER = 9;
+  public static final int NUMBER = 12;
   public static final int SEMI = 2;
   public static final int EOF = 0;
   public static final int PLUS = 3;
-  public static final int ID = 10;
+  public static final int VALUE = 14;
+  public static final int ID = 13;
   public static final int error = 1;
+  public static final int SPACE = 9;
   public static final int RPAREN = 8;
   public static final int TIMES = 5;
+  public static final int EQUALS = 10;
+  public static final int LT = 11;
   public static final int LPAREN = 7;
+  public static final int WORD = 15;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -27,8 +32,13 @@ public class sym {
   "DIVIDE",
   "LPAREN",
   "RPAREN",
+  "SPACE",
+  "EQUALS",
+  "LT",
   "NUMBER",
-  "ID"
+  "ID",
+  "VALUE",
+  "WORD"
   };
 }
 
