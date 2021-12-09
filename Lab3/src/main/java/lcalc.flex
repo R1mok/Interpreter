@@ -81,7 +81,7 @@ import java_cup.runtime.*;
 LineTerminator = \r|\n|\r\n
 LineTrans = \n
 /* White space is a line terminator, space, tab, or line feed. */
-WhiteSpace     = {LineTerminator} | [ \t\f]
+//WhiteSpace     = {LineTerminator} | [ \t\f] remove spaces
    
 /* A literal integer is is a number beginning with a number between
    one and nine followed by zero or more numbers between zero and nine
@@ -107,7 +107,6 @@ word = [A-Za-z_]*
    the start state YYINITIAL. */
    
 <YYINITIAL> {
-   
     /* Return the token SEMI declared in the class sym that was found. */
     ";"                { return symbol(sym.SEMI); }
    
@@ -119,9 +118,9 @@ word = [A-Za-z_]*
     "/"                { return symbol(sym.DIVIDE); }
     "("                { return symbol(sym.LPAREN); }
     ")"                { return symbol(sym.RPAREN); }
-    " "                { return symbol(sym.SPACE); }
     "value"            { return symbol(sym.VALUE, new String(yytext()));}
-    "="                 { return symbol(sym.EQUALS);}
+    "="                { return symbol(sym.EQUALS);}
+    " "                { }
    
     /* If an integer is found print it out, return the token NUMBER
        that represents an integer and the value of the integer that is

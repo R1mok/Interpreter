@@ -91,7 +91,7 @@ parser code {:
    Terminals that have no value are listed first and then terminals
    that do have an value, in this case an integer value, are listed on
    the next line down. */
-terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, SPACE, EQUALS, LT;
+terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, EQUALS, LT;
 terminal Integer NUMBER, ID;
 terminal String VALUE, WORD;
 
@@ -164,7 +164,7 @@ non terminal Pair<String, Integer> var;
                   | initialize_part SEMI
                   {: System.out.print(";");:}
                   ;
-   initialize_part ::= defenition:e SPACE EQUALS SPACE expr:n
+   initialize_part ::= defenition:e EQUALS expr:n
                      {:
                      System.out.print(" = " + n);
                      for (Pair<String, Integer> el : varArray) {
@@ -180,7 +180,7 @@ non terminal Pair<String, Integer> var;
                      |
                      defenition:e
                    ;
-   defenition ::= VALUE:v SPACE WORD:w
+   defenition ::= VALUE:v WORD:w
                      {: Pair<String, Integer> p = new Pair(w, 0);
                      varArray.add(p);
                      System.out.print(v + " " + w);
@@ -221,10 +221,10 @@ non terminal Pair<String, Integer> var;
    'intValue'.  The values will be added or subtracted and then the
    new integer will be stored in 'RESULT'.*/
    
-   expr      ::= expr:e SPACE PLUS SPACE factor:f
+   expr      ::= expr:e PLUS factor:f
                  {: RESULT = new Integer(e.intValue() + f.intValue()); :}
                  |
-                 expr:e SPACE MINUS SPACE factor:f
+                 expr:e MINUS factor:f
                  {: RESULT = new Integer(e.intValue() - f.intValue()); :}
                  |
                  factor:f
