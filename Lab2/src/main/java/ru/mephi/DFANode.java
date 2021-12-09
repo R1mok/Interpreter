@@ -31,7 +31,7 @@ public class DFANode {
     public Set<SoftReference<DFANode>> getGroupByNode(Set<Set<SoftReference<DFANode>>> Splitting) {
         for (Set<SoftReference<DFANode>> group : Splitting) {
             for (SoftReference<DFANode> node : group) {
-                if (node.get().equals(this)) {
+                if (node.get().getValue().equals(this.getValue())) { // this.getValue().get().forEach().get().getID()
                     return group;
                 }
             }

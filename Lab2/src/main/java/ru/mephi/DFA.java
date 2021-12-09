@@ -72,7 +72,7 @@ public class DFA {
         return new SoftReference<>(new DFANode(newSet));
     }
 
-    public DFA makeDFA(SoftReference<NFA> nfa) { // изменить epsCircuits and trans чтобы была работа с ссылками
+    public DFA makeDFA(SoftReference<NFA> nfa) {
         DFA dfa = new DFA();
         dfa.alphabet.addAll(nfa.get().alphabet);
         Set<SoftReference<NFANode>> startSet = epsCircuits(nfa, nfa.get().getStart());
@@ -87,29 +87,19 @@ public class DFA {
                 DFANode curSet = new DFANode(epsCircuitsByDFANode(nfa, trans(tmpSet, symbol)));
                 int k = 0;
                 for (SoftReference<DFANode> setElem : dfa.sets) {
-                    if ((curSet.getValue().equals(setElem.get().getValue()))) { // сравнить кол-во эл-тов из множеств
+                    if ((curSet.getValue().equals(setElem.get().getValue()))) { // есть ли элемент в множестве вершин
                         k++;
                     }
                 }
-                if (k == 0) {
+                if (k == 0) { // если нет, добавляем
                     SoftReference<DFANode> curSetSR = new SoftReference<>(curSet);
                     dfa.q.add(curSetSR);
-                    tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
-                    if (curSet.getValue().size() == 0){
+                    if (curSet.getValue().size() == 0) {
                         dfa.terminalNode = curSetSR;
                     }
                     dfa.sets.add(new SoftReference<>(curSet));
-                } else { // для терминального состояния убрать переходы
-                    for (SoftReference<DFANode> set : dfa.sets) {
-                        if (set.get().equals(tmpSet.get())) {
-                            tmpSet.get().listNodes.add(new Pair<>(dfa.terminalNode, symbol));
-                        }
-                    }
                 }
-                /*for (Pair<SoftReference<DFANode>, String> pair : tmpSet.get().listNodes) {
-                    if (!pair.getValue().equals(symbol))
-                        tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol)); // делаем переход из неиспользуемых символов
-                } // в терминальный состояние */
+                tmpSet.get().listNodes.add(new Pair<>(new SoftReference<>(curSet), symbol));
             }
         }
         SoftReference<NFANode> endNode = nfa.get().getEnd();

@@ -27,7 +27,7 @@ public class minDFA {
         int i = 0;
         for (Set<SoftReference<DFANode>> group : Splitting) {
             for (SoftReference<DFANode> node : group) {
-                if (node.get().equals(destNode.get())) {
+                if (node.get().getValue().equals(destNode.get().getValue())) {
                     return i;
                 }
             }
@@ -43,12 +43,14 @@ public class minDFA {
         for (SoftReference<DFANode> nodes : dfa.getSets()) {
             for (String symbol : dfa.alphabet) {
                 SoftReference<DFANode> nullNode = nodes.get().getTransBySymbol(symbol);
-                if (nullNode.get().equals(dfa.terminalNode.get())) {
+                if (dfa.terminalNode != null && nullNode.get().equals(dfa.terminalNode.get())) {
                     nodes.get().listNodes.removeIf(node -> node.getKey().get().equals(dfa.terminalNode.get()) && node.getValue().equals(symbol)); // не добавляется элемент с тремя штуками
                 }
             }
         }
-        dfa.sets.removeIf(node -> node.get().equals(dfa.terminalNode.get()));
+        if (dfa.terminalNode != null) {
+            dfa.sets.removeIf(node -> node.get().equals(dfa.terminalNode.get()));
+        }
         for (SoftReference<DFANode> nodes : dfa.getSets()) {
             if (!endSet.contains(nodes)) {
                 otherSet.add(nodes);
@@ -78,7 +80,7 @@ public class minDFA {
                     }
                 }
                 int del = 0;
-                // если nodeSet.equals(nodeSet); нужно разделить все элементы в nodeSet по разным группам
+                // если nodeSet.equals(group); нужно разделить все элементы в nodeSet по разным группам
                 if (nodesSet.equals(group) && nodesSet.size() > 1) {
                     for (SoftReference<DFANode> elem : nodesSet) {
                         Set<SoftReference<DFANode>> newSet = new HashSet<>();

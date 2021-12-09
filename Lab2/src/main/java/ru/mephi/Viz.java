@@ -174,7 +174,7 @@ public class Viz {
 
     public static void main(String[] args) throws IOException {
         String str1 = "a{3,4}"; // aaa(^|a) a{3}
-        String str = "(abc)+"; // (aaa)(^|a) -> (aaa)|(aaaa)
+        String str = "(bc)+"; // (aaa)(^|a) -> (aaa)|(aaaa)
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
