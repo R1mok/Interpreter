@@ -81,7 +81,7 @@ import java_cup.runtime.*;
 LineTerminator = \r|\n|\r\n
 LineTrans = \n
 /* White space is a line terminator, space, tab, or line feed. */
-//WhiteSpace     = {LineTerminator} | [ \t\f] remove spaces
+WhiteSpace     = {LineTerminator} | [ \t\f]
    
 /* A literal integer is is a number beginning with a number between
    one and nine followed by zero or more numbers between zero and nine
@@ -119,20 +119,24 @@ word = [A-Za-z_]*
     "("                { return symbol(sym.LPAREN); }
     ")"                { return symbol(sym.RPAREN); }
     "value"            { return symbol(sym.VALUE, new String(yytext()));}
+    "const"            { return symbol(sym.CONST, new String(yytext())); }
     "="                { return symbol(sym.EQUALS);}
     " "                { }
+    "{"                { return symbol(sym.LBRACE);}
+    "}"                { return symbol(sym.RBRACE);}
    
     /* If an integer is found print it out, return the token NUMBER
        that represents an integer and the value of the integer that is
        held in the string yytext which will get turned into an integer
        before returning */
     {dec_int_lit}      { return symbol(sym.NUMBER, new Integer(yytext())); }
-    {LineTerminator}        { return symbol(sym.LT);}
+    //{LineTerminator}        { return symbol(sym.LT);}
    
     /* If an identifier is found print it out, return the token ID
        that represents an identifier and the default value one that is
        given to all identifiers. */
     {word}       { return symbol(sym.WORD, new String(yytext())); }
+    {WhiteSpace} { }
 }
 
 
