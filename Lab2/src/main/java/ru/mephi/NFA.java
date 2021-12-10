@@ -31,7 +31,7 @@ public class NFA {
     }
 
     private NFA order(Node v) {
-        if (v != null && v.getRightChild() == null && v.getLeftChild() == null) {
+        if (v != null && !v.getValue().toString().equals("^") && v.getRightChild() == null && v.getLeftChild() == null) {
             alphabet.add((String) v.getValue());
         }
         if (v != null) {
@@ -100,6 +100,16 @@ public class NFA {
                 Node newEndNode = new Node(Metasymbols.EPSILON);
                 newNodes[left.get().getAuto().get().getCountNodes()].listNodes.add(new Pair<>(new SoftReference<>(newNodes[newNodes.length - 1]), newEndNode));
                 newNodes[newNodes.length - 2].listNodes.add(new Pair<>(new SoftReference<>(newNodes[newNodes.length - 1]), newEndNode));
+                // replace ^ as eps
+                for (NFANode tmpNFANode : newNodes) {
+                    for (Pair<SoftReference<NFANode>, Node> tmpPair : tmpNFANode.listNodes) {
+                        if (tmpPair.getValue().getValue() instanceof Node && ((Node)tmpPair.getValue().getValue()).getValue().toString().equals("^")) {
+                            tmpNFANode.listNodes.clear();
+                            tmpNFANode.listNodes.add(new Pair<>(tmpPair.getKey(), new Node(Metasymbols.EPSILON)));
+                        }
+                    }
+                }
+                //
                 tmpNFA.start = new SoftReference<>(newNodes[0]);
                 tmpNFA.setCountNodes(newNodes.length);
                 tmpNFA.end = new SoftReference<>(newNodes[tmpNFA.countNodes - 1]);

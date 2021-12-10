@@ -27,7 +27,7 @@ public class AbstractSyntaxTree {
 
     public void order(Node v, int n) {
         int i;
-        if (v != null && v.getRightChild() == null && v.getLeftChild() == null) {
+        if (v != null && !v.getValue().equals("^") && v.getRightChild() == null && v.getLeftChild() == null) {
             alphabet.add((String) v.getValue());
         }
         if (v != null) {
@@ -173,7 +173,7 @@ public class AbstractSyntaxTree {
                                 newR[j] = predR;
                             }
                             newR[j] = '(';
-                            newR[j + 1] = Metasymbols.CIRCUMFLEXUS;
+                            newR[j + 1] = '^';
                             j += 2;
                             int c = 1;
                             int l;
