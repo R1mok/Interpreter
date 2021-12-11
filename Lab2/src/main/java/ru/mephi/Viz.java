@@ -173,8 +173,7 @@ public class Viz {
     }
 
     public static void main(String[] args) throws IOException {
-        String str1 = "a{3,4}"; // aaa(^|a) a{3}
-        String str = "(a(^|b))+"; // (aaa)(^|a) -> (aaa)|(aaaa)
+        String str = "cb|a"; // (aaa)(^|a) -> (aaa)|(aaaa)
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
@@ -221,5 +220,7 @@ public class Viz {
             System.out.print(endNode.get().getValue().stream().findFirst().get().get().getId() + " ");
         }
         System.out.println("");
+        RegexLib rl = new RegexLib();
+        System.out.println(rl.kpath(mindfa));
     }
 }
