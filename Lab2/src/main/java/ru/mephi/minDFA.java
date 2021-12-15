@@ -14,6 +14,7 @@ public class minDFA {
     protected SoftReference<DFANode>[] nodesArray;
     protected SoftReference<DFANode> startNode;
     protected Set<SoftReference<DFANode>> endNodes = new HashSet<>();
+    protected Set<String> alphabet = new HashSet<>();
 
     minDFA(SoftReference<DFANode>[] nodesArray) {
         this.nodesArray = nodesArray;
@@ -37,6 +38,7 @@ public class minDFA {
     }
 
     public void makeMinDFA(DFA dfa) {
+        this.alphabet = dfa.alphabet;
         Set<SoftReference<DFANode>> endSet = new HashSet<>(dfa.getEnd());
         Set<SoftReference<DFANode>> otherSet = new HashSet<>();
         Splitting.add(endSet);

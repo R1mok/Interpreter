@@ -8,8 +8,6 @@ public class Main {
         RegexLib rl = new RegexLib();
         String str = "ab|c";
         minDFA mindfa = rl.compile(str);
-        RegexLib rl1 = new RegexLib();
-        String str1 = rl1.kpath(mindfa);
-        System.out.println(str1);
+        rl.multiplyOfAutomatoes("ac");
     }
 }

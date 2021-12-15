@@ -6,6 +6,17 @@ import lombok.Data;
 import java.lang.ref.SoftReference;
 import java.util.*;
 
+class MulDFANode {
+    protected Pair<DFANode, DFANode> node;
+    protected HashSet<Pair<MulDFANode, String>> listnodes;
+}
+
+class mulDFA {
+    protected MulDFANode[] nodesArray;
+    protected MulDFANode startNode;
+    protected HashSet<MulDFANode> endNodes;
+}
+
 @Data
 public class RegexLib {
     private String string;
@@ -117,5 +128,53 @@ public class RegexLib {
             resString = resString.replaceAll("\\|\\)", "\\|\\^\\)");
         } while (!eqResString.equals(resString));
         return resString;
+    }
+
+    public void search(String str) {
+        minDFA mindfa = compile(str);
+    }
+
+    public mulDFA multiplyOfAutomatoes(String str) {
+        minDFA secdfa = compile(str);
+        mulDFA muldfa = new mulDFA();
+        muldfa.nodesArray = new MulDFANode[this.mindfa.nodesArray.length * secdfa.nodesArray.length];
+        int i = 0;
+        for (SoftReference<DFANode> firstNode : this.mindfa.nodesArray) {
+            for (SoftReference<DFANode> secondNode : secdfa.nodesArray) {
+                MulDFANode tmpNode = new MulDFANode();
+                tmpNode.node = new Pair<>(firstNode.get(), secondNode.get());
+                muldfa.nodesArray[i] = tmpNode;
+                ++i;
+            }
+        }
+        for (MulDFANode elem : muldfa.nodesArray) {
+            elem.listnodes = new HashSet<>();
+            DFANode firNode = elem.node.getKey();
+            DFANode secNode = elem.node.getValue();
+            DFANode destFirNode = null;
+            DFANode destSecNode = null;
+            Set<String> alphabets = new HashSet<>();
+            alphabets.addAll(this.dfa.alphabet);
+            alphabets.addAll(secdfa.alphabet);
+            String tmpSymbol = "";
+            for (String symbol : alphabets) {
+                if (firNode.getTransBySymbol(symbol) != null && secNode.getTransBySymbol(symbol) != null) {
+                    destFirNode = firNode.getTransBySymbol(symbol).get();
+                    destSecNode = secNode.getTransBySymbol(symbol).get();
+                    tmpSymbol = symbol;
+                }
+            }
+            for (MulDFANode destElem : muldfa.nodesArray) {
+                if (destElem.node.getKey().equals(destFirNode) && destElem.node.getValue().equals(destSecNode)) {
+                    elem.listnodes.add(new Pair<>(destElem, tmpSymbol));
+                }
+            }
+        }
+        for (MulDFANode elem : muldfa.nodesArray) {
+            if (elem.node.getKey().equals(this.mindfa.startNode.get()) && elem.node.getValue().equals(secdfa.startNode.get())) {
+                muldfa.startNode = elem;
+            }
+        }
+        return muldfa;
     }
 }
