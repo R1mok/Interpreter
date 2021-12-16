@@ -93,7 +93,7 @@ public class minDFA {
                     Splitting.addAll(mainSet);
                     break;
                 }
-                int notEquals = 0;// исправить тут что-то для того, чтобы не было в разных группах одинаковых элементов
+                int notEquals = 0;
                 for (SoftReference<DFANode> node : nodesSet) {
                     for (Set<SoftReference<DFANode>> nodes : Splitting) {
                         if (nodes.equals(nodesSet)) {
@@ -117,14 +117,14 @@ public class minDFA {
             }
         }
         nodesArray = new SoftReference[Splitting.size()];
-        int i = 0;
+        int i = 1;
         for (Set<SoftReference<DFANode>> group : Splitting) {
             DFANode node = new DFANode(i);
             SoftReference<DFANode> nodeSR = new SoftReference<>(node);
-            nodesArray[i] = nodeSR;
+            nodesArray[i-1] = nodeSR;
             ++i;
         }
-        i = 0;
+        i = 1;
         for (Set<SoftReference<DFANode>> group : Splitting) {
             for (SoftReference<DFANode> node : group) {
                 for (String symbol : dfa.alphabet) {
@@ -133,8 +133,8 @@ public class minDFA {
                         Set<SoftReference<DFANode>> destGroup = destNode.get().getGroupByNode(Splitting);
                         if (destGroup != null) {
                             int GroupId = getIdOfGroup(Splitting, destNode);
-                            if (!nodesArray[i].get().isTransAlreadyExist(nodesArray[GroupId], symbol))
-                                nodesArray[i].get().listNodes.add(new Pair<>(nodesArray[GroupId], symbol));
+                            if (!nodesArray[i-1].get().isTransAlreadyExist(nodesArray[GroupId], symbol))
+                                nodesArray[i-1].get().listNodes.add(new Pair<>(nodesArray[GroupId], symbol));
                         }
                     }
                 }

@@ -50,7 +50,6 @@ public class RegexLib {
         String resString = "";
         int transCount = mindfa.nodesArray[sourceNode].get().listNodes.size();
         for (Pair<SoftReference<DFANode>, String> pair : mindfa.nodesArray[sourceNode].get().listNodes) {
-            //System.out.println("i:" + sourceNode + "j:" + endNode + "getKey: " + pair.getKey().get().getValue().toString() + "\nendDFA: " + endDFA.get().getValue().toString());
             if (pair.getKey().get().getValue().equals(endDFA.get().getValue())) {
                 //System.out.println("its equals");
                 resString = resString.concat(pair.getValue());
@@ -64,37 +63,39 @@ public class RegexLib {
     }
 
     private String R(minDFA mindfa, int k, int i, int j) {
-        HashMap<String, Integer> tmpMap = new HashMap<>();
-        tmpMap.put("k", k);
-        tmpMap.put("i", i);
-        tmpMap.put("j", j);
-        for (Pair<HashMap<String, Integer>, String> pair : table) {
-            if (pair.getKey().equals(tmpMap)) {
-                return pair.getValue();
-            }
-        }
-        //System.out.println("k:" + k + "i:" + i + "j:" + j);
         String curString = "";
         if (k == 0) { // базис
-            curString = getTransByDestNode(mindfa, i, j);
+            if (i != j) {
+                curString = getTransByDestNode(mindfa, i - 1, j - 1); // если существует путь из i в j
+            } else {
+                curString = getTransByDestNode(mindfa, i - 1, j - 1); // если существует путь из i в j
+                if (!curString.equals("")) {
+                    curString = curString.concat("|^");
+                } else curString = curString.concat("^");
+            }
             return curString;
         } else {
             // R(k,i,j) = R(k-1,i,j) | (R(k-1,i,k)(R(k-1,k,k)+|^)R(k-1,k,j))
-            curString = curString.concat(R(mindfa, k - 1, i, j)); // R(k,i,j) = R(k-1,i,j)
-            curString = curString.concat("|("); // |(
-            curString = curString.concat(R(mindfa, k - 1, i, k)); // R(k-1,i,k)
-            curString = curString.concat("(("); // ((
-            curString = curString.concat(R(mindfa, k - 1, k, k)); // R(k-1,k,k)
-            curString = curString.concat(")+|^)("); // )+|^)(
-            curString = curString.concat(R(mindfa, k - 1, k, j)); // R(k-1,k,j)
-            curString = curString.concat("))"); // ))
+            String tmpString = R(mindfa, k - 1, i, j);
+            curString = curString.concat(tmpString); // R(k,i,j) = R(k-1,i,j)
+            if (!tmpString.equals(""))
+                curString = curString.concat("|("); // |(
+            else {
+                curString = curString.concat("(");
+            }
+            String tmpString1 = R(mindfa, k - 1, i, k);
+            String tmpString2 = R(mindfa, k - 1, k, k);
+            String tmpString3 = R(mindfa, k - 1, k, j);
+            if (tmpString1.equals("") | tmpString2.equals("") | tmpString3.equals("")){
+                return tmpString;
+            }
+            curString = curString.concat(tmpString1); // R(k-1,i,k)
+            curString = curString.concat("(("); // (
+            curString = curString.concat(tmpString2); // R(k-1,k,k)
+            curString = curString.concat(")+|^)("); // )+|^
+            curString = curString.concat(tmpString3); // R(k-1,k,j)
+            curString = curString.concat("))"); // )
         }
-
-        HashMap<String, Integer> curTriple = new HashMap<>();
-        curTriple.put("k", k);
-        curTriple.put("i", i);
-        curTriple.put("j", j);
-        table.add(new Pair<>(curTriple, curString));
         return curString;
     }
 
@@ -107,7 +108,7 @@ public class RegexLib {
         }
         String resString = "";
         for (int i = 0; i < endId.length; ++i) {
-            resString = resString.concat(R(mindfa, mindfa.nodesArray.length - 1, sourceId, endId[i]));
+            resString = resString.concat(R(mindfa, mindfa.nodesArray.length, sourceId, endId[i]));
             if (i != endId.length - 1) {
                 resString = resString.concat("|");
             }
@@ -116,16 +117,23 @@ public class RegexLib {
         String eqResString;
         do {
             eqResString = resString;
-            resString = resString.replaceAll("\\(\\(\\^\\)\\+\\|\\^\\)", "") // delete ((^)+|^)
-                    .replaceAll("\\(\\(\\)\\+\\|\\^\\)", ""); // delete (()+|^)
-            resString = resString.replaceAll("\\(\\^\\)", "") // delete (^)
-                    .replaceAll("\\(\\)", "")
-                    .replaceAll("\\(\\|\\(", "\\(\\("); // delete ()
-            while (resString.indexOf("|") == 0) {
+            resString = resString.replaceAll("\\(\\(\\^\\)\\+\\|\\^\\)", "^") // replace ((^)+|^) to ^
+                    .replaceAll("\\(\\(\\)\\+\\|\\^\\)", ""); // replace (()+|^) to ""
+            resString = resString.replaceAll("\\(\\^\\)", "^") // replace (^) to ^
+                    .replaceAll("\\(\\)", "") // replace () to ""
+                    .replaceAll("\\(\\|\\(", "\\(\\("); // replace (|( to ((
+            while (resString.indexOf("|") == 0 || resString.indexOf(".") == 0) { // delete first |
                 resString = resString.replaceFirst("\\|", "");
             }
-            resString = resString.replaceAll("\\|\\|", "\\|");
-            resString = resString.replaceAll("\\|\\)", "\\|\\^\\)");
+            resString = resString.replaceAll("\\|\\|", "\\|"); // replace || to |
+            resString = resString.replaceAll("\\^\\^", "\\^"); // replace ^^ to ^
+            resString = resString.replaceAll("\\|\\)", "\\)"); // replace |) to )
+            resString = resString.replaceAll("\\(\\^\\(", "\\(\\("); // replace (^( to ((
+            resString = resString.replaceAll("\\)\\^\\)", "\\)\\)"); // replace )^) to ))
+            resString = resString.replaceAll("\\)\\^\\(", "\\)\\("); // replace )^( to )(
+            resString = resString.replaceAll("\\|\\^\\(", "\\(") // replace |^( to (
+                    .replaceAll("\\^\\)", "\\)") // replace ^) to )
+                    .replaceAll("\\|\\^\\)", "\\)"); // replace |^) to )
         } while (!eqResString.equals(resString));
         return resString;
     }

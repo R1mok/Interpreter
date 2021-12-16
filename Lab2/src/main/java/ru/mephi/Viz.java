@@ -146,7 +146,7 @@ public class Viz {
         DirectedWeightedPseudograph<String, MyEdge> g =
                 new DirectedWeightedPseudograph<>(MyEdge.class);
         for (int i = 0; i < mindfa.get().nodesArray.length; ++i) {
-            g.addVertex(String.valueOf(i));
+            g.addVertex(String.valueOf(i+1));
         }
         for (int i = 0; i < mindfa.get().nodesArray.length; ++i) {
             String sourceVertex = String.valueOf(mindfa.get().nodesArray[i].get().getValue().stream().findAny().get().get().getId());
@@ -173,7 +173,7 @@ public class Viz {
     }
 
     public static void main(String[] args) throws IOException {
-        String str = "cb|a"; // (aaa)(^|a) -> (aaa)|(aaaa)
+        String str = "a|(a)|((a|(a)))|(b|((b))(c|(c)))"; // (aaa)(^|a) -> (aaa)|(aaaa)
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
