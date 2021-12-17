@@ -86,7 +86,7 @@ public class RegexLib {
             String tmpString1 = R(mindfa, k - 1, i, k);
             String tmpString2 = R(mindfa, k - 1, k, k);
             String tmpString3 = R(mindfa, k - 1, k, j);
-            if (tmpString1.equals("") | tmpString2.equals("") | tmpString3.equals("")){
+            if (tmpString1.equals("") | tmpString2.equals("") | tmpString3.equals("")) {
                 return tmpString;
             }
             curString = curString.concat(tmpString1); // R(k-1,i,k)
@@ -113,14 +113,13 @@ public class RegexLib {
                 resString = resString.concat("|");
             }
         }
-        System.out.println(resString);
         String eqResString;
         do {
             eqResString = resString;
-            resString = resString.replaceAll("\\(\\(\\^\\)\\+\\|\\^\\)", "^"); // replace ((^)+|^) to ^
+            //resString = resString.replaceAll("\\(\\(\\^\\)\\+\\|\\^\\)", "^"); // replace ((^)+|^) to ^
             //resString = resString.replaceAll("\\(\\^\\)", "^") // replace (^) to ^
-                    //.replaceAll("\\(\\)", "") // replace () to ""
-                    //.replaceAll("\\(\\|\\(", "\\(\\("); // replace (|( to ((
+            //.replaceAll("\\(\\)", "") // replace () to ""
+            //.replaceAll("\\(\\|\\(", "\\(\\("); // replace (|( to ((
             while (resString.indexOf("|") == 0 || resString.indexOf(".") == 0) { // delete first |
                 resString = resString.replaceFirst("\\|", "");
             }
@@ -137,16 +136,81 @@ public class RegexLib {
         return resString;
     }
 
-    public void search(String str) {
-        minDFA mindfa = compile(str);
+    public boolean isEmptyDFA(mulDFA dfa) {
+        Queue<MulDFANode> q = new ArrayDeque<>();
+        Set<MulDFANode> set = new HashSet<>();
+        q.offer(dfa.startNode);
+        int[] visited = new int[dfa.nodesArray.length];
+        int startIndex = Arrays.asList(dfa.nodesArray).indexOf(dfa.startNode);
+        visited[startIndex] = 1;
+        while (!q.isEmpty()) {
+            MulDFANode tmpNode = q.poll();
+            set.add(tmpNode);
+            for (Pair<MulDFANode, String> nodes : tmpNode.listnodes) {
+                if (visited[Arrays.asList(dfa.nodesArray).indexOf(nodes.getKey())] == 0) {
+                    q.offer(nodes.getKey());
+                    set.add(nodes.getKey());
+                    visited[Arrays.asList(dfa.nodesArray).indexOf(nodes.getKey())] = 1;
+                    boolean endKeyExist = false;
+                    for (MulDFANode key : dfa.endNodes) {  // ищем среди принимающих состояний 1го автомата текущее
+                        if (nodes.getKey().equals(key)) {
+                            // в принимающих вершинах есть текущая вершина
+                            endKeyExist = true;
+                        }
+                    }
+                    if (endKeyExist) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
-    public mulDFA multiplyOfAutomatoes(String str) {
-        minDFA secdfa = compile(str);
+    public mulDFA search(String str1, String str2) {
+        Object[] mul = multiplyOfAutomatoes(str1, str2);
+        minDFA firstdfa = (minDFA) mul[0];
+        minDFA secdfa = (minDFA) mul[1]; // L
+        mulDFA muldfa = (mulDFA) mul[2];
+        muldfa.endNodes = new HashSet<>();
+        for (MulDFANode node : muldfa.nodesArray) { // проходим по массиву вершин и ищем принимающие состояния
+            boolean endKeyExist = false;
+            boolean endValueExist = false;
+            for (SoftReference<DFANode> key : firstdfa.endNodes) {  // ищем среди принимающих состояний 1го автомата текущее
+                if (node.node.getKey().equals(key.get())) {
+                    // в принимающих вершинах есть текущая вершина key (1го автомата)
+                    endKeyExist = true;
+                }
+            }
+            for (SoftReference<DFANode> value : secdfa.endNodes) {
+                if (node.node.getValue().equals(value.get())) {
+                    endValueExist = true;
+                    // в принимающих вершинах есть текущая вершина value (1го автомата)
+                }
+            }
+            if (!endKeyExist && endValueExist) {
+                muldfa.endNodes.add(node);
+            }
+            // если в вершине key не принимающая, а value принимающая - добавляем node в endNodes
+        }
+        if (isEmptyDFA(muldfa)) {
+            System.out.println("String " + str2 + " not exist in " + str1);
+        } else {
+            System.out.println("String " + str2 + " exist in " + str1);
+        }
+        return muldfa;
+    }
+
+    public Object[] multiplyOfAutomatoes(String str1, String str2) {
+        Object[] returning = new Object[3];
+        minDFA firstdfa = compile(str1);
+        minDFA secdfa = compile(str2);
+        returning[0] = firstdfa;
+        returning[1] = secdfa;
         mulDFA muldfa = new mulDFA();
-        muldfa.nodesArray = new MulDFANode[this.mindfa.nodesArray.length * secdfa.nodesArray.length];
+        muldfa.nodesArray = new MulDFANode[firstdfa.nodesArray.length * secdfa.nodesArray.length];
         int i = 0;
-        for (SoftReference<DFANode> firstNode : this.mindfa.nodesArray) {
+        for (SoftReference<DFANode> firstNode : firstdfa.nodesArray) {
             for (SoftReference<DFANode> secondNode : secdfa.nodesArray) {
                 MulDFANode tmpNode = new MulDFANode();
                 tmpNode.node = new Pair<>(firstNode.get(), secondNode.get());
@@ -161,7 +225,7 @@ public class RegexLib {
             DFANode destFirNode = null;
             DFANode destSecNode = null;
             Set<String> alphabets = new HashSet<>();
-            alphabets.addAll(this.dfa.alphabet);
+            alphabets.addAll(firstdfa.alphabet);
             alphabets.addAll(secdfa.alphabet);
             String tmpSymbol = "";
             for (String symbol : alphabets) {
@@ -178,10 +242,11 @@ public class RegexLib {
             }
         }
         for (MulDFANode elem : muldfa.nodesArray) {
-            if (elem.node.getKey().equals(this.mindfa.startNode.get()) && elem.node.getValue().equals(secdfa.startNode.get())) {
+            if (elem.node.getKey().equals(firstdfa.startNode.get()) && elem.node.getValue().equals(secdfa.startNode.get())) {
                 muldfa.startNode = elem;
             }
         }
-        return muldfa;
+        returning[2] = muldfa;
+        return returning;
     }
 }

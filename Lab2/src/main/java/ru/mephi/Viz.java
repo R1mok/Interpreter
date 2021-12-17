@@ -146,7 +146,7 @@ public class Viz {
         DirectedWeightedPseudograph<String, MyEdge> g =
                 new DirectedWeightedPseudograph<>(MyEdge.class);
         for (int i = 0; i < mindfa.get().nodesArray.length; ++i) {
-            g.addVertex(String.valueOf(i+1));
+            g.addVertex(String.valueOf(i + 1));
         }
         for (int i = 0; i < mindfa.get().nodesArray.length; ++i) {
             String sourceVertex = String.valueOf(mindfa.get().nodesArray[i].get().getValue().stream().findAny().get().get().getId());
@@ -172,8 +172,40 @@ public class Viz {
         ImageIO.write(image, "PNG", imgFile);
     }
 
+    public static DirectedWeightedPseudograph<String, MyEdge> createMulDFAGraph(SoftReference<mulDFA> muldfa) throws IOException {
+        File imgFile = new File("mulDFAgraph.png");
+        imgFile.createNewFile();
+        DirectedWeightedPseudograph<String, MyEdge> g =
+                new DirectedWeightedPseudograph<>(MyEdge.class);
+        for (int i = 0; i < muldfa.get().nodesArray.length; ++i) {
+            g.addVertex(String.valueOf(i + 1));
+        }
+        for (int i = 0; i < muldfa.get().nodesArray.length; ++i) {
+            String sourceVertex = String.valueOf(i + 1);
+            for (Pair<MulDFANode, String> listnode : muldfa.get().nodesArray[i].listnodes) {
+                String desVertex = String.valueOf(Arrays.asList(muldfa.get().nodesArray).indexOf(listnode.getKey()) + 1);
+                String curEdge = listnode.getValue();
+                MyEdge edge = new MyEdge();
+                edge.edgeName = curEdge;
+                g.addEdge(sourceVertex, desVertex, edge);
+            }
+        }
+        return g;
+    }
+
+    public static void VizMulDFA(SoftReference<mulDFA> muldfa) throws IOException {
+        JGraphXAdapter<String, MyEdge> graphAdapter =
+                new JGraphXAdapter<String, MyEdge>(createMulDFAGraph(muldfa));
+        mxIGraphLayout layout = new mxHierarchicalLayout(graphAdapter); // mxHierarchicalLayout
+        layout.execute(graphAdapter.getDefaultParent());
+        BufferedImage image =
+                mxCellRenderer.createBufferedImage(graphAdapter, null, 2, Color.WHITE, true, null);
+        File imgFile = new File("mulDFAgraph.png");
+        ImageIO.write(image, "PNG", imgFile);
+    }
+
     public static void main(String[] args) throws IOException {
-        String str = "ab|c"; // (aaa)(^|a) -> (aaa)|(aaaa)
+        String str = "ap+"; // ap+
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
@@ -216,11 +248,32 @@ public class Viz {
         System.out.println("\nminDFA nodes");
         System.out.print("Start node: " + mindfa.startNode.get().getValue().stream().findFirst().get().get().getId() + "\n");
         System.out.print("End nodes: ");
-        for (SoftReference<DFANode> endNode : mindfa.endNodes){
+        for (SoftReference<DFANode> endNode : mindfa.endNodes) {
             System.out.print(endNode.get().getValue().stream().findFirst().get().get().getId() + " ");
         }
         System.out.println("");
         RegexLib rl = new RegexLib();
         System.out.println(rl.kpath(mindfa));
+        rl.compile("abc");
+        String firstLine = "a+b|c";
+        String secondLine = "c";
+        VizMinDFA(new SoftReference<>(rl.compile(firstLine)));
+        mulDFA muldfa = rl.search(firstLine, secondLine);
+        VizMulDFA(new SoftReference<>(muldfa));
+        int i = 1;
+        System.out.println("MulDFA");
+        System.out.print("End nodes: ");
+        if (muldfa.endNodes != null) {
+            for (MulDFANode node : muldfa.nodesArray) {
+                for (MulDFANode endNode : muldfa.endNodes) {
+                    if (endNode.equals(node)) {
+                        System.out.print(i + " ");
+                    }
+                }
+                ++i;
+            }
+        } else {
+            System.out.println("Haven't nodes");
+        }
     }
 }

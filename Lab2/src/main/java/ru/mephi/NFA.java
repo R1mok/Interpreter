@@ -121,15 +121,16 @@ public class NFA {
                 for (int i = 0; i < left.get().getAuto().get().getCountNodes(); ++i) {
                     newNodes[i].setId(i);
                 }
+
                 System.arraycopy(right.get().getAuto().get().nodes, 1, newNodes, left.get().getAuto().get().countNodes, right.get().getAuto().get().countNodes - 1);
                 for (int i = left.get().getAuto().get().countNodes; i < newNodes.length; ++i) {
                     newNodes[i].setId(i);
                 }
                 Node crossNode = new Node();
-                if (right.get().getValue().equals(Metasymbols.AND) || right.get().getValue().equals(Metasymbols.OR) || right.get().getValue().equals(Metasymbols.CIRCUIT)) {
+                if (right.get().getValue().equals(Metasymbols.OR) || right.get().getValue().equals(Metasymbols.CIRCUIT)) {
                     crossNode.setValue(Metasymbols.EPSILON);
                 } else {
-                    crossNode.setValue(right.get());
+                    crossNode.setValue(right.get().getAuto().get().getStart().get().listNodes.stream().findFirst().get().getValue().getValue());
                 }
 
                 for (Pair<SoftReference<NFANode>, Node> startElem : right.get().getAuto().get().start.get().listNodes) {
