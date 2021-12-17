@@ -117,11 +117,10 @@ public class RegexLib {
         String eqResString;
         do {
             eqResString = resString;
-            resString = resString.replaceAll("\\(\\(\\^\\)\\+\\|\\^\\)", "^") // replace ((^)+|^) to ^
-                    .replaceAll("\\(\\(\\)\\+\\|\\^\\)", ""); // replace (()+|^) to ""
-            resString = resString.replaceAll("\\(\\^\\)", "^") // replace (^) to ^
-                    .replaceAll("\\(\\)", "") // replace () to ""
-                    .replaceAll("\\(\\|\\(", "\\(\\("); // replace (|( to ((
+            resString = resString.replaceAll("\\(\\(\\^\\)\\+\\|\\^\\)", "^"); // replace ((^)+|^) to ^
+            //resString = resString.replaceAll("\\(\\^\\)", "^") // replace (^) to ^
+                    //.replaceAll("\\(\\)", "") // replace () to ""
+                    //.replaceAll("\\(\\|\\(", "\\(\\("); // replace (|( to ((
             while (resString.indexOf("|") == 0 || resString.indexOf(".") == 0) { // delete first |
                 resString = resString.replaceFirst("\\|", "");
             }
@@ -131,9 +130,9 @@ public class RegexLib {
             resString = resString.replaceAll("\\(\\^\\(", "\\(\\("); // replace (^( to ((
             resString = resString.replaceAll("\\)\\^\\)", "\\)\\)"); // replace )^) to ))
             resString = resString.replaceAll("\\)\\^\\(", "\\)\\("); // replace )^( to )(
-            resString = resString.replaceAll("\\|\\^\\(", "\\(") // replace |^( to (
-                    .replaceAll("\\^\\)", "\\)") // replace ^) to )
-                    .replaceAll("\\|\\^\\)", "\\)"); // replace |^) to )
+            //resString = resString.replaceAll("\\|\\^\\(", "\\(") // replace |^( to (
+            //       .replaceAll("\\^\\)", "\\)") // replace ^) to )
+            //        .replaceAll("\\|\\^\\)", "\\)"); // replace |^) to )
         } while (!eqResString.equals(resString));
         return resString;
     }

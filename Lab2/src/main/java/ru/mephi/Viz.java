@@ -173,7 +173,7 @@ public class Viz {
     }
 
     public static void main(String[] args) throws IOException {
-        String str = "a|(a)|((a|(a)))|(b|((b))(c|(c)))"; // (aaa)(^|a) -> (aaa)|(aaaa)
+        String str = "ab|c"; // (aaa)(^|a) -> (aaa)|(aaaa)
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
