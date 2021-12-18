@@ -136,14 +136,20 @@ public class RegexLib {
         return resString;
     }
 
-    public boolean isEmptyDFA(mulDFA dfa, minDFA firstdfa, minDFA secdfa) {
-        MulDFANode[] startNodes = new MulDFANode[firstdfa.nodesArray.length];
-        int i = 0;
-        for (MulDFANode node : dfa.nodesArray){
-            if (node.node.getValue().equals(secdfa.startNode.get())){
-                startNodes[i] = node;
-                ++i;
+    public boolean isEmptyDFA(mulDFA dfa, minDFA firstdfa, minDFA secdfa, boolean isItForSearch) {
+        MulDFANode[] startNodes;
+        if (isItForSearch) {
+            startNodes = new MulDFANode[firstdfa.nodesArray.length];
+            int i = 0;
+            for (MulDFANode node : dfa.nodesArray) {
+                if (node.node.getValue().equals(secdfa.startNode.get())) {
+                    startNodes[i] = node;
+                    ++i;
+                }
             }
+        } else {
+            startNodes = new MulDFANode[1];
+            startNodes[0] = dfa.startNode;
         }
         for (MulDFANode startNode : startNodes) {
             Queue<MulDFANode> q = new ArrayDeque<>();
@@ -177,29 +183,47 @@ public class RegexLib {
         mulDFA muldfa = (mulDFA) mul[2];
         muldfa.endNodes = new HashSet<>();
         for (MulDFANode node : muldfa.nodesArray) { // проходим по массиву вершин и ищем принимающие состояния
-            boolean endKeyExist = false;
             boolean endValueExist = false;
-            for (SoftReference<DFANode> key : firstdfa.endNodes) {  // ищем среди принимающих состояний 1го автомата текущее
-                if (node.node.getKey().equals(key.get())) {
-                    // в принимающих вершинах есть текущая вершина key (1го автомата)
-                    endKeyExist = true;
-                }
-            }
             for (SoftReference<DFANode> value : secdfa.endNodes) {
                 if (node.node.getValue().equals(value.get())) {
                     endValueExist = true;
-                    // в принимающих вершинах есть текущая вершина value (1го автомата)
+                    // в принимающих вершинах есть текущая вершина value (2го автомата)
                 }
             }
-            if (/* !endKeyExist && */ endValueExist) {
+            if (endValueExist) {
                 muldfa.endNodes.add(node);
             }
-            // если в вершине key не принимающая, а value принимающая - добавляем node в endNodes
         }
-        if (isEmptyDFA(muldfa, firstdfa, secdfa)) {
+        if (isEmptyDFA(muldfa, firstdfa, secdfa, true)) {
             System.out.println("Substring " + str2 + " not exist in " + str1);
         } else {
             System.out.println("Substring " + str2 + " exist in " + str1);
+        }
+        return muldfa;
+    }
+
+    public mulDFA intersection(String str1, String str2){
+        Object[] mul = multiplyOfAutomatoes(str1, str2);
+        minDFA firstdfa = (minDFA) mul[0];
+        minDFA secdfa = (minDFA) mul[1]; // L
+        mulDFA muldfa = (mulDFA) mul[2];
+        muldfa.endNodes = new HashSet<>();
+        for (MulDFANode node : muldfa.nodesArray){
+            boolean endKeyExist = false;
+            boolean endValueExist = false;
+            for (SoftReference<DFANode> key : firstdfa.endNodes){
+                if (node.node.getKey().equals(key.get())){
+                    endKeyExist = true; // в принимающих вершинах есть текущая key
+                }
+            }
+            for (SoftReference<DFANode> value : secdfa.endNodes){
+                if (node.node.getValue().equals(value.get())){
+                    endValueExist = true;
+                }
+            }
+            if (endKeyExist && endValueExist){
+                muldfa.endNodes.add(node);
+            }
         }
         return muldfa;
     }

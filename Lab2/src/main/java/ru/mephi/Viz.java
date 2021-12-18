@@ -254,11 +254,11 @@ public class Viz {
         System.out.println("");
         RegexLib rl = new RegexLib();
         System.out.println(rl.kpath(mindfa));
-        String firstLine = "ab+";
+        String firstLine = "ab+|(cd)|(kl|m)";
         rl.compile(firstLine);
-        String secondLine = "a";
+        String secondLine = "kl";
         VizMinDFA(new SoftReference<>(rl.compile(firstLine)));
-        mulDFA muldfa = rl.search(firstLine, secondLine);
+        mulDFA muldfa = rl.intersection(firstLine, secondLine);
         VizMulDFA(new SoftReference<>(muldfa));
         int i = 1;
         System.out.println("MulDFA");
