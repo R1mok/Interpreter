@@ -136,30 +136,33 @@ public class RegexLib {
         return resString;
     }
 
-    public boolean isEmptyDFA(mulDFA dfa) {
-        Queue<MulDFANode> q = new ArrayDeque<>();
-        Set<MulDFANode> set = new HashSet<>();
-        q.offer(dfa.startNode);
-        int[] visited = new int[dfa.nodesArray.length];
-        int startIndex = Arrays.asList(dfa.nodesArray).indexOf(dfa.startNode);
-        visited[startIndex] = 1;
-        while (!q.isEmpty()) {
-            MulDFANode tmpNode = q.poll();
-            set.add(tmpNode);
-            for (Pair<MulDFANode, String> nodes : tmpNode.listnodes) {
-                if (visited[Arrays.asList(dfa.nodesArray).indexOf(nodes.getKey())] == 0) {
-                    q.offer(nodes.getKey());
-                    set.add(nodes.getKey());
-                    visited[Arrays.asList(dfa.nodesArray).indexOf(nodes.getKey())] = 1;
-                    boolean endKeyExist = false;
-                    for (MulDFANode key : dfa.endNodes) {  // ищем среди принимающих состояний 1го автомата текущее
-                        if (nodes.getKey().equals(key)) {
-                            // в принимающих вершинах есть текущая вершина
-                            endKeyExist = true;
+    public boolean isEmptyDFA(mulDFA dfa, minDFA firstdfa, minDFA secdfa) {
+        MulDFANode[] startNodes = new MulDFANode[firstdfa.nodesArray.length];
+        int i = 0;
+        for (MulDFANode node : dfa.nodesArray){
+            if (node.node.getValue().equals(secdfa.startNode.get())){
+                startNodes[i] = node;
+                ++i;
+            }
+        }
+        for (MulDFANode startNode : startNodes) {
+            Queue<MulDFANode> q = new ArrayDeque<>();
+            q.offer(startNode);
+            int[] visited = new int[dfa.nodesArray.length];
+            int startIndex = Arrays.asList(dfa.nodesArray).indexOf(dfa.startNode);
+            visited[startIndex] = 1;
+            while (!q.isEmpty()) {
+                MulDFANode tmpNode = q.poll();
+                for (Pair<MulDFANode, String> nodes : tmpNode.listnodes) {
+                    if (visited[Arrays.asList(dfa.nodesArray).indexOf(nodes.getKey())] == 0) {
+                        q.offer(nodes.getKey());
+                        visited[Arrays.asList(dfa.nodesArray).indexOf(nodes.getKey())] = 1;
+                        for (MulDFANode key : dfa.endNodes) {  // ищем среди принимающих состояний 1го автомата текущее
+                            if (nodes.getKey().equals(key)) {
+                                // в принимающих вершинах есть текущая вершина
+                                return false;
+                            }
                         }
-                    }
-                    if (endKeyExist) {
-                        return false;
                     }
                 }
             }
@@ -188,15 +191,15 @@ public class RegexLib {
                     // в принимающих вершинах есть текущая вершина value (1го автомата)
                 }
             }
-            if (!endKeyExist && endValueExist) {
+            if (/* !endKeyExist && */ endValueExist) {
                 muldfa.endNodes.add(node);
             }
             // если в вершине key не принимающая, а value принимающая - добавляем node в endNodes
         }
-        if (isEmptyDFA(muldfa)) {
-            System.out.println("String " + str2 + " not exist in " + str1);
+        if (isEmptyDFA(muldfa, firstdfa, secdfa)) {
+            System.out.println("Substring " + str2 + " not exist in " + str1);
         } else {
-            System.out.println("String " + str2 + " exist in " + str1);
+            System.out.println("Substring " + str2 + " exist in " + str1);
         }
         return muldfa;
     }

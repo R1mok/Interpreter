@@ -163,7 +163,7 @@ public class Viz {
 
     public static void VizMinDFA(SoftReference<minDFA> mindfa) throws IOException {
         JGraphXAdapter<String, MyEdge> graphAdapter =
-                new JGraphXAdapter<String, MyEdge>(createMinDFAGraph(mindfa));
+                new JGraphXAdapter<>(createMinDFAGraph(mindfa));
         mxIGraphLayout layout = new mxHierarchicalLayout(graphAdapter); // mxHierarchicalLayout
         layout.execute(graphAdapter.getDefaultParent());
         BufferedImage image =
@@ -254,9 +254,9 @@ public class Viz {
         System.out.println("");
         RegexLib rl = new RegexLib();
         System.out.println(rl.kpath(mindfa));
-        rl.compile("abc");
-        String firstLine = "a+b|c";
-        String secondLine = "c";
+        String firstLine = "ab+";
+        rl.compile(firstLine);
+        String secondLine = "a";
         VizMinDFA(new SoftReference<>(rl.compile(firstLine)));
         mulDFA muldfa = rl.search(firstLine, secondLine);
         VizMulDFA(new SoftReference<>(muldfa));

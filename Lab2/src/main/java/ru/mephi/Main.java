@@ -9,6 +9,5 @@ public class Main {
         String str = "(3:(abc))xy";
         String str1 = "abc|abcxy+";
         minDFA mindfa = rl.compile(str);
-        rl.multiplyOfAutomatoes("ac");
     }
 }
