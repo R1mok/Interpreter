@@ -202,26 +202,63 @@ public class RegexLib {
         return muldfa;
     }
 
-    public mulDFA intersection(String str1, String str2){
-        Object[] mul = multiplyOfAutomatoes(str1, str2);
+    public mulDFA complement(String str) {
+        minDFA dfa = compile(str);
+        String alphabetKlini = "(";
+        int i = 0;
+        for (String symbol : dfa.alphabet) {
+            ++i;
+            alphabetKlini = alphabetKlini.concat(symbol);
+            if (i != dfa.alphabet.size()) {
+                alphabetKlini = alphabetKlini.concat("|");
+            }
+        }
+        alphabetKlini = alphabetKlini.concat("|^)+|^");
+        Object[] mul = multiplyOfAutomatoes(alphabetKlini, str);
         minDFA firstdfa = (minDFA) mul[0];
-        minDFA secdfa = (minDFA) mul[1]; // L
+        minDFA secdfa = (minDFA) mul[1];
         mulDFA muldfa = (mulDFA) mul[2];
         muldfa.endNodes = new HashSet<>();
-        for (MulDFANode node : muldfa.nodesArray){
+        for (MulDFANode node : muldfa.nodesArray) {
             boolean endKeyExist = false;
             boolean endValueExist = false;
-            for (SoftReference<DFANode> key : firstdfa.endNodes){
-                if (node.node.getKey().equals(key.get())){
+            for (SoftReference<DFANode> key : firstdfa.endNodes) {
+                if (node.node.getKey().equals(key.get())) {
                     endKeyExist = true; // в принимающих вершинах есть текущая key
                 }
             }
-            for (SoftReference<DFANode> value : secdfa.endNodes){
-                if (node.node.getValue().equals(value.get())){
+            for (SoftReference<DFANode> value : secdfa.endNodes) {
+                if (node.node.getValue().equals(value.get())) {
+                    endValueExist = true; // в принимающих вершинах есть текущая value
+                }
+            }
+            if (endKeyExist && !endValueExist) {
+                muldfa.endNodes.add(node);
+            }
+        }
+        return muldfa;
+    }
+
+    public mulDFA intersection(String str1, String str2) {
+        Object[] mul = multiplyOfAutomatoes(str1, str2);
+        minDFA firstdfa = (minDFA) mul[0];
+        minDFA secdfa = (minDFA) mul[1];
+        mulDFA muldfa = (mulDFA) mul[2];
+        muldfa.endNodes = new HashSet<>();
+        for (MulDFANode node : muldfa.nodesArray) {
+            boolean endKeyExist = false;
+            boolean endValueExist = false;
+            for (SoftReference<DFANode> key : firstdfa.endNodes) {
+                if (node.node.getKey().equals(key.get())) {
+                    endKeyExist = true; // в принимающих вершинах есть текущая key
+                }
+            }
+            for (SoftReference<DFANode> value : secdfa.endNodes) {
+                if (node.node.getValue().equals(value.get())) {
                     endValueExist = true;
                 }
             }
-            if (endKeyExist && endValueExist){
+            if (endKeyExist && endValueExist) {
                 muldfa.endNodes.add(node);
             }
         }

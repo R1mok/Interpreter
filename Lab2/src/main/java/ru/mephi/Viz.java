@@ -205,7 +205,7 @@ public class Viz {
     }
 
     public static void main(String[] args) throws IOException {
-        String str = "ap+"; // ap+
+        String str = "ab+|c"; //
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
@@ -254,14 +254,21 @@ public class Viz {
         System.out.println("");
         RegexLib rl = new RegexLib();
         System.out.println(rl.kpath(mindfa));
-        String firstLine = "ab+|(cd)|(kl|m)";
+        String firstLine = "ab";
         rl.compile(firstLine);
-        String secondLine = "kl";
-        VizMinDFA(new SoftReference<>(rl.compile(firstLine)));
-        mulDFA muldfa = rl.intersection(firstLine, secondLine);
+        String secondLine = "savd";
+        mulDFA muldfa = rl.complement(firstLine);
         VizMulDFA(new SoftReference<>(muldfa));
         int i = 1;
         System.out.println("MulDFA");
+        System.out.print("Start node: ");
+        for (MulDFANode node : muldfa.nodesArray){
+            if (node.equals(muldfa.startNode)){
+                System.out.println(i);
+            }
+            ++i;
+        }
+        i = 1;
         System.out.print("End nodes: ");
         if (muldfa.endNodes != null) {
             for (MulDFANode node : muldfa.nodesArray) {
