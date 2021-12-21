@@ -205,7 +205,7 @@ public class Viz {
     }
 
     public static void main(String[] args) throws IOException {
-        String str = "ab+|c"; //
+        String str = "a(^|b|(bb)|(bbb))";
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
@@ -258,7 +258,7 @@ public class Viz {
         rl.compile(firstLine);
         String secondLine = "savd";
         mulDFA muldfa = rl.complement(firstLine);
-        VizMulDFA(new SoftReference<>(muldfa));
+        //VizMulDFA(new SoftReference<>(muldfa));
         int i = 1;
         System.out.println("MulDFA");
         System.out.print("Start node: ");
