@@ -205,7 +205,7 @@ public class Viz {
     }
 
     public static void main(String[] args) throws IOException {
-        String str = "a(^|b|(bb)|(bbb))";
+        String str = "(a((^)+|^)((b((^)+|^)(b|a))))|(((^)+|^)((a((^)+|^)((b((^)+|^)(b|a))))))|((a((^)+|^)((b((^)+|^)(b|a))))|(((^)+|^)((a((^)+|^)((b((^)+|^)(b|a))))))((^)+|^)(^))";
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);

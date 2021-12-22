@@ -15,10 +15,10 @@ public class RegexLibTest {
         String str4 = "a+";
         String str5 = "ab+";
         String str6 = "ab|c+";
-        String str7 = "ab{1,3}"; // a(^|b|(bb)|(bbb))
-        String str8 = "a|b{3}"; // a|((bb)(b|b+))
+        String str7 = "ab{2,2}";
+        String str8 = "a|(b{3})";
         String str9 = "(abc){1,2}";
-        String str10 = "(ab+){2,3}";
+        String str10 = "ab(3:(a|b))";
         RegexLib rl = new RegexLib();
         String out1 = rl.kpath(rl.compile(str1));
         Assert.assertEquals(out1, "((a((^)+|^)(b))((^)+|^)(c|(c((^)+|^)(^))))|(((^)+|^)(((a((^)+|^)(b))((^)+|^)(c|(c((^)+|^)(^))))))");
@@ -33,7 +33,13 @@ public class RegexLibTest {
         String out6 = rl.kpath(rl.compile(str6));
         Assert.assertEquals(out6, "(a((^)+|^)(c|b))|((a((^)+|^)(c|b))((c|^)+|^)(c|^))|(((^)+|^)((a((^)+|^)(c|b))|((a((^)+|^)(c|b))((c|^)+|^)(c|^))))");
         String out7 = rl.kpath(rl.compile(str7));
-        Assert.assertEquals(out7, "(a|(((^)+|^)(a))((^)+|^)(b))|((a|(((^)+|^)(a))((^)+|^)(b))((b|^)+|^)(b|^))");
+        Assert.assertEquals(out7, "(a((^)+|^)((b((^)+|^)(b))))|((a((^)+|^)((b((^)+|^)(b))))((^)+|^)(^))|(((^)+|^)((a((^)+|^)((b((^)+|^)(b))))|((a((^)+|^)((b((^)+|^)(b))))((^)+|^)(^))))");
+        String out8 = rl.kpath(rl.compile(str8));
+        Assert.assertEquals(out8, "a|(a|((b|^)+|^)(b|^))|(((^)+|^)(a|(a|((b|^)+|^)(b|^))))|((b|((^)+|^)(b))|(((^)+|^)((b|((^)+|^)(b))))((^)+|^)(b|(b((b|^)+|^)(b|^))))");
+        String out9 = rl.kpath(rl.compile(str9));
+        Assert.assertEquals(out9, "((a((^)+|^)(b))|(((^)+|^)((a((^)+|^)(b))))((^)+|^)(c))|(((a((^)+|^)(b))|(((^)+|^)((a((^)+|^)(b))))((^)+|^)(c))((^)+|^)(^))|(((a((^)+|^)(b))|(((^)+|^)((a((^)+|^)(b))))((^)+|^)(c))((^)+|^)((a((^)+|^)((b((^)+|^)(c))))|((a((^)+|^)((b((^)+|^)(c))))((^)+|^)(^))))");
+        String out10 = rl.kpath(rl.compile(str10));
+        Assert.assertEquals(out10, "(a((^)+|^)((b((^)+|^)(b|a))))|(((^)+|^)((a((^)+|^)((b((^)+|^)(b|a))))))|((a((^)+|^)((b((^)+|^)(b|a))))|(((^)+|^)((a((^)+|^)((b((^)+|^)(b|a))))))((^)+|^)(^))");
     }
 
     @Test

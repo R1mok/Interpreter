@@ -105,6 +105,7 @@ public class RegexLib {
         int p = 0;
         for (SoftReference<DFANode> endNode : mindfa.endNodes) {
             endId[p] = endNode.get().getValue().stream().findFirst().get().get().getId();
+            ++p;
         }
         String resString = "";
         for (int i = 0; i < endId.length; ++i) {
