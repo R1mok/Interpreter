@@ -55,7 +55,23 @@ public class AbstractSyntaxTree {
             parents((Node) v.getLeftChild());
         }
     }
-
+    public Node doOrderForBrace(Node rootV) {
+        Node newRootNode = new Node();
+        newRootNode.setValue(rootV.getValue());
+        orderForBrace(rootV, newRootNode);
+        setParents(newRootNode);
+        return newRootNode;
+    }
+    public void orderForBrace(Node v, Node newNode){
+        if (v != null){
+            if (v.getRightChild() != null)
+                newNode.setRightChild(new Node(((Node) v.getRightChild()).getValue()));
+            if (v.getLeftChild() != null)
+                newNode.setLeftChild(new Node(((Node) v.getLeftChild()).getValue()));
+            orderForBrace((Node) v.getLeftChild(), (Node) newNode.getLeftChild());
+            orderForBrace((Node) v.getRightChild(), (Node) newNode.getRightChild());
+        }
+    }
     public Node buildTree() {
         String tmp = "(";
         tmp += r.concat(")");
@@ -142,7 +158,7 @@ public class AbstractSyntaxTree {
             String strY = "";
             for (int i = first; i < last; ++i) { // r = a[i-1]
                 if (a[i].equals('{')) {
-                    Object predR = a[i - 1];
+                    Node predR = (Node) a[i - 1];
                     int m = i + 1;
                     for (; !a[m].equals(',') && !(a[m].equals('}')); ++m) {
                         strX += ((Node) a[m]).getValue();
@@ -161,7 +177,10 @@ public class AbstractSyntaxTree {
                             newR[0] = '(';
                             int j = 1;
                             for (; j < x + 1; ++j) {
-                                newR[j] = predR;
+                                if (predR.getRightChild() == null && predR.getLeftChild() == null)
+                                    newR[j] = new Node(predR.getValue());
+                                else
+                                    newR[j] = doOrderForBrace(predR);
                             }
                             newR[j] = ')';
                         } else {
@@ -170,7 +189,10 @@ public class AbstractSyntaxTree {
                             newR[0] = '(';
                             int j = 1;
                             for (; j < x + 1; ++j) {
-                                newR[j] = predR;
+                                if (predR.getRightChild() == null && predR.getLeftChild() == null)
+                                    newR[j] = new Node(predR.getValue());
+                                else
+                                    newR[j] = doOrderForBrace(predR);
                             }
                             newR[j] = '(';
                             newR[j + 1] = '^';
@@ -186,7 +208,11 @@ public class AbstractSyntaxTree {
                                     ++j;
                                 }
                                 while (l > 0) {
-                                    newR[j] = predR;
+                                    if (predR.getRightChild() == null && predR.getLeftChild() == null)
+                                        newR[j] = new Node(predR.getValue());
+                                    else {
+                                        newR[j] = doOrderForBrace(predR);
+                                    }
                                     ++j;
                                     l -= 1;
                                 }
@@ -210,7 +236,10 @@ public class AbstractSyntaxTree {
                         Object[] newR = new Object[x + 3];
                         newR[0] = '(';
                         for (int j = 1; j <= x; ++j) {
-                            newR[j] = predR;
+                            if (predR.getRightChild() == null && predR.getLeftChild() == null)
+                                newR[j] = new Node(predR.getValue());
+                            else
+                                newR[j] = doOrderForBrace(predR);
                         }
                         newR[newR.length - 2] = '+';
                         newR[newR.length - 1] = ')';
