@@ -177,7 +177,7 @@ public class RegexLib {
         return true;
     }
 
-    public mulDFA search(String str1, String str2) {
+    public boolean search(String str1, String str2) {
         Object[] mul = multiplyOfAutomatoes(str1, str2);
         minDFA firstdfa = (minDFA) mul[0];
         minDFA secdfa = (minDFA) mul[1]; // L
@@ -196,11 +196,10 @@ public class RegexLib {
             }
         }
         if (isEmptyDFA(muldfa, firstdfa, secdfa, true)) {
-            System.out.println("Substring " + str2 + " not exist in " + str1);
+            return false;
         } else {
-            System.out.println("Substring " + str2 + " exist in " + str1);
+            return true;
         }
-        return muldfa;
     }
 
     public mulDFA complement(String str) {

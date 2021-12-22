@@ -44,6 +44,19 @@ public class RegexLibTest {
 
     @Test
     public void search() {
+        RegexLib rl = new RegexLib();
+        // TRUE search
+        assertTrue(rl.search("a|(bc)+", "bc"));
+        assertTrue(rl.search("a+bc", "aaabc"));
+        assertTrue(rl.search("r{1,3}", "rr"));
+        assertTrue(rl.search("(abc){1}", "abcabc"));
+        assertTrue(rl.search("a+|bc", "bc"));
+        // FALSE search
+        assertFalse(rl.search("a(b|c)ad", "abd"));
+        assertFalse(rl.search("abc+d", "ac"));
+        assertFalse(rl.search("a|b|c|(def)", "ab"));
+        assertFalse(rl.search("(3:(abc))", "ac"));
+        assertFalse(rl.search("ab|(cde|da)", "^"));
     }
 
     @Test
