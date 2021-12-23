@@ -75,7 +75,7 @@ public class AbstractSyntaxTreeTest {
         Assert.assertThat(((Node)rootNode1.getLeftChild()).getValue(), is(new Node("a").getValue()));
         Assert.assertThat(((Node)((Node)rootNode1.getRightChild()).getRightChild()).getValue(), is(new Node(Metasymbols.AND).getValue()));
         Assert.assertThat(((Node)((Node)rootNode1.getRightChild()).getLeftChild()).getValue(), is(new Node(Metasymbols.OR).getValue()));
-        Assert.assertThat(((Node)((Node)((Node)rootNode1.getRightChild()).getLeftChild()).getLeftChild()).getValue(), is(new Node(Metasymbols.CIRCUMFLEXUS).getValue().toString()));
+        Assert.assertThat(((Node)((Node)((Node)rootNode1.getRightChild()).getLeftChild()).getLeftChild()).getValue(), is("^"));
         Assert.assertThat(((Node)((Node)((Node)rootNode1.getRightChild()).getLeftChild()).getRightChild()).getValue(), is(new Node("a").getValue()));
         Assert.assertThat(((Node)((Node)((Node)rootNode1.getRightChild()).getRightChild()).getRightChild()).getValue(), is(new Node("a").getValue()));
         Assert.assertThat(((Node)((Node)((Node)rootNode1.getRightChild()).getRightChild()).getLeftChild()).getValue(), is(new Node("a").getValue()));

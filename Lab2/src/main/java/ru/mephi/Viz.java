@@ -205,7 +205,7 @@ public class Viz {
     }
 
     public static void main(String[] args) throws IOException {
-        String str = "(a((^)+|^)((b((^)+|^)(b|a))))|(((^)+|^)((a((^)+|^)((b((^)+|^)(b|a))))))|((a((^)+|^)((b((^)+|^)(b|a))))|(((^)+|^)((a((^)+|^)((b((^)+|^)(b|a))))))((^)+|^)(^))";
+        String str = "b|c|d";
         AbstractSyntaxTree tree = new AbstractSyntaxTree(str);
         Node rootNode = tree.buildTree();
         tree.doOrder(rootNode);
@@ -253,23 +253,23 @@ public class Viz {
         }
         System.out.println("");
         RegexLib rl = new RegexLib();
-        System.out.println(rl.kpath(mindfa));
-        String firstLine = "ab";
-        rl.compile(firstLine);
-        String secondLine = "savd";
-        mulDFA muldfa = rl.complement(firstLine);
-        //VizMulDFA(new SoftReference<>(muldfa));
-        int i = 1;
+        mulDFA muldfa = rl.complement("b|c|d");
+        Viz.VizMulDFA(new SoftReference<>(muldfa));
+        printMulDFA(muldfa);
+    }
+
+    public static void printMulDFA(mulDFA muldfa) {
         System.out.println("MulDFA");
         System.out.print("Start node: ");
+        int i = 1;
         for (MulDFANode node : muldfa.nodesArray){
             if (node.equals(muldfa.startNode)){
-                System.out.println(i);
+                System.out.print(i);
             }
             ++i;
         }
         i = 1;
-        System.out.print("End nodes: ");
+        System.out.print("\nEnd nodes: ");
         if (muldfa.endNodes != null) {
             for (MulDFANode node : muldfa.nodesArray) {
                 for (MulDFANode endNode : muldfa.endNodes) {
@@ -282,5 +282,6 @@ public class Viz {
         } else {
             System.out.println("Haven't nodes");
         }
+        System.out.println("");
     }
 }

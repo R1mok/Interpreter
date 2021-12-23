@@ -202,6 +202,40 @@ public class RegexLib {
         }
     }
 
+    public minDFA doFullMinDFA(minDFA mindfa){
+        DFANode terminal = new DFANode(mindfa.nodesArray.length+1);
+        int newLength = mindfa.nodesArray.length + 1;
+        int startNodeId = mindfa.startNode.get().getValue().stream().findFirst().get().get().getId();
+        int[] endNodeIds = new int[mindfa.endNodes.size()];
+        int i = 0;
+        for (SoftReference<DFANode> endNodes : mindfa.endNodes){
+            endNodeIds[i] = endNodes.get().getValue().stream().findFirst().get().get().getId();
+        }
+        SoftReference<DFANode>[] newNodesArray = new SoftReference[newLength];
+        System.arraycopy(mindfa.nodesArray, 0, newNodesArray, 0, mindfa.nodesArray.length);
+        newNodesArray[mindfa.nodesArray.length] = new SoftReference<>(terminal);
+        SoftReference<DFANode> TerminalInArray = newNodesArray[mindfa.nodesArray.length];
+        mindfa.nodesArray = newNodesArray;
+        for (SoftReference<DFANode> node : mindfa.nodesArray){
+            for (String symbol : mindfa.alphabet){
+                if (node.get().getTransBySymbol(symbol) == null){
+                    node.get().listNodes.add(new Pair<>(new SoftReference<>(terminal), symbol));
+                }
+            }
+        }
+        for (SoftReference<DFANode> node : mindfa.nodesArray){
+            if (node.get().getValue().stream().findFirst().get().get().getId() == startNodeId){
+                mindfa.startNode = node;
+            }
+            for (int id : endNodeIds) {
+                if (node.get().getValue().stream().findFirst().get().get().getId() == id){
+                    mindfa.endNodes.add(node);
+                }
+            }
+        }
+
+        return mindfa;
+    }
     public mulDFA complement(String str) {
         minDFA dfa = compile(str);
         String alphabetKlini = "(";
@@ -213,10 +247,12 @@ public class RegexLib {
                 alphabetKlini = alphabetKlini.concat("|");
             }
         }
-        alphabetKlini = alphabetKlini.concat("|^)+|^");
-        Object[] mul = multiplyOfAutomatoes(alphabetKlini, str);
-        minDFA firstdfa = (minDFA) mul[0];
-        minDFA secdfa = (minDFA) mul[1];
+        alphabetKlini = alphabetKlini.concat(")+");
+        RegexLib rl = new RegexLib();
+        minDFA firstdfa = rl.doFullMinDFA(compile(alphabetKlini));
+        firstdfa.endNodes.add(firstdfa.startNode);
+        minDFA secdfa = rl.doFullMinDFA(compile(str));
+        Object[] mul = multiplyOfAutomatoes(firstdfa, secdfa);
         mulDFA muldfa = (mulDFA) mul[2];
         muldfa.endNodes = new HashSet<>();
         for (MulDFANode node : muldfa.nodesArray) {
@@ -265,10 +301,25 @@ public class RegexLib {
         return muldfa;
     }
 
-    public Object[] multiplyOfAutomatoes(String str1, String str2) {
+    public Object[] multiplyOfAutomatoes(Object str1, Object str2) {
         Object[] returning = new Object[3];
-        minDFA firstdfa = compile(str1);
-        minDFA secdfa = compile(str2);
+        minDFA firstdfa = null;
+        minDFA secdfa = null;
+
+        if (str1 instanceof String){
+            firstdfa = compile((String) str1);
+        } else {
+            if (str1 instanceof minDFA){
+                firstdfa = (minDFA) str1;
+            }
+        }
+        if (str2 instanceof String){
+            secdfa = compile((String) str2);
+        } else {
+            if (str2 instanceof minDFA){
+                secdfa = (minDFA) str2;
+            }
+        }
         returning[0] = firstdfa;
         returning[1] = secdfa;
         mulDFA muldfa = new mulDFA();
@@ -297,11 +348,11 @@ public class RegexLib {
                     destFirNode = firNode.getTransBySymbol(symbol).get();
                     destSecNode = secNode.getTransBySymbol(symbol).get();
                     tmpSymbol = symbol;
-                }
-            }
-            for (MulDFANode destElem : muldfa.nodesArray) {
-                if (destElem.node.getKey().equals(destFirNode) && destElem.node.getValue().equals(destSecNode)) {
-                    elem.listnodes.add(new Pair<>(destElem, tmpSymbol));
+                    for (MulDFANode destElem : muldfa.nodesArray) {
+                        if (destElem.node.getKey().equals(destFirNode) && destElem.node.getValue().equals(destSecNode)) {
+                            elem.listnodes.add(new Pair<>(destElem, tmpSymbol));
+                        }
+                    }
                 }
             }
         }

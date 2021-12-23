@@ -3,6 +3,9 @@ package ru.mephi;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+
 import static org.junit.Assert.*;
 
 public class RegexLibTest {
@@ -43,7 +46,7 @@ public class RegexLibTest {
     }
 
     @Test
-    public void search() {
+    public void search() throws IOException {
         RegexLib rl = new RegexLib();
         // TRUE search
         assertTrue(rl.search("a|(bc)+", "bc"));
@@ -60,10 +63,39 @@ public class RegexLibTest {
     }
 
     @Test
-    public void complement() {
+    public void complement() throws IOException {
+        RegexLib rl = new RegexLib();
+        mulDFA comp = rl.complement("ab");
+        Viz.VizMulDFA(new SoftReference<>(comp));
+        Viz.printMulDFA(comp);
+        comp = rl.complement("a+");
+        Viz.VizMulDFA(new SoftReference<>(comp));
+        Viz.printMulDFA(comp);
+        comp = rl.complement("b|c|d");
+        Viz.VizMulDFA(new SoftReference<>(comp));
+        Viz.printMulDFA(comp);
     }
 
     @Test
-    public void intersection() {
+    public void intersection() throws IOException {
+        RegexLib rl = new RegexLib();
+        mulDFA intersection = rl.intersection("ab", "cd");
+        Viz.VizMulDFA(new SoftReference<>(intersection));
+        for (MulDFANode elem : intersection.nodesArray){
+            Assert.assertEquals(elem.listnodes.size(), 0);
+        }
+        intersection = rl.intersection("ab+", "ab");
+        Viz.VizMulDFA(new SoftReference<>(intersection));
+        Viz.printMulDFA(intersection);
+        intersection = rl.intersection("a|(bc)", "bc");
+        Viz.VizMulDFA(new SoftReference<>(intersection));
+        Viz.printMulDFA(intersection);
+        intersection = rl.intersection("a+b|c", "ac");
+        Viz.VizMulDFA(new SoftReference<>(intersection));
+        Viz.printMulDFA(intersection);
+        intersection = rl.intersection("a{1,2}b|c", "aab");
+        Viz.VizMulDFA(new SoftReference<>(intersection));
+        Viz.printMulDFA(intersection);
+
     }
 }
