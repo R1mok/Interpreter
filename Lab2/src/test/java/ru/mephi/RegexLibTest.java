@@ -74,6 +74,12 @@ public class RegexLibTest {
         comp = rl.complement("b|c|d");
         Viz.VizMulDFA(new SoftReference<>(comp));
         Viz.printMulDFA(comp);
+        comp = rl.complement("(ab){1,3}");
+        Viz.VizMulDFA(new SoftReference<>(comp));
+        Viz.printMulDFA(comp);
+        comp = rl.complement("ab|c(de|f)");
+        Viz.VizMulDFA(new SoftReference<>(comp));
+        Viz.printMulDFA(comp);
     }
 
     @Test

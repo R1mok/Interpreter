@@ -276,9 +276,11 @@ public class RegexLib {
     }
 
     public mulDFA intersection(String str1, String str2) {
-        Object[] mul = multiplyOfAutomatoes(str1, str2);
-        minDFA firstdfa = (minDFA) mul[0];
-        minDFA secdfa = (minDFA) mul[1];
+        minDFA secdfa = compile(str2);
+        secdfa = doFullMinDFA(secdfa);
+        minDFA firstdfa = compile(str1);
+        firstdfa = doFullMinDFA(firstdfa);
+        Object[] mul = multiplyOfAutomatoes(firstdfa, secdfa);
         mulDFA muldfa = (mulDFA) mul[2];
         muldfa.endNodes = new HashSet<>();
         for (MulDFANode node : muldfa.nodesArray) {
