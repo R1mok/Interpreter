@@ -22,13 +22,18 @@
 */
    
 import java.io.*;
-   
+import java.util.Arrays;
+
 public class Main {
   static public void main(String argv[]) {    
     /* Start the parser */
     try {
+      Types t = Types.VALUE;
       Parser p = new Parser(new Lexer(new FileReader(argv[0])));
+      System.out.println("Start parsing");
+      VarFunctionsContext context = new VarFunctionsContext();
       Object result = p.parse().value;
+      System.out.println("Finish parsing");
     } catch (Exception e) {
       /* do cleanup here -- possibly rethrow e */
       System.out.println("");

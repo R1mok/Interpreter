@@ -15,7 +15,6 @@
   To Create: > java java_cup.Main < ycalc.cup
 */
    
-   
 /* ----------------------Preliminary Declarations Section--------------------*/
    
 /* Import the class java_cup.runtime.*  */
@@ -24,12 +23,32 @@ import javafx.util.Pair;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Objects;
+import java.util.LinkedList;
 
 /* Parser code to change the way the parser reports errors (include
    line and column number of the error). */
 parser code {:
-
+    /** User initialization code. */
+    VarFunctionsContext context = new VarFunctionsContext();
+    public static void newScope(){
+	typenames.push(new HashSet<String>());
+    }
+    public static void deleteScope(){
+	typenames.pop();
+    }
+    public static boolean lookupType(String name){
+	for (HashSet<String> scope: typenames)
+	    if (scope.contains(name)) return true;
+	return false;
+    }
+    public static void addType(String name){
+        typenames.peek().add(name);
+    }
     Set<Pair<String, Integer>> varArray = new HashSet();
+    public static LinkedList<HashSet<String>> typenames = new LinkedList<HashSet<String>>();
+    public Parser(Lexer lex, ComplexSymbolFactory sf) {
+        super(lex,sf);
+    }
     /* Change the method report_error so it will display the line and
        column of where the error occurred in the input as well as the
        reason for the error which is passed into the method in the
@@ -92,15 +111,22 @@ parser code {:
    that do have an value, in this case an integer value, are listed on
    the next line down. */
 
-terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, EQUALS, LT;
-terminal Integer NUMBER, ID;
-terminal String VALUE, WORD, LBRACE, RBRACE, CONST;
+terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, EQUALS, LT; // arythmetical terminals
+terminal Integer NUMBER; // int terminals
+terminal String LBRACE, RBRACE; // other string terminals
+terminal String POINTER, VALUE, NAME, CONST, ARRAY_OF; // type terminals
 
-non terminal Object     programm, expr_list, expr_part, initialize_part, initialize;
-non terminal Object     type, value, pointer, array_of, const; // type nonterminals
-non terminal Object     function, function_parametrs, function_body; // function nonterminals
+non terminal Object     expr_part, initialize_part, initialize;
+non terminal Program    programm;
+non terminal Types      type;
+non terminal DeclList   function_parametrs;
+non terminal DecList    expr_list;
+non terminal Stmt       function_body;
+non terminal Object     value, pointer, array_of, const_value, const_pointer, const_array_of; // type nonterminals
+non terminal Object     function;
 non terminal Integer    expr, factor, term;
-non terminal String     defenition, programm_name;
+non terminal String     programm_name; // other string non terminals
+non terminal String     defenition_value, defenition_const_value, defenition_array_of, defenition_const_array_of, defenition_pointer, defeniniton_const_pointer; // defenition
 
 /* -------------Precedence and Associatively of Terminals Section----------- */
 
@@ -108,37 +134,40 @@ precedence left PLUS, MINUS;
 precedence left TIMES, DIVIDE;
 
 
-   programm ::= programm function
-                | function
+   programm ::= programm function  {: RESULT = new Program(); :} |
+                function
                 ;
-   function ::= type:t WORD:w LPAREN function_parametrs RPAREN LBRACE function_body RBRACE
-                {:
-                :}
+   function ::= type:t NAME:n  LPAREN function_parametrs:p RPAREN LBRACE function_body:b RBRACE // объявление функции
+                {: context.registerFunction(new FunctionDefinition(t, n, p, b)); :}
                 ;
-   function_body ::=
+   function_body ::= // тело функции
                 expr_list {: :}
                 ;
    function_parametrs ::=
-                type:t WORD:w {: :}
-                ;
-   type ::=     value:v {: :}
+                type:t NAME:w {: :} // есть параметры функии
                 |
-                pointer:p
-                |
-                array_of:a
+                // у функции нет параметров
                 ;
-   expr_list ::= expr_list initialize
+   type ::=     const_value:v {: :} // целочисленный тип
+                |
+                value:v {: RESULT = Types.VALUE; :}
+                |
+                const_pointer:p // указатель
+                |
+                pointer
+                |
+                const_array_of:a // массив
+                |
+                array_of
+                ;
+   expr_list ::= expr_list initialize // все строчки в функции
                  |
                  initialize
-                 |
-                 expr_list expr_part
-                 |
-                 expr_part
                  ;
    initialize ::= initialize_part SEMI
                   {: System.out.println(";");:}
                   ;
-   initialize_part ::= defenition:e EQUALS expr:n
+   initialize_part ::= defenition_value:e EQUALS expr:n
                      {:
                      System.out.print(" = " + n);
                      for (Pair<String, Integer> el : varArray) {
@@ -152,15 +181,31 @@ precedence left TIMES, DIVIDE;
                      }
                      :}
                      |
-                     defenition:e
-                   ;
-   defenition ::= VALUE:v WORD:w
+                     defenition_value:e
+                     |
+                     defenition_pointer:p
+                     |
+                     defeniniton_const_pointer:p
+                     |
+                     defenition_array_of:a
+                     |
+                     defenition_const_array_of:a
+                     ;
+   defenition_value ::= VALUE:v NAME:w
                      {: Pair<String, Integer> p = new Pair(w, 0);
                      varArray.add(p);
                      System.out.print(v + " " + w);
                      RESULT = w;
                      :}
                      ;
+   defenition_pointer ::= POINTER:p type:t NAME:w
+                    {: System.out.print("pointer " + t.toString() + " " + w);
+                    :}
+                    ;
+   defenition_array_of ::= ARRAY_OF type:t NAME:w
+                    {: System.out.print("array of " + t.toString() + " " + w);
+                    :}
+                    ;
    expr_part ::= expr:e
                  {: System.out.println(" = " + e); :}
                  SEMI
@@ -183,19 +228,19 @@ precedence left TIMES, DIVIDE;
                  term:t
                  {: RESULT = new Integer(t.intValue()); :}
                  ;
-   value ::= VALUE:w
-            {:
-            :}
-            |
-            CONST VALUE:w
-            ;
+   value ::= VALUE;
+   const_value ::= CONST VALUE;
+   pointer ::= POINTER type;
+   const_pointer ::= CONST POINTER type;
+   array_of ::= ARRAY_OF type;
+   const_array_of ::= CONST ARRAY_OF type;
    term      ::= LPAREN expr:e RPAREN
                  {: RESULT = e; :}
                  |
                  NUMBER:n
                  {: RESULT = n; :}
                  |
-                 WORD:w
+                 NAME:w
                  {:
                  for (Pair<String, Integer> el : varArray) {
                      if (Objects.equals(el.getKey(), w)){

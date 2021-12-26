@@ -91,7 +91,7 @@ dec_int_lit = 0 | [1-9][0-9]*
 /* A identifier integer is a word beginning a letter between A and
    Z, a and z, or an underscore followed by zero or more letters
    between A and Z, a and z, zero and nine, or an underscore. */
-word = [A-Za-z_]*
+name = [A-Za-z_]*[0-9]*
 
    
 %%
@@ -124,6 +124,8 @@ word = [A-Za-z_]*
     " "                { }
     "{"                { return symbol(sym.LBRACE);}
     "}"                { return symbol(sym.RBRACE);}
+    "pointer"          { return symbol(sym.POINTER);}
+    "array of"         { return symbol(sym.ARRAY_OF);}
    
     /* If an integer is found print it out, return the token NUMBER
        that represents an integer and the value of the integer that is
@@ -135,7 +137,7 @@ word = [A-Za-z_]*
     /* If an identifier is found print it out, return the token ID
        that represents an identifier and the default value one that is
        given to all identifiers. */
-    {word}       { return symbol(sym.WORD, new String(yytext())); }
+    {name}       { return symbol(sym.NAME, new String(yytext())); }
     {WhiteSpace} { }
 }
 
