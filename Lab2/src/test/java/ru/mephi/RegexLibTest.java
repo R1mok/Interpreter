@@ -54,6 +54,7 @@ public class RegexLibTest {
         assertTrue(rl.search("r{1,3}", "rr"));
         assertTrue(rl.search("(abc){1}", "abcabc"));
         assertTrue(rl.search("a+|bc", "bc"));
+        assertTrue(rl.search("mephi is the besty bes university", "best|m"));
         // FALSE search
         assertFalse(rl.search("a(b|c)ad", "abd"));
         assertFalse(rl.search("abc+d", "ac"));
@@ -65,7 +66,7 @@ public class RegexLibTest {
     @Test
     public void complement() throws IOException {
         RegexLib rl = new RegexLib();
-        mulDFA comp = rl.complement("ab");
+        mulDFA comp = rl.complement("^");
         Viz.VizMulDFA(new SoftReference<>(comp));
         Viz.printMulDFA(comp);
         comp = rl.complement("a+");
@@ -102,6 +103,5 @@ public class RegexLibTest {
         intersection = rl.intersection("a{1,2}b|c", "aab");
         Viz.VizMulDFA(new SoftReference<>(intersection));
         Viz.printMulDFA(intersection);
-
     }
 }
