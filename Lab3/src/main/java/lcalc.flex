@@ -120,12 +120,14 @@ name = [A-Za-z_]*[0-9]*
     ")"                { return symbol(sym.RPAREN); }
     "value"            { return symbol(sym.VALUE, new String(yytext()));}
     "const"            { return symbol(sym.CONST, new String(yytext())); }
-    "="                { return symbol(sym.EQUALS);}
+    "="                { return symbol(sym.ASSIGN);}
     " "                { }
     "{"                { return symbol(sym.LBRACE);}
     "}"                { return symbol(sym.RBRACE);}
-    "pointer"          { return symbol(sym.POINTER);}
-    "array of"         { return symbol(sym.ARRAY_OF);}
+    "pointer"          { return symbol(sym.POINTER, new String(yytext()));}
+    "array of"         { return symbol(sym.ARRAY_OF, new String(yytext()));}
+    ","                { return symbol(sym.COMMA);}
+    "return"           { return symbol(sym.RETURN, new String(yytext())); }
    
     /* If an integer is found print it out, return the token NUMBER
        that represents an integer and the value of the integer that is
@@ -137,7 +139,7 @@ name = [A-Za-z_]*[0-9]*
     /* If an identifier is found print it out, return the token ID
        that represents an identifier and the default value one that is
        given to all identifiers. */
-    {name}       { return symbol(sym.NAME, new String(yytext())); }
+    {name}       { return symbol(sym.NAME  , new String(yytext())); }
     {WhiteSpace} { }
 }
 

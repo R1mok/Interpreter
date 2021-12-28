@@ -24,7 +24,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Objects;
 import java.util.LinkedList;
-
+import java.io.*;
+import java.util.Arrays;
 /* Parser code to change the way the parser reports errors (include
    line and column number of the error). */
 parser code {:
@@ -89,7 +90,26 @@ parser code {:
            an error message, out on a line. */
         System.err.println(m);
     }
-   
+
+   public static class Main {
+     static public void main(String argv[]) {
+       /* Start the parser */
+       try {
+         Parser p = new Parser(new Lexer(new FileReader(argv[0])));
+         System.out.println("Start parsing");
+         p.context.newScope();
+         Program result = (Program) p.parse().value;
+         p.context.deleteScope();
+         p.context.getFunctions();
+         p.context.getVariables();
+         System.out.println("Finish parsing");
+       } catch (Exception e) {
+         /* do cleanup here -- possibly rethrow e */
+         System.out.println("");
+         e.printStackTrace();
+       }
+     }
+   }
     /* Change the method report_fatal_error so when it reports a fatal
        error it will display the line and column number of where the
        fatal error occurred in the input as well as the reason for the
@@ -111,91 +131,81 @@ parser code {:
    that do have an value, in this case an integer value, are listed on
    the next line down. */
 
-terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, EQUALS, LT; // arythmetical terminals
+terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, ASSIGN, COMMA; // arythmetical terminals
 terminal Integer NUMBER; // int terminals
 terminal String LBRACE, RBRACE; // other string terminals
 terminal String POINTER, VALUE, NAME, CONST, ARRAY_OF; // type terminals
 
-non terminal Object     expr_part, initialize_part, initialize;
+non terminal Opr initialize, initialize_part;
 non terminal Program    programm;
-non terminal Types      type;
-non terminal DeclList   function_parametrs;
-non terminal DecList    expr_list;
-non terminal Stmt       function_body;
-non terminal Object     value, pointer, array_of, const_value, const_pointer, const_array_of; // type nonterminals
-non terminal Object     function;
-non terminal Integer    expr, factor, term;
+non terminal Types      type, value, const_value;
+non terminal Types      pointer, array_of, const_pointer, const_array_of;
+non terminal Opr   function_parametrs;
+non terminal Opr   expr_list;
+non terminal Opr       statement_list, statement;
+non terminal Opr   function_body;
+non terminal Opr     function;
+non terminal Opr       factor, term;
+non terminal Opr       expr;
 non terminal String     programm_name; // other string non terminals
-non terminal String     defenition_value, defenition_const_value, defenition_array_of, defenition_const_array_of, defenition_pointer, defeniniton_const_pointer; // defenition
-
+non terminal Opr defenition_value, defenition_const_value, defenition_array_of, defenition_const_array_of, defenition_pointer, defeniniton_const_pointer; // defenition
+non terminal boolean    const;
+terminal     Opr        RETURN;
 /* -------------Precedence and Associatively of Terminals Section----------- */
 
 precedence left PLUS, MINUS;
 precedence left TIMES, DIVIDE;
 
 
-   programm ::= programm function  {: RESULT = new Program(); :} |
-                function
+   programm ::= programm function  {: RESULT = new Program(); :}
+                | function
                 ;
    function ::= type:t NAME:n  LPAREN function_parametrs:p RPAREN LBRACE function_body:b RBRACE // объявление функции
                 {: context.registerFunction(new FunctionDefinition(t, n, p, b)); :}
                 ;
    function_body ::= // тело функции
-                expr_list {: :}
+                statement:s function_body {: :}
+                | statement:s {: RESULT = s; :}
+                ;
+   statement    ::=
+                SEMI {: Opr res = new Opr(NodeType.OPR);
+                 res.addInListOpr(null);
+                 RESULT = res;
+                 :}
+                | NAME:n ASSIGN expr:e
+                | initialize:i {: RESULT = i; :} statement
+                | expr_list SEMI
                 ;
    function_parametrs ::=
-                type:t NAME:w {: :} // есть параметры функии
+                type:t NAME:n {:  :} function_parametrs // один или несколько параметров
+                | COMMA type:t NAME:n {:  :} function_parametrs // через запятую сделать параметры через запятую
                 |
-                // у функции нет параметров
                 ;
    type ::=     const_value:v {: :} // целочисленный тип
                 |
-                value:v {: RESULT = Types.VALUE; :}
+                value:v {:  :}
                 |
-                const_pointer:p // указатель
+                const_pointer:p  // указатель
                 |
-                pointer
+                pointer:p {:  :}
                 |
                 const_array_of:a // массив
                 |
-                array_of
+                array_of type:t
                 ;
-   expr_list ::= expr_list initialize // все строчки в функции
-                 |
-                 initialize
-                 ;
-   initialize ::= initialize_part SEMI
-                  {: System.out.println(";");:}
-                  ;
-   initialize_part ::= defenition_value:e EQUALS expr:n
-                     {:
-                     System.out.print(" = " + n);
-                     for (Pair<String, Integer> el : varArray) {
-                         if (Objects.equals(el.getKey(), e)){
-                              Pair<String, Integer> elem;
-                              elem = new Pair<>(e, n);
-                              varArray.remove(el);
-                              varArray.add(elem);
-                              break;
-                         }
-                     }
-                     :}
-                     |
-                     defenition_value:e
-                     |
-                     defenition_pointer:p
-                     |
-                     defeniniton_const_pointer:p
-                     |
-                     defenition_array_of:a
-                     |
-                     defenition_const_array_of:a
+   initialize ::= defenition_value:e ASSIGN expr:n
+                     {:  :}
+                     | defenition_value:e {: RESULT = e; :}
+                     | defenition_pointer:p
+                     | defeniniton_const_pointer:p
+                     | defenition_array_of:a
+                     | defenition_const_array_of:a
                      ;
-   defenition_value ::= VALUE:v NAME:w
-                     {: Pair<String, Integer> p = new Pair(w, 0);
-                     varArray.add(p);
-                     System.out.print(v + " " + w);
-                     RESULT = w;
+   defenition_value ::= VALUE NAME:n
+                     {:
+                     Variable var = new Variable(Types.VALUE, n);
+                     context.addVar(var);
+                     RESULT = var;
                      :}
                      ;
    defenition_pointer ::= POINTER:p type:t NAME:w
@@ -206,31 +216,27 @@ precedence left TIMES, DIVIDE;
                     {: System.out.print("array of " + t.toString() + " " + w);
                     :}
                     ;
-   expr_part ::= expr:e
-                 {: System.out.println(" = " + e); :}
-                 SEMI
-                 ;
    expr      ::= expr:e PLUS factor:f
-                 {: RESULT = new Integer(e.intValue() + f.intValue()); :}
+                 {: RESULT = new Opr(NodeType.OPR); :}
                  |
                  expr:e MINUS factor:f
-                 {: RESULT = new Integer(e.intValue() - f.intValue()); :}
+                 {: RESULT = new Opr(NodeType.OPR); :}
                  |
                  factor:f
-                 {: RESULT = new Integer(f.intValue()); :}
+                 {: RESULT = new Opr(NodeType.OPR); :}
                  ;
    factor    ::= factor:f TIMES term:t
-                 {: RESULT = new Integer(f.intValue() * t.intValue()); :}
+                 {: RESULT = new Opr(NodeType.OPR); :}
                  |
                  factor:f DIVIDE term:t
-                 {: RESULT = new Integer(f.intValue() / t.intValue()); :}
+                 {: RESULT = new Opr(NodeType.OPR); :}
                  |
                  term:t
-                 {: RESULT = new Integer(t.intValue()); :}
+                 {: RESULT = new Opr(NodeType.OPR); :}
                  ;
-   value ::= VALUE;
-   const_value ::= CONST VALUE;
-   pointer ::= POINTER type;
+   value ::= VALUE {: RESULT = Types.VALUE; :};
+   const_value ::= CONST VALUE {: RESULT = Types.CONST_VALUE; :};
+   pointer ::= POINTER type:t {: RESULT = Types.POINTER; RESULT.setType(t); :};
    const_pointer ::= CONST POINTER type;
    array_of ::= ARRAY_OF type;
    const_array_of ::= CONST ARRAY_OF type;
@@ -238,16 +244,9 @@ precedence left TIMES, DIVIDE;
                  {: RESULT = e; :}
                  |
                  NUMBER:n
-                 {: RESULT = n; :}
-                 |
-                 NAME:w
-                 {:
-                 for (Pair<String, Integer> el : varArray) {
-                     if (Objects.equals(el.getKey(), w)){
-                         RESULT = el.getValue();
-                         break;
-                     }
-                 }
+                 {: RESULT = (Opr) new Const(n);
                  :}
+                 //|
+                 //NAME:w
                  ;
 

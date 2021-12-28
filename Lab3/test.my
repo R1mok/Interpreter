@@ -1,11 +1,3 @@
 value main () {
     value a;
-    value b=10;
-    value c=3+5*2;
-    value d=b+c;
-}
-value func () {
-    value p = 3*2;
-    pointer value p;
-    array of value a;
 }
