@@ -102,6 +102,7 @@ parser code {:
          p.context.deleteScope();
          p.context.getFunctions();
          p.context.getVariables();
+         System.out.println(p.context.ex(p.context.rootFunc("main")));
          System.out.println("Finish parsing");
        } catch (Exception e) {
          /* do cleanup here -- possibly rethrow e */
@@ -164,16 +165,37 @@ precedence left TIMES, DIVIDE;
                 {: context.registerFunction(new FunctionDefinition(t, n, p, b)); :}
                 ;
    function_body ::= // тело функции
-                statement:s function_body {: :}
-                | statement:s {: RESULT = s; :}
+                statement:s function_body:b {:
+                Opr res = new Opr(NodeType.OPR, operType.NEXTSTMT);
+                res.addInListOpr(s);
+                res.addInListOpr(b);
+                RESULT = res; :}
+                | statement:s {: Opr res = new Opr(NodeType.OPR);
+                res.addInListOpr(s);
+                RESULT = res; :}
                 ;
    statement    ::=
-                SEMI {: Opr res = new Opr(NodeType.OPR);
+                RETURN NUMBER:n SEMI {: Opr res = new Const(n);
+                   RESULT = res; :}
+                | RETURN NAME:n SEMI {:
+                Opr res = new Opr(NodeType.OPR, operType.RETURN);
+                Variable var = context.getVar(n);
+                res.addInListOpr(var);
+                RESULT = res;
+                :}
+                | SEMI {: Opr res = new Opr(NodeType.OPR, operType.SEMI);
                  res.addInListOpr(null);
                  RESULT = res;
                  :}
-                | NAME:n ASSIGN expr:e
-                | initialize:i {: RESULT = i; :} statement
+                | NAME:n ASSIGN expr:e SEMI {: Opr res = new Opr(NodeType.OPR, operType.ASSIGN);
+                Variable var = context.getVar(n);
+                res.addInListOpr(var);
+                res.addInListOpr(e);
+                RESULT = res;
+                //res.addInListOpr(e);
+                //res.addInListOpr(/* existt variable */);
+                 :}
+                | initialize:i {: RESULT = i; :}
                 | expr_list SEMI
                 ;
    function_parametrs ::=
@@ -193,9 +215,16 @@ precedence left TIMES, DIVIDE;
                 |
                 array_of type:t
                 ;
-   initialize ::= defenition_value:e ASSIGN expr:n
-                     {:  :}
-                     | defenition_value:e {: RESULT = e; :}
+   initialize ::= defenition_value:e ASSIGN expr:n SEMI
+                     {: Opr res = new Opr(NodeType.OPR, operType.ASSIGN);
+                     /*if (e instanceof Variable){
+                         ((Variable)e).setValue(n);
+                     }*/
+                      res.addInListOpr(e);
+                      res.addInListOpr(n);
+                      RESULT = res;
+                      :}
+                     | defenition_value:e SEMI {: RESULT = e; :}
                      | defenition_pointer:p
                      | defeniniton_const_pointer:p
                      | defenition_array_of:a
@@ -205,6 +234,7 @@ precedence left TIMES, DIVIDE;
                      {:
                      Variable var = new Variable(Types.VALUE, n);
                      context.addVar(var);
+                     var.setValue(new Const(0));
                      RESULT = var;
                      :}
                      ;
@@ -216,23 +246,40 @@ precedence left TIMES, DIVIDE;
                     {: System.out.print("array of " + t.toString() + " " + w);
                     :}
                     ;
-   expr      ::= expr:e PLUS factor:f
-                 {: RESULT = new Opr(NodeType.OPR); :}
-                 |
-                 expr:e MINUS factor:f
-                 {: RESULT = new Opr(NodeType.OPR); :}
-                 |
-                 factor:f
-                 {: RESULT = new Opr(NodeType.OPR); :}
+   expr      ::=  expr:e PLUS factor:f
+                 {:
+                  Opr res = new Opr(NodeType.OPR, operType.PLUS);
+                  /*if (e instanceof Variable){
+                    e = ((Variable)e).getValue();
+                  }*/
+                  res.addInListOpr(e);
+                  res.addInListOpr(f);
+                  RESULT = res;:}
+                 | expr:e MINUS factor:f
+                 {: Opr res = new Opr(NodeType.OPR, operType.MINUS);
+                  res.addInListOpr(e);
+                  res.addInListOpr(f);
+                  RESULT = res; :}
+                 | factor:f
+                 {: RESULT = f; :}
                  ;
    factor    ::= factor:f TIMES term:t
-                 {: RESULT = new Opr(NodeType.OPR); :}
+                 {: Opr res = new Opr(NodeType.OPR, operType.TIMES);
+                  res.addInListOpr(f);
+                  res.addInListOpr(t);
+                  RESULT = res;
+                  :}
                  |
                  factor:f DIVIDE term:t
-                 {: RESULT = new Opr(NodeType.OPR); :}
+                 {:
+                 Opr res = new Opr(NodeType.OPR, operType.DIVIDE);
+                 res.addInListOpr(f);
+                 res.addInListOpr(t);
+                 RESULT = res;
+                  :}
                  |
                  term:t
-                 {: RESULT = new Opr(NodeType.OPR); :}
+                 {: RESULT = t; :}
                  ;
    value ::= VALUE {: RESULT = Types.VALUE; :};
    const_value ::= CONST VALUE {: RESULT = Types.CONST_VALUE; :};
@@ -246,7 +293,8 @@ precedence left TIMES, DIVIDE;
                  NUMBER:n
                  {: RESULT = (Opr) new Const(n);
                  :}
-                 //|
-                 //NAME:w
+                 |
+                 NAME:n {: Variable var = context.getVar(n);
+                 RESULT = var; :}
                  ;
 

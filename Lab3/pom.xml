@@ -13,6 +13,18 @@
             <artifactId>java-cup</artifactId>
             <version>11b-20160615</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.vbmacher</groupId>
+            <artifactId>java-cup-runtime</artifactId>
+            <version>11b</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
