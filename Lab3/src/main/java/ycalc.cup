@@ -175,12 +175,15 @@ precedence left TIMES, DIVIDE;
                 RESULT = res; :}
                 ;
    statement    ::=
-                RETURN NUMBER:n SEMI {: RESULT = new Const(n); :}
-                | RETURN NAME:n SEMI {:
-                Opr res = new Opr(NodeType.OPR, operType.RETURN);
-                Variable var = context.getVar(n);
-                res.addInListOpr(var);
-                RESULT = res;
+                RETURN expr:n SEMI {:
+                if (n instanceof Variable) {
+                    Opr res = new Opr(NodeType.OPR, operType.RETURN);
+                    Variable var = context.getVar(((Variable) n).getName());
+                    res.addInListOpr(var);
+                    RESULT = res;
+                    } else {
+                    RESULT = n;
+                }
                 :}
                 | SEMI {: Opr res = new Opr(NodeType.OPR, operType.SEMI);
                  res.addInListOpr(null);

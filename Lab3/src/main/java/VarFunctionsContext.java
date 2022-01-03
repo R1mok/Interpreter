@@ -12,6 +12,7 @@ public class VarFunctionsContext extends Construction{
         for (HashMap<String, Variable> elem : variables){
             System.out.print(elem);
         }
+        System.out.println("");
     }
     public Opr rootFunc(String funcMain){
         FunctionDefinition func = functions.get(funcMain);

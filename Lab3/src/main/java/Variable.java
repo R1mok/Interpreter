@@ -1,3 +1,6 @@
+import lombok.Data;
+
+@Data
 public class Variable extends Opr {
     Types type; // type of node
     String name; // var name
