@@ -116,6 +116,7 @@ name = [A-Za-z_]*[0-9]*
     "-"                { return symbol(sym.MINUS); }
     "*"                { return symbol(sym.TIMES); }
     "/"                { return symbol(sym.DIVIDE); }
+    "%"                { return symbol(sym.MOD); }
     "("                { return symbol(sym.LPAREN); }
     ")"                { return symbol(sym.RPAREN); }
     "value"            { return symbol(sym.VALUE, new String(yytext()));}

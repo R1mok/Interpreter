@@ -100,9 +100,9 @@ parser code {:
          p.context.newScope();
          Program result = (Program) p.parse().value;
          p.context.deleteScope();
+         System.out.println(p.context.ex(p.context.rootFunc("main")));
          p.context.getFunctions();
          p.context.getVariables();
-         System.out.println(p.context.ex(p.context.rootFunc("main")));
          System.out.println("Finish parsing");
        } catch (Exception e) {
          /* do cleanup here -- possibly rethrow e */
@@ -132,7 +132,7 @@ parser code {:
    that do have an value, in this case an integer value, are listed on
    the next line down. */
 
-terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, ASSIGN, COMMA; // arythmetical terminals
+terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, ASSIGN, COMMA, MOD; // arythmetical terminals
 terminal Integer NUMBER; // int terminals
 terminal String LBRACE, RBRACE; // other string terminals
 terminal String POINTER, VALUE, NAME, CONST, ARRAY_OF; // type terminals
@@ -175,8 +175,7 @@ precedence left TIMES, DIVIDE;
                 RESULT = res; :}
                 ;
    statement    ::=
-                RETURN NUMBER:n SEMI {: Opr res = new Const(n);
-                   RESULT = res; :}
+                RETURN NUMBER:n SEMI {: RESULT = new Const(n); :}
                 | RETURN NAME:n SEMI {:
                 Opr res = new Opr(NodeType.OPR, operType.RETURN);
                 Variable var = context.getVar(n);
@@ -192,8 +191,6 @@ precedence left TIMES, DIVIDE;
                 res.addInListOpr(var);
                 res.addInListOpr(e);
                 RESULT = res;
-                //res.addInListOpr(e);
-                //res.addInListOpr(/* existt variable */);
                  :}
                 | initialize:i {: RESULT = i; :}
                 | expr_list SEMI
@@ -217,9 +214,6 @@ precedence left TIMES, DIVIDE;
                 ;
    initialize ::= defenition_value:e ASSIGN expr:n SEMI
                      {: Opr res = new Opr(NodeType.OPR, operType.ASSIGN);
-                     /*if (e instanceof Variable){
-                         ((Variable)e).setValue(n);
-                     }*/
                       res.addInListOpr(e);
                       res.addInListOpr(n);
                       RESULT = res;
@@ -239,19 +233,14 @@ precedence left TIMES, DIVIDE;
                      :}
                      ;
    defenition_pointer ::= POINTER:p type:t NAME:w
-                    {: System.out.print("pointer " + t.toString() + " " + w);
-                    :}
+                    {:  :}
                     ;
    defenition_array_of ::= ARRAY_OF type:t NAME:w
-                    {: System.out.print("array of " + t.toString() + " " + w);
-                    :}
+                    {:  :}
                     ;
    expr      ::=  expr:e PLUS factor:f
                  {:
                   Opr res = new Opr(NodeType.OPR, operType.PLUS);
-                  /*if (e instanceof Variable){
-                    e = ((Variable)e).getValue();
-                  }*/
                   res.addInListOpr(e);
                   res.addInListOpr(f);
                   RESULT = res;:}
@@ -277,8 +266,14 @@ precedence left TIMES, DIVIDE;
                  res.addInListOpr(t);
                  RESULT = res;
                   :}
-                 |
-                 term:t
+                 | factor:f MOD term:t
+                 {:
+                 Opr res = new Opr(NodeType.OPR, operType.MOD);
+                 res.addInListOpr(f);
+                 res.addInListOpr(t);
+                 RESULT = res;
+                 :}
+                 | term:t
                  {: RESULT = t; :}
                  ;
    value ::= VALUE {: RESULT = Types.VALUE; :};
@@ -297,4 +292,3 @@ precedence left TIMES, DIVIDE;
                  NAME:n {: Variable var = context.getVar(n);
                  RESULT = var; :}
                  ;
-

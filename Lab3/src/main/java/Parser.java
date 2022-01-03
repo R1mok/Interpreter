@@ -306,9 +306,9 @@ public class Parser extends java_cup.runtime.lr_parser {
          p.context.newScope();
          Program result = (Program) p.parse().value;
          p.context.deleteScope();
+         System.out.println(p.context.ex(p.context.rootFunc("main")));
          p.context.getFunctions();
          p.context.getVariables();
-         System.out.println(p.context.ex(p.context.rootFunc("main")));
          System.out.println("Finish parsing");
        } catch (Exception e) {
          /* do cleanup here -- possibly rethrow e */
