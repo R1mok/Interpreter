@@ -7,5 +7,6 @@ public enum operType {
     SEMI,
     NEXTSTMT,
     RETURN,
-    MOD
+    MOD,
+    FUNC_CALL
 }

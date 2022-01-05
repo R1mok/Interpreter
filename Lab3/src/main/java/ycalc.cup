@@ -141,7 +141,7 @@ non terminal Opr initialize, initialize_part;
 non terminal Program    programm;
 non terminal Types      type, value, const_value;
 non terminal Types      pointer, array_of, const_pointer, const_array_of;
-non terminal Opr   function_parametrs;
+non terminal Opr   function_parametrs, function_call;
 non terminal Opr   expr_list;
 non terminal Opr       statement_list, statement;
 non terminal Opr   function_body;
@@ -195,13 +195,21 @@ precedence left TIMES, DIVIDE;
                 res.addInListOpr(e);
                 RESULT = res;
                  :}
-                | initialize:i {: RESULT = i; :}
+                | function_call:fc {: RESULT = fc; :}
+                | initialize:i SEMI {: RESULT = i; :}
                 | expr_list SEMI
                 ;
    function_parametrs ::=
-                type:t NAME:n {:  :} function_parametrs // один или несколько параметров
+                initialize:i {: if (i instanceof Variable) { context.addVar((Variable)i); } else { context.addVar((Variable)i.ops.get(0)); } :} function_parametrs // один или несколько параметров
                 | COMMA type:t NAME:n {:  :} function_parametrs // через запятую сделать параметры через запятую
                 |
+                ;
+   function_call ::=  NAME:n LPAREN function_parametrs:p RPAREN
+                {: context.newScope();
+                Opr res = new Opr(NodeType.OPR, operType.FUNC_CALL);
+                res.addInListOpr(context.rootFunc(n));
+                RESULT = res;
+                :}
                 ;
    type ::=     const_value:v {: :} // целочисленный тип
                 |
@@ -215,13 +223,13 @@ precedence left TIMES, DIVIDE;
                 |
                 array_of type:t
                 ;
-   initialize ::= defenition_value:e ASSIGN expr:n SEMI
+   initialize ::= defenition_value:e ASSIGN expr:n
                      {: Opr res = new Opr(NodeType.OPR, operType.ASSIGN);
                       res.addInListOpr(e);
                       res.addInListOpr(n);
                       RESULT = res;
                       :}
-                     | defenition_value:e SEMI {: RESULT = e; :}
+                     | defenition_value:e {: RESULT = e; :}
                      | defenition_pointer:p
                      | defeniniton_const_pointer:p
                      | defenition_array_of:a
@@ -241,7 +249,8 @@ precedence left TIMES, DIVIDE;
    defenition_array_of ::= ARRAY_OF type:t NAME:w
                     {:  :}
                     ;
-   expr      ::=  expr:e PLUS factor:f
+   expr      ::=  function_call:fc {: RESULT = fc; :}
+                 | expr:e PLUS factor:f
                  {:
                   Opr res = new Opr(NodeType.OPR, operType.PLUS);
                   res.addInListOpr(e);

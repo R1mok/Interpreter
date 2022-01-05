@@ -14,8 +14,8 @@ public class VarFunctionsContext extends Construction{
         }
         System.out.println("");
     }
-    public Opr rootFunc(String funcMain){
-        FunctionDefinition func = functions.get(funcMain);
+    public Opr rootFunc(String funcName){
+        FunctionDefinition func = functions.get(funcName);
         return func.getFunctionStatements();
     }
     public int ex(Opr p){
@@ -56,6 +56,12 @@ public class VarFunctionsContext extends Construction{
                     }
                     case MOD -> {
                         return ex(p.ops.get(0)) % ex(p.ops.get(1));
+                    }
+                    case MINUS -> {
+                        return ex(p.ops.get(0)) - ex(p.ops.get(1));
+                    }
+                    case FUNC_CALL -> {
+                        return ex(p.ops.get(0));
                     }
                 }
 
