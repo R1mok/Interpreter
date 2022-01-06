@@ -65,8 +65,7 @@ public class VarFunctionsContext extends Construction{
                         return ex(p.ops.get(0)) - ex(p.ops.get(1));
                     }
                     case FUNC_CALL -> {
-                        ((Variable) p.ops.get(1)).value = ((Variable) p.ops.get(2)).value;
-                        ((Variable) p.ops.get(1)).intValue = ((Variable) p.ops.get(2)).intValue;
+                        setFuncParams(p.ops.get(1), p.ops.get(2));
                         return ex(p.ops.get(0));
                     }
                 }
@@ -74,6 +73,13 @@ public class VarFunctionsContext extends Construction{
             }
         }
         return 0;
+    }
+    public void setFuncParams(Opr newVal, Opr val){
+            ((Variable)newVal.ops.get(0)).value = ((Variable) val.ops.get(0)).value;
+            ((Variable) newVal.ops.get(0)).intValue = ((Variable) val.ops.get(0)).intValue;
+            if (newVal.ops.size() != 1 || val.ops.size() != 1)
+                setFuncParams(newVal.ops.get(1), val.ops.get(1));
+            else return;
     }
     public Variable getVar(String varName){
         for (HashMap<String, Variable> elem : variables){

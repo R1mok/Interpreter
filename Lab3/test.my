@@ -1,11 +1,9 @@
-value sum(value a){
-    return a + 1;
+value mul(value a, value b, value c){
+    return a+b-c;
 }
-value add(value a){
-    value b = a + 1;
-    return sum(b);
-}
-value main (){
-    value b = 2;
-    return add(b);
+value main(){
+    value a = 2;
+    value b = 1;
+    value c = 3;
+    return mul(a, b, c);
 }

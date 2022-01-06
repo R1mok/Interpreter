@@ -164,7 +164,17 @@ precedence left TIMES, DIVIDE;
    function ::= type:t NAME:n  LPAREN function_parametrs_declaration:fp RPAREN LBRACE function_body:b RBRACE // объявление функции
                 {: context.registerFunction(new FunctionDefinition(t, n, fp, b)); :}
                 ;
-   function_parametrs_declaration ::= initialize:i {: RESULT = i; :}
+   function_parametrs_declaration ::= initialize:i  function_parametrs_declaration:fpd {:
+                Opr res = new Opr(NodeType.VAR, operType.NEXTSTMT);
+                res.addInListOpr(i);
+                if (fpd != null)
+                    res.addInListOpr(fpd);
+                RESULT = res; :}
+                | COMMA initialize:i function_parametrs_declaration:fpd {: Opr res = new Opr(NodeType.VAR, operType.NEXTSTMT);
+                res.addInListOpr(i);
+                if (fpd != null)
+                    res.addInListOpr(fpd);
+                RESULT = res; :}
                 |
                 ;
    function_body ::= // тело функции
@@ -203,11 +213,24 @@ precedence left TIMES, DIVIDE;
                 | expr_list SEMI
                 ;
    function_parametrs ::=
-                NAME:n function_parametrs // один или несколько параметров
-                {: Variable var = context.getVar(n);
-                RESULT = var;
+                NAME:n function_parametrs:fp // один или несколько параметров
+                {: Opr res = new Opr(NodeType.VAR);
+                Variable var = context.getVar(n);
+                res.addInListOpr(var);
+                if (fp != null)
+                    res.addInListOpr(fp);
+                RESULT = res;
                 :}
-                // | COMMA type:t NAME:n {:  :} function_parametrs // через запятую сделать параметры через запятую
+                | COMMA NAME:n function_parametrs:fp
+                {:
+                Variable var = context.getVar(n);
+                RESULT = var;
+                Opr res = new Opr(NodeType.VAR);
+                res.addInListOpr(var);
+                if (fp != null)
+                    res.addInListOpr(fp);
+                RESULT = res;
+                :}
                 |
                 ;
    function_call ::=  NAME:n LPAREN {: context.newScope(); :} function_parametrs:p RPAREN
