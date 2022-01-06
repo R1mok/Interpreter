@@ -29,18 +29,44 @@ public class VarFunctionsContext extends Construction{
                 return ((Const) p).getValue();
             }
             case VAR -> {
-                return ((Variable)p).getIntValue(); // mb return var value
+                if (p.ops.size() == 2) {
+                    int size = ex(p.ops.get(1));
+                    Variable[] value = new Variable[size];
+                    for (int i = 0; i < size; ++i) {
+                        value[i] = new Variable(NodeType.VAR);
+                        value[i].setType(((Variable)p.ops.get(0)).type.type);
+                    }
+                    ((Variable)p.ops.get(0)).value = value;
+                } else
+                return ((Variable)p).getIntValue();
             }
             case OPR -> {
                 if (p.operType == null){
                     return ex(p.ops.get(0));
-                } else
+                }
+                else
                 switch (p.operType){
+                    case TAKE_FROM_ARRAY -> {
+                        int index = ((Const)p.ops.get(1)).value;
+                        return ((Variable[])((Variable)p.ops.get(0)).value)[index].intValue;
+                    }
                     case ASSIGN -> {
-                        int intVal = ex(p.ops.get(1));
-                        ((Variable)p.ops.get(0)).setIntValue(intVal);
-                        ((Variable)p.ops.get(0)).setValue(p.ops.get(1));
-                        return intVal;
+                        if (p.ops.size() == 3){
+                           int index = ((Const)p.ops.get(1)).value;
+                            if (p.ops.get(2) instanceof Const && (((Variable) p.ops.get(0)).type.type.equals(Types.VALUE) || (((Variable) p.ops.get(0)).type.type.equals(Types.CONST_VALUE))))
+                            {
+                                Variable var = new Variable(NodeType.CONST);
+                                var.intValue = ((Const)p.ops.get(2)).getValue();
+                                var.value = p.ops.get(2);
+                                var.type = Types.VALUE;
+                                ((Variable[]) ((Variable) p.ops.get(0)).value)[index] = var;
+                            }
+                        } else {
+                            int intVal = ex(p.ops.get(1));
+                            ((Variable) p.ops.get(0)).setIntValue(intVal);
+                            ((Variable) p.ops.get(0)).setValue(p.ops.get(1));
+                            return intVal;
+                        }
                     }
                     case PLUS -> {
                         return ex(p.ops.get(0)) + ex(p.ops.get(1));

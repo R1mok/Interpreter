@@ -1,9 +1,5 @@
-value mul(value a, value b, value c){
-    return a+b-c;
-}
 value main(){
-    value a = 2;
-    value b = 1;
-    value c = 3;
-    return mul(a, b, c);
+    array of value a;
+    a[0] = 5;
+    return a[1];
 }

@@ -125,6 +125,8 @@ name = [A-Za-z_]*[0-9]*
     " "                { }
     "{"                { return symbol(sym.LBRACE);}
     "}"                { return symbol(sym.RBRACE);}
+    "]"                { return symbol(sym.RSQUARE); }
+    "["                { return symbol(sym.LSQUARE); }
     "pointer"          { return symbol(sym.POINTER, new String(yytext()));}
     "array of"         { return symbol(sym.ARRAY_OF, new String(yytext()));}
     ","                { return symbol(sym.COMMA);}

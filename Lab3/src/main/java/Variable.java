@@ -15,6 +15,7 @@ public class Variable extends Opr {
         super(nt);
     }
 
+    public void setValue(Object value) { this.value = value; }
     public void setValue(Opr value) {
         this.value = value;
     }
@@ -29,6 +30,8 @@ public class Variable extends Opr {
     }
     @Override
     public String toString() {
-        return type + " " + name + "=" + intValue;
+        if (!(this.type.equals(Types.ARRAY_OF) || this.type.equals(Types.CONST_ARRAY_OF)))
+            return type + " " + name + "=" + intValue;
+        else return type + " " + name;
     }
 }

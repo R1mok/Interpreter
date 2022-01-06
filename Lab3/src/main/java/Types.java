@@ -1,6 +1,6 @@
 public enum Types{
     VALUE, CONST_VALUE(), CONST_POINTER(Types.VALUE), POINTER(Types.VALUE), CONST_ARRAY_OF(Types.VALUE), ARRAY_OF(Types.VALUE);
-    private Types type;
+    protected Types type;
     Types() {}
     Types(Types t){
         this.type = t;

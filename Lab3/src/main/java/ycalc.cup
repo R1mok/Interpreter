@@ -134,7 +134,7 @@ parser code {:
 
 terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, ASSIGN, COMMA, MOD; // arythmetical terminals
 terminal Integer NUMBER; // int terminals
-terminal String LBRACE, RBRACE; // other string terminals
+terminal String LBRACE, RBRACE, LSQUARE, RSQUARE; // other string terminals
 terminal String POINTER, VALUE, NAME, CONST, ARRAY_OF; // type terminals
 
 non terminal Opr initialize, initialize_part;
@@ -208,6 +208,13 @@ precedence left TIMES, DIVIDE;
                 res.addInListOpr(e);
                 RESULT = res;
                  :}
+                | NAME:n LSQUARE expr:i RSQUARE ASSIGN expr:e SEMI {: Opr res = new Opr(NodeType.OPR, operType.ASSIGN);
+                Variable var = context.getVar(n);
+                res.addInListOpr(var);
+                res.addInListOpr(i);
+                res.addInListOpr(e);
+                RESULT = res;
+                :}
                 | function_call:fc {: RESULT = fc; :}
                 | initialize:i SEMI {: RESULT = i; :}
                 | expr_list SEMI
@@ -244,9 +251,9 @@ precedence left TIMES, DIVIDE;
                 context.deleteScope();
                 :}
                 ;
-   type ::=     const_value:v {: :} // целочисленный тип
+   type ::=     const_value:v {: :}
                 |
-                value:v {:  :}
+                value:v {: RESULT = v; :}
                 |
                 const_pointer:p  // указатель
                 |
@@ -254,7 +261,7 @@ precedence left TIMES, DIVIDE;
                 |
                 const_array_of:a // массив
                 |
-                array_of type:t
+                array_of:t {: RESULT = t; :}
                 ;
    initialize ::= defenition_value:e ASSIGN expr:n
                      {: Opr res = new Opr(NodeType.OPR, operType.ASSIGN);
@@ -263,12 +270,16 @@ precedence left TIMES, DIVIDE;
                       RESULT = res;
                       :}
                      | defenition_value:e {: RESULT = e; :}
-                     | defenition_pointer:p
+                     | defenition_pointer:p {: RESULT = p; :}
                      | defeniniton_const_pointer:p
-                     | defenition_array_of:a
+                     | defenition_array_of:a {: RESULT = a; :}
                      | defenition_const_array_of:a
+                     | defenition_pointer:p ASSIGN expr:e {: Opr res = new Opr(NodeType.OPR, operType.ASSIGN);
+                      res.addInListOpr(p);
+                      res.addInListOpr(e);
+                      RESULT = res;:}
                      ;
-   defenition_value ::= VALUE NAME:n
+   defenition_value ::= value NAME:n
                      {:
                      Variable var = new Variable(Types.VALUE, n);
                      context.addVar(var);
@@ -276,11 +287,29 @@ precedence left TIMES, DIVIDE;
                      RESULT = var;
                      :}
                      ;
-   defenition_pointer ::= POINTER:p type:t NAME:w
-                    {:  :}
+   defenition_pointer ::= POINTER:p type:t NAME:n
+                    {: Variable var = new Variable(Types.POINTER, n);
+                     context.addVar(var);
+                     var.setValue(new Variable(t, n));
+                     RESULT = var; :}
                     ;
-   defenition_array_of ::= ARRAY_OF type:t NAME:w
-                    {:  :}
+   defenition_array_of ::= array_of:t NAME:n
+                    {: Variable var = new Variable(Types.ARRAY_OF, n);
+                    context.addVar(var);
+                    Opr res = new Opr(NodeType.VAR);
+                    res.addInListOpr(var);
+                    res.addInListOpr(new Const(4));
+                    RESULT = res;
+                    :}
+                    |
+                    array_of:t NAME:n LSQUARE expr:e RSQUARE
+                    {: Variable var = new Variable(Types.ARRAY_OF, n);
+                    context.addVar(var);
+                    Opr res = new Opr(NodeType.VAR);
+                    res.addInListOpr(var);
+                    res.addInListOpr(e);
+                    RESULT = res;
+                    :}
                     ;
    expr      ::=  function_call:fc {: RESULT = fc; :}
                  | expr:e PLUS factor:f
@@ -324,8 +353,8 @@ precedence left TIMES, DIVIDE;
    value ::= VALUE {: RESULT = Types.VALUE; :};
    const_value ::= CONST VALUE {: RESULT = Types.CONST_VALUE; :};
    pointer ::= POINTER type:t {: RESULT = Types.POINTER; RESULT.setType(t); :};
-   const_pointer ::= CONST POINTER type;
-   array_of ::= ARRAY_OF type;
+   const_pointer ::= CONST POINTER type:t {: RESULT = Types.CONST_POINTER; RESULT.setType(t); :} ;
+   array_of ::= ARRAY_OF type:t {: RESULT = t; :} ;
    const_array_of ::= CONST ARRAY_OF type;
    term      ::= LPAREN expr:e RPAREN
                  {: RESULT = e; :}
@@ -336,4 +365,10 @@ precedence left TIMES, DIVIDE;
                  |
                  NAME:n {: Variable var = context.getVar(n);
                  RESULT = var; :}
+                 | NAME:n LSQUARE expr:e RSQUARE {: Variable var = context.getVar(n);
+                 Opr res = new Opr(NodeType.OPR, operType.TAKE_FROM_ARRAY);
+                 res.addInListOpr(var);
+                 res.addInListOpr(e);
+                 RESULT = res;
+                 :}
                  ;

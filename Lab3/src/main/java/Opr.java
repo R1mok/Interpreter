@@ -8,6 +8,7 @@ public class Opr extends Construction {
     Opr(NodeType nt){
         this.typeNode = nt;
     }
+    Opr() {}
     Opr(NodeType nt, operType ot){
         this.typeNode = nt;
         this.operType = ot;

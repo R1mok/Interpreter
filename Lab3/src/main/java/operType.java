@@ -8,5 +8,6 @@ public enum operType {
     NEXTSTMT,
     RETURN,
     MOD,
-    FUNC_CALL
+    FUNC_CALL,
+    TAKE_FROM_ARRAY
 }
