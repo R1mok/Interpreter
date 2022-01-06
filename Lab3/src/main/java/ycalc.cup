@@ -141,7 +141,7 @@ non terminal Opr initialize, initialize_part;
 non terminal Program    programm;
 non terminal Types      type, value, const_value;
 non terminal Types      pointer, array_of, const_pointer, const_array_of;
-non terminal Opr   function_parametrs, function_call;
+non terminal Opr   function_parametrs, function_call, function_parametrs_declaration;
 non terminal Opr   expr_list;
 non terminal Opr       statement_list, statement;
 non terminal Opr   function_body;
@@ -161,8 +161,11 @@ precedence left TIMES, DIVIDE;
    programm ::= programm function  {: RESULT = new Program(); :}
                 | function
                 ;
-   function ::= type:t NAME:n  LPAREN function_parametrs:p RPAREN LBRACE function_body:b RBRACE // объявление функции
-                {: context.registerFunction(new FunctionDefinition(t, n, p, b)); :}
+   function ::= type:t NAME:n  LPAREN function_parametrs_declaration:fp RPAREN LBRACE function_body:b RBRACE // объявление функции
+                {: context.registerFunction(new FunctionDefinition(t, n, fp, b)); :}
+                ;
+   function_parametrs_declaration ::= initialize:i {: RESULT = i; :}
+                |
                 ;
    function_body ::= // тело функции
                 statement:s function_body:b {:
@@ -200,15 +203,22 @@ precedence left TIMES, DIVIDE;
                 | expr_list SEMI
                 ;
    function_parametrs ::=
-                initialize:i {: if (i instanceof Variable) { context.addVar((Variable)i); } else { context.addVar((Variable)i.ops.get(0)); } :} function_parametrs // один или несколько параметров
-                | COMMA type:t NAME:n {:  :} function_parametrs // через запятую сделать параметры через запятую
+                NAME:n function_parametrs // один или несколько параметров
+                {: Variable var = context.getVar(n);
+                RESULT = var;
+                :}
+                // | COMMA type:t NAME:n {:  :} function_parametrs // через запятую сделать параметры через запятую
                 |
                 ;
-   function_call ::=  NAME:n LPAREN function_parametrs:p RPAREN
-                {: context.newScope();
+   function_call ::=  NAME:n LPAREN {: context.newScope(); :} function_parametrs:p RPAREN
+                {:
+                Opr funcParams = context.funcParametrs(n);
                 Opr res = new Opr(NodeType.OPR, operType.FUNC_CALL);
                 res.addInListOpr(context.rootFunc(n));
+                res.addInListOpr(funcParams);
+                res.addInListOpr(p);
                 RESULT = res;
+                context.deleteScope();
                 :}
                 ;
    type ::=     const_value:v {: :} // целочисленный тип

@@ -18,6 +18,10 @@ public class VarFunctionsContext extends Construction{
         FunctionDefinition func = functions.get(funcName);
         return func.getFunctionStatements();
     }
+    public Opr funcParametrs(String funcName){
+        FunctionDefinition func = functions.get(funcName);
+        return func.getParametrs();
+    }
     public int ex(Opr p){
         if (p == null) return 0;
         switch (p.typeNode){
@@ -61,6 +65,8 @@ public class VarFunctionsContext extends Construction{
                         return ex(p.ops.get(0)) - ex(p.ops.get(1));
                     }
                     case FUNC_CALL -> {
+                        ((Variable) p.ops.get(1)).value = ((Variable) p.ops.get(2)).value;
+                        ((Variable) p.ops.get(1)).intValue = ((Variable) p.ops.get(2)).intValue;
                         return ex(p.ops.get(0));
                     }
                 }
@@ -71,7 +77,8 @@ public class VarFunctionsContext extends Construction{
     }
     public Variable getVar(String varName){
         for (HashMap<String, Variable> elem : variables){
-            return elem.get(varName);
+            if (elem.get(varName)!= null)
+                return elem.get(varName);
         }
         return null;
     }

@@ -16,4 +16,8 @@ public class FunctionDefinition extends Construction {
         this.parametrs = parametrs;
         this.returnType = returnType;
     }
+
+    public void setParametrs(Opr parametrs) {
+        this.parametrs = parametrs;
+    }
 }
