@@ -131,6 +131,7 @@ name = [A-Za-z_]*[0-9]*
     "array of"         { return symbol(sym.ARRAY_OF, new String(yytext()));}
     ","                { return symbol(sym.COMMA);}
     "return"           { return symbol(sym.RETURN, new String(yytext())); }
+    "while"            { return symbol(sym.WHILE); }
    
     /* If an integer is found print it out, return the token NUMBER
        that represents an integer and the value of the integer that is

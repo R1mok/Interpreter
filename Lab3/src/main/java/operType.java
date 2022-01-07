@@ -9,5 +9,6 @@ public enum operType {
     RETURN,
     MOD,
     FUNC_CALL,
-    TAKE_FROM_ARRAY
+    TAKE_FROM_ARRAY,
+    WHILE
 }
