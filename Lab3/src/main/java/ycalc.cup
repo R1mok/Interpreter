@@ -132,7 +132,7 @@ parser code {:
    that do have an value, in this case an integer value, are listed on
    the next line down. */
 
-terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, ASSIGN, COMMA, MOD; // arythmetical terminals
+terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, ASSIGN, COMMA, MOD, GTE, LTE, NE; // arythmetical terminals
 terminal Integer NUMBER; // int terminals
 terminal String LBRACE, RBRACE, LSQUARE, RSQUARE, WHILE; // other string terminals
 terminal String POINTER, VALUE, NAME, CONST, ARRAY_OF; // type terminals
@@ -318,6 +318,19 @@ precedence left TIMES, DIVIDE;
                     :}
                     ;
    expr      ::=  function_call:fc {: RESULT = fc; :}
+                 | expr:e LTE factor:f {: Opr res = new Opr(NodeType.OPR, operType.LTE);
+                  res.addInListOpr(e);
+                  res.addInListOpr(f);
+                  RESULT = res; :}
+                 | expr:e GTE factor:f {: Opr res = new Opr(NodeType.OPR, operType.GTE);
+                  res.addInListOpr(e);
+                  res.addInListOpr(f);
+                  RESULT = res; :}
+                 | expr:e NE factor:f {: Opr res = new Opr(NodeType.OPR, operType.NE);
+                 res.addInListOpr(e);
+                 res.addInListOpr(f);
+                 RESULT = res;
+                 :}
                  | expr:e PLUS factor:f
                  {:
                   Opr res = new Opr(NodeType.OPR, operType.PLUS);

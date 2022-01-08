@@ -123,6 +123,9 @@ name = [A-Za-z_]*[0-9]*
     "const"            { return symbol(sym.CONST, new String(yytext())); }
     "="                { return symbol(sym.ASSIGN);}
     " "                { }
+    ">="               { return symbol(sym.GTE); }
+    "<="               { return symbol(sym.LTE); }
+    "!="               { return symbol(sym.NE); }
     "{"                { return symbol(sym.LBRACE);}
     "}"                { return symbol(sym.RBRACE);}
     "]"                { return symbol(sym.RSQUARE); }

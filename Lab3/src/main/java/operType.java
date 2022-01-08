@@ -10,5 +10,8 @@ public enum operType {
     MOD,
     FUNC_CALL,
     TAKE_FROM_ARRAY,
-    WHILE
+    WHILE,
+    LTE,
+    GTE,
+    NE
 }

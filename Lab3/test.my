@@ -1,9 +1,13 @@
-value main(){
-    value i = 0;
-    array of value a;
-    while (4 - i){
-        a[i] = i;
-        i = i + 1;
+value addMass(array of value a){
+    value b = 0;
+    while (b <= 3){
+        a[b] = b;
     }
-    return a[3];
+    return a[0]+a[1]+a[2]+a[3];
+}
+value main(){
+    array of value a;
+    value b;
+    b = addMass(a);
+    return b;
 }

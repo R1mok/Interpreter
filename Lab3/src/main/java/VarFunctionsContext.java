@@ -37,6 +37,7 @@ public class VarFunctionsContext extends Construction{
                         value[i].setType(((Variable)p.ops.get(0)).type.type);
                     }
                     ((Variable)p.ops.get(0)).value = value;
+                    return p.ops.get(0);
                 } else
                 return p;
             }
@@ -110,6 +111,66 @@ public class VarFunctionsContext extends Construction{
                             ((Variable) p.ops.get(0)).setValue(p.ops.get(1));
                             return val;
                         }
+                    }
+                    case GTE -> {
+                        int a = 0, b = 0;
+                        Opr fst = p.ops.get(0), sec = p.ops.get(1);
+                        if (!(p.ops.get(0) instanceof Variable) && !(p.ops.get(0) instanceof Const)) {
+                            fst = ex(p.ops.get(0));
+                        }
+                        if (!(p.ops.get(1) instanceof Variable) && !(p.ops.get(1) instanceof Const)) {
+                            sec = ex(p.ops.get(1));
+                        }
+                        if (fst instanceof Variable)
+                            a = ((Variable)ex(fst)).intValue;
+                        else if (fst instanceof Const)
+                            a = ((Const)ex(fst)).value;
+                        if (sec instanceof Variable)
+                            b = ((Variable)ex(sec)).intValue;
+                        else if (sec instanceof Const)
+                            b = ((Const)ex(sec)).value;
+                        if (a >= b) return new Const(1);
+                        else return new Const(0);
+                    }
+                    case LTE -> {
+                        int a = 0, b = 0;
+                        Opr fst = p.ops.get(0), sec = p.ops.get(1);
+                        if (!(p.ops.get(0) instanceof Variable) && !(p.ops.get(0) instanceof Const)) {
+                            fst = ex(p.ops.get(0));
+                        }
+                        if (!(p.ops.get(1) instanceof Variable) && !(p.ops.get(1) instanceof Const)) {
+                            sec = ex(p.ops.get(1));
+                        }
+                        if (fst instanceof Variable)
+                            a = ((Variable)ex(fst)).intValue;
+                        else if (fst instanceof Const)
+                            a = ((Const)ex(fst)).value;
+                        if (sec instanceof Variable)
+                            b = ((Variable)ex(sec)).intValue;
+                        else if (sec instanceof Const)
+                            b = ((Const)ex(sec)).value;
+                        if (a <= b) return new Const(1);
+                        else return new Const(0);
+                    }
+                    case NE -> {
+                        int a = 0, b = 0;
+                        Opr fst = p.ops.get(0), sec = p.ops.get(1);
+                        if (!(p.ops.get(0) instanceof Variable) && !(p.ops.get(0) instanceof Const)) {
+                            fst = ex(p.ops.get(0));
+                        }
+                        if (!(p.ops.get(1) instanceof Variable) && !(p.ops.get(1) instanceof Const)) {
+                            sec = ex(p.ops.get(1));
+                        }
+                        if (fst instanceof Variable)
+                            a = ((Variable)ex(fst)).intValue;
+                        else if (fst instanceof Const)
+                            a = ((Const)ex(fst)).value;
+                        if (sec instanceof Variable)
+                            b = ((Variable)ex(sec)).intValue;
+                        else if (sec instanceof Const)
+                            b = ((Const)ex(sec)).value;
+                        if (a != b) return new Const(1);
+                        else return new Const(0);
                     }
                     case PLUS -> {
                         int a = 0, b = 0;
@@ -186,8 +247,14 @@ public class VarFunctionsContext extends Construction{
                         return new Const(a - b);
                     }
                     case FUNC_CALL -> {
-                        if (p.ops.get(1) != null && p.ops.get(2) != null)
-                            setFuncParams(p.ops.get(1), p.ops.get(2));
+                        Opr fst = p.ops.get(1), scnd = p.ops.get(2);
+                        if (p.ops.get(1) != null && p.ops.get(2) != null) {
+                            if (p.ops.get(1).operType.equals(operType.NEXTSTMT))
+                                fst = ex(p.ops.get(1));
+                            if (p.ops.get(0).operType.equals(operType.NEXTSTMT))
+                                scnd = ex(p.ops.get(2));
+                            setFuncParams(fst, scnd);
+                        }
                         return ex(p.ops.get(0));
                     }
                 }
@@ -197,11 +264,28 @@ public class VarFunctionsContext extends Construction{
         return new Const(0);
     }
     public void setFuncParams(Opr newVal, Opr val){
-            ((Variable)newVal.ops.get(0)).value = ((Variable) val.ops.get(0)).value;
-            ((Variable) newVal.ops.get(0)).intValue = ((Variable) val.ops.get(0)).intValue;
-            if (newVal.ops.size() != 1 || val.ops.size() != 1)
-                setFuncParams(newVal.ops.get(1), val.ops.get(1));
-            else return;
+        if (newVal.ops.get(0) instanceof Variable && val.ops.get(0) instanceof Variable) {
+            if (((Variable) newVal.ops.get(0)).type.equals(Types.VALUE) && ((Variable) val.ops.get(0)).type.equals(Types.VALUE)) {
+                ((Variable) newVal.ops.get(0)).value = ((Variable) val.ops.get(0)).value;
+                ((Variable) newVal.ops.get(0)).intValue = ((Variable) val.ops.get(0)).intValue;
+                if (newVal.ops.size() != 1 || val.ops.size() != 1)
+                    setFuncParams(newVal.ops.get(1), val.ops.get(1));
+                else return;
+            } else if (((Variable) newVal.ops.get(0)).type.equals(Types.ARRAY_OF) && ((Variable) val.ops.get(0)).type.equals(Types.ARRAY_OF)) {
+                newVal = ex(newVal.ops.get(0));
+                ((Variable) newVal.ops.get(0)).value = ((Variable) val.ops.get(0)).value;
+                if (newVal.ops.size() != 1 || val.ops.size() != 1)
+                    setFuncParams(newVal.ops.get(1), val.ops.get(1));
+                else return;
+            }
+        } else {
+            Opr fst = newVal, scnd = val;
+            if (newVal.ops.get(0).operType.equals(operType.NEXTSTMT))
+                fst = newVal.ops.get(0);
+            if (val.ops.get(0).operType.equals(operType.NEXTSTMT))
+                scnd = val.ops.get(0);
+            setFuncParams(fst, scnd);
+        }
     }
     public Variable getVar(String varName){
         for (HashMap<String, Variable> elem : variables){
