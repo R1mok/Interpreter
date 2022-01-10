@@ -489,7 +489,7 @@ class CUP$Parser$actions {
 		int fpdright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Opr fpd = (Opr)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                Opr res = new Opr(NodeType.VAR, operType.NEXTSTMT);
+                Opr res = new Opr(NodeType.OPR, operType.NEXTSTMT);
                 res.addInListOpr(i);
                 if (fpd != null)
                     res.addInListOpr(fpd);
@@ -508,7 +508,7 @@ class CUP$Parser$actions {
 		int fpdleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int fpdright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Opr fpd = (Opr)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 Opr res = new Opr(NodeType.VAR, operType.NEXTSTMT);
+		 Opr res = new Opr(NodeType.OPR, operType.NEXTSTMT);
                 res.addInListOpr(i);
                 if (fpd != null)
                     res.addInListOpr(fpd);
@@ -699,7 +699,7 @@ class CUP$Parser$actions {
 		int fpleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int fpright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Opr fp = (Opr)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 Opr res = new Opr(NodeType.VAR);
+		 Opr res = new Opr(NodeType.OPR);
                 Variable var = context.getVar(n);
                 res.addInListOpr(var);
                 if (fp != null)
@@ -723,7 +723,7 @@ class CUP$Parser$actions {
 		
                 Variable var = context.getVar(n);
                 RESULT = var;
-                Opr res = new Opr(NodeType.VAR);
+                Opr res = new Opr(NodeType.OPR);
                 res.addInListOpr(var);
                 if (fp != null)
                     res.addInListOpr(fp);
