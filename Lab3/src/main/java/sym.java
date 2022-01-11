@@ -10,14 +10,15 @@ public class sym {
   public static final int MOD = 11;
   public static final int NE = 14;
   public static final int PLUS = 3;
+  public static final int NOTZERO = 22;
   public static final int RBRACE = 17;
   public static final int RPAREN = 8;
   public static final int LTE = 13;
   public static final int WHILE = 20;
   public static final int SEMI = 2;
-  public static final int VALUE = 22;
-  public static final int RETURN = 26;
-  public static final int NAME = 23;
+  public static final int VALUE = 25;
+  public static final int RETURN = 29;
+  public static final int NAME = 26;
   public static final int LPAREN = 7;
   public static final int LBRACE = 16;
   public static final int GTE = 12;
@@ -25,14 +26,16 @@ public class sym {
   public static final int EOF = 0;
   public static final int NUMBER = 15;
   public static final int DIVIDE = 6;
+  public static final int FOREACH = 23;
   public static final int LSQUARE = 18;
   public static final int MINUS = 4;
-  public static final int CONST = 24;
+  public static final int CONST = 27;
   public static final int error = 1;
-  public static final int POINTER = 21;
+  public static final int POINTER = 24;
   public static final int ASSIGN = 9;
   public static final int RSQUARE = 19;
-  public static final int ARRAY_OF = 25;
+  public static final int ZERO = 21;
+  public static final int ARRAY_OF = 28;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -55,6 +58,9 @@ public class sym {
   "LSQUARE",
   "RSQUARE",
   "WHILE",
+  "ZERO",
+  "NOTZERO",
+  "FOREACH",
   "POINTER",
   "VALUE",
   "NAME",

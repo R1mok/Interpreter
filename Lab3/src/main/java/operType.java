@@ -13,5 +13,8 @@ public enum operType {
     WHILE,
     LTE,
     GTE,
-    NE
+    NE,
+    ZERO,
+    NOTZERO,
+    FOREACH
 }

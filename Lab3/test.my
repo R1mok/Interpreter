@@ -1,3 +1,8 @@
+value addMass(value i){
+    return i + 2;
+}
 value main(){
-
+    array of value a;
+    foreach a addMass(a);
+    return a[3];
 }

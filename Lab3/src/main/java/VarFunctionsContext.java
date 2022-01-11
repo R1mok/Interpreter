@@ -1,6 +1,9 @@
+import lombok.val;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 
 public class VarFunctionsContext extends Construction{
     private HashMap<String, FunctionDefinition> functions = new HashMap<>();
@@ -52,6 +55,68 @@ public class VarFunctionsContext extends Construction{
                     case TAKE_FROM_ARRAY -> {
                         int index = ((Const)p.ops.get(1)).value;
                         return ex(((Variable[])((Variable)p.ops.get(0)).value)[index]);
+                    }
+                    case FOREACH -> {
+                        if (p.ops.get(0) instanceof Variable){
+                            if (((Variable) p.ops.get(0)).type.equals(Types.ARRAY_OF)){
+                                Object funcParamsValue = ((Variable)p.ops.get(1).ops.get(2).ops.get(0)).value;
+                                int funcParamsIntValue = ((Variable)p.ops.get(1).ops.get(2).ops.get(0)).intValue;
+                                Variable[] arr = (Variable[]) ((Variable) p.ops.get(0)).value;
+                                for (int i = 0; i < arr.length; ++i){
+                                    Variable set = (Variable) p.ops.get(1).ops.get(2).ops.set(0, arr[i]);
+                                    Opr res = ex(p.ops.get(1));
+                                    if (res instanceof Variable){
+                                        arr[i] = (Variable) res;
+                                    } else if (res instanceof Const){
+                                        arr[i] = new Variable(NodeType.VAR);
+                                        arr[i].setType(Types.VALUE);
+                                        arr[i].value = res;
+                                        arr[i].intValue = ((Const) res).value;
+                                    }
+                                }
+                                ((Variable)p.ops.get(1).ops.get(2).ops.get(0)).intValue = funcParamsIntValue;
+                                ((Variable)p.ops.get(1).ops.get(2).ops.get(0)).value = funcParamsValue;
+                            } else if (((Variable) p.ops.get(0)).type.equals(Types.VALUE)){
+                                return ex(p.ops.get(1));
+                            }
+
+                        }
+                    }
+                    case ZERO -> {
+                        Opr fst = ex(p.ops.get(0));
+                        if (fst instanceof Variable){
+                            fst = p.ops.get(0);
+                            Opr sec = p.ops.get(1);
+                            if (((Variable) ex(fst)).intValue == 0){
+                                sec = ex(p.ops.get(1));
+                            }
+                            return sec;
+                        } else if (fst instanceof Const){
+                            fst = p.ops.get(0);
+                            Opr sec = p.ops.get(1);
+                            if (((Const) ex(fst)).value == 0){
+                                sec = ex(p.ops.get(1));
+                            }
+                            return sec;
+                        }
+                    }
+                    case NOTZERO -> {
+                        Opr fst = ex(p.ops.get(0));
+                        if (fst instanceof Variable){
+                            fst = p.ops.get(0);
+                            Opr sec = p.ops.get(1);
+                            if (((Variable) ex(fst)).intValue != 0){
+                                sec = ex(p.ops.get(1));
+                            }
+                            return sec;
+                        } else if (fst instanceof Const){
+                            fst = p.ops.get(0);
+                            Opr sec = p.ops.get(1);
+                            if (((Const) ex(fst)).value != 0){
+                                sec = ex(p.ops.get(1));
+                            }
+                            return sec;
+                        }
                     }
                     case WHILE -> {
                         Opr fst = ex(p.ops.get(0));

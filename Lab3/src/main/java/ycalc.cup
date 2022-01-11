@@ -134,7 +134,7 @@ parser code {:
 
 terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, ASSIGN, COMMA, MOD, GTE, LTE, NE; // arythmetical terminals
 terminal Integer NUMBER; // int terminals
-terminal String LBRACE, RBRACE, LSQUARE, RSQUARE, WHILE; // other string terminals
+terminal String LBRACE, RBRACE, LSQUARE, RSQUARE, WHILE, ZERO, NOTZERO, FOREACH; // other string terminals
 terminal String POINTER, VALUE, NAME, CONST, ARRAY_OF; // type terminals
 
 non terminal Opr initialize, initialize_part;
@@ -199,7 +199,6 @@ precedence left TIMES, DIVIDE;
                 }
                 :}
                 | SEMI {: Opr res = new Opr(NodeType.OPR, operType.SEMI);
-                 res.addInListOpr(null);
                  RESULT = res;
                  :}
                 | NAME:n ASSIGN expr:e SEMI {: Opr res = new Opr(NodeType.OPR, operType.ASSIGN);
@@ -219,6 +218,25 @@ precedence left TIMES, DIVIDE;
                 Opr res = new Opr(NodeType.OPR, operType.WHILE);
                 res.addInListOpr(e);
                 res.addInListOpr(s);
+                RESULT = res;
+                :}
+                | ZERO LPAREN expr:e RPAREN LBRACE function_body:s RBRACE {:
+                Opr res = new Opr(NodeType.OPR, operType.ZERO);
+                res.addInListOpr(e);
+                res.addInListOpr(s);
+                RESULT = res;
+                 :}
+                | NOTZERO LPAREN expr:e RPAREN LBRACE function_body:s RBRACE {:
+                Opr res = new Opr(NodeType.OPR, operType.NOTZERO);
+                res.addInListOpr(e);
+                res.addInListOpr(s);
+                RESULT = res;
+                :}
+                | FOREACH NAME:n function_call:fc {:
+                Opr res = new Opr(NodeType.OPR, operType.FOREACH);
+                Variable var = context.getVar(n);
+                res.addInListOpr(var);
+                res.addInListOpr(fc);
                 RESULT = res;
                 :}
                 | function_call:fc {: RESULT = fc; :}
