@@ -1,4 +1,5 @@
 import lombok.val;
+import org.w3c.dom.Node;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,7 +78,15 @@ public class VarFunctionsContext extends Construction{
                                 ((Variable)p.ops.get(1).ops.get(2).ops.get(0)).intValue = funcParamsIntValue;
                                 ((Variable)p.ops.get(1).ops.get(2).ops.get(0)).value = funcParamsValue;
                             } else if (((Variable) p.ops.get(0)).type.equals(Types.VALUE)){
-                                return ex(p.ops.get(1));
+                                Opr res = ex(p.ops.get(1));
+                                if (res instanceof Const) {
+                                    ((Variable) p.ops.get(0)).intValue = ((Const) res).value;
+                                    ((Variable) p.ops.get(0)).value = res;
+                                } else if (res instanceof Variable){
+                                    ((Variable) p.ops.get(0)).intValue = ((Variable)res).intValue;
+                                    ((Variable) p.ops.get(0)).value = ((Variable) res).value;
+                                }
+                                return res;
                             }
 
                         }
@@ -363,10 +372,9 @@ public class VarFunctionsContext extends Construction{
             if (elem.get(varName)!= null)
                 return elem.get(varName);
         }
-        return null;
+        return  null;
     }
     public void registerFunction(FunctionDefinition funcdef){
-        newScope();
         functions.put(funcdef.getName(), funcdef);
     }
     public void newScope(){

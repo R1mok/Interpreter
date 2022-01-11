@@ -25,9 +25,6 @@ public class Variable extends Opr {
     public Opr getValue(){
         return (Opr) this.value;
     }
-    public int getIntValue(){
-        return this.intValue;
-    }
     @Override
     public String toString() {
         if (!(this.type.equals(Types.ARRAY_OF) || this.type.equals(Types.CONST_ARRAY_OF)))

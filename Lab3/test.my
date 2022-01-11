@@ -1,8 +1,7 @@
-value addMass(value i){
-    return i + 2;
+value foo(){
+    return a;
 }
 value main(){
-    array of value a;
-    foreach a addMass(a);
-    return a[3];
+    value a = 10;
+    return foo();
 }

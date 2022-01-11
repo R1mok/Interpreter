@@ -97,9 +97,7 @@ parser code {:
        try {
          Parser p = new Parser(new Lexer(new FileReader(argv[0])));
          System.out.println("Start parsing");
-         p.context.newScope();
          Program result = (Program) p.parse().value;
-         p.context.deleteScope();
          System.out.println(p.context.ex(p.context.rootFunc("main")));
          p.context.getFunctions();
          p.context.getVariables();
@@ -161,8 +159,8 @@ precedence left TIMES, DIVIDE;
    programm ::= programm function  {: RESULT = new Program(); :}
                 | function
                 ;
-   function ::= type:t NAME:n  LPAREN function_parametrs_declaration:fp RPAREN LBRACE function_body:b RBRACE // объявление функции
-                {: context.registerFunction(new FunctionDefinition(t, n, fp, b)); :}
+   function ::= type:t NAME:n  LPAREN {: context.newScope(); :} function_parametrs_declaration:fp RPAREN LBRACE function_body:b RBRACE // объявление функции
+                {: context.registerFunction(new FunctionDefinition(t, n, fp, b)); context.deleteScope(); :}
                 ;
    function_parametrs_declaration ::= initialize:i  function_parametrs_declaration:fpd {:
                 Opr res = new Opr(NodeType.OPR, operType.NEXTSTMT);
@@ -214,25 +212,28 @@ precedence left TIMES, DIVIDE;
                 res.addInListOpr(e);
                 RESULT = res;
                 :}
-                | WHILE LPAREN expr:e RPAREN LBRACE function_body:s RBRACE {:
+                | WHILE LPAREN expr:e RPAREN LBRACE {: context.newScope(); :} function_body:s RBRACE {:
                 Opr res = new Opr(NodeType.OPR, operType.WHILE);
                 res.addInListOpr(e);
                 res.addInListOpr(s);
                 RESULT = res;
+                context.deleteScope();
                 :}
-                | ZERO LPAREN expr:e RPAREN LBRACE function_body:s RBRACE {:
+                | ZERO LPAREN expr:e RPAREN LBRACE {: context.newScope(); :} function_body:s RBRACE {:
                 Opr res = new Opr(NodeType.OPR, operType.ZERO);
                 res.addInListOpr(e);
                 res.addInListOpr(s);
                 RESULT = res;
+                context.deleteScope();
                  :}
-                | NOTZERO LPAREN expr:e RPAREN LBRACE function_body:s RBRACE {:
+                | NOTZERO LPAREN expr:e RPAREN LBRACE {: context.newScope(); :} function_body:s RBRACE {:
                 Opr res = new Opr(NodeType.OPR, operType.NOTZERO);
                 res.addInListOpr(e);
                 res.addInListOpr(s);
                 RESULT = res;
+                context.deleteScope();
                 :}
-                | FOREACH NAME:n function_call:fc {:
+                | FOREACH NAME:n function_call:fc SEMI {:
                 Opr res = new Opr(NodeType.OPR, operType.FOREACH);
                 Variable var = context.getVar(n);
                 res.addInListOpr(var);
