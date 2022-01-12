@@ -94,21 +94,25 @@ parser code {:
    public static class Main {
      static public void main(String argv[]) throws Exception {
        /* Start the parser */
+        Parser p = new Parser(new Lexer(new FileReader(argv[0])));
        try {
-         Parser p = new Parser(new Lexer(new FileReader(argv[0])));
          Robot robot = new Robot(argv[1]);
          System.out.println("Start parsing");
          Program result = (Program) p.parse().value;
-         System.out.println(p.context.ex(p.context.rootFunc("main")));
+         try {
+            System.out.println(p.context.ex(p.context.rootFunc("main")));
+         } catch (Exception e){
+         System.out.println(e.getMessage());
+         }
          p.context.getFunctions();
          p.context.getVariables();
          System.out.println("Finish parsing");
-        }catch (RuntimeException e) {
+        }catch (Exception e) {
           //do cleanup here -- possibly rethrow e
          System.out.println("");
          e.printStackTrace();
        }
-     }
+       }
    }
     /* Change the method report_fatal_error so when it reports a fatal
        error it will display the line and column number of where the
@@ -161,7 +165,7 @@ precedence left TIMES, DIVIDE;
                 | function
                 ;
    function ::= type:t NAME:n  LPAREN {: context.newScope(); :} function_parametrs_declaration:fp {: context.registerFunctionByName(n, fp); :}RPAREN LBRACE function_body:b // объявление функции
-                {: context.registerFunction(n, new FunctionDefinition(t, n, fp, b)); context.deleteScope(); :} RBRACE
+                {: context.registerFunction(n, new FunctionDefinition(t, n, fp, b)); :} RBRACE
                 ;
    function_parametrs_declaration ::= initialize:i  function_parametrs_declaration:fpd {:
                 Opr res = new Opr(NodeType.OPR, operType.NEXTSTMT);
@@ -269,7 +273,7 @@ precedence left TIMES, DIVIDE;
                 :}
                 |
                 ;
-   function_call ::=  NAME:n LPAREN {: context.newScope(); :} function_parametrs:p RPAREN
+   function_call ::=  NAME:n LPAREN function_parametrs:p RPAREN
                 {:
                 Opr funcParams = context.funcParametrs(n);
                 Opr res = new Opr(NodeType.OPR, operType.FUNC_CALL);
@@ -277,7 +281,6 @@ precedence left TIMES, DIVIDE;
                 res.addInListOpr(funcParams);
                 res.addInListOpr(p);
                 RESULT = res;
-                context.deleteScope();
                 :}
                 ;
    type ::=     const_value:v {: :}

@@ -1,9 +1,17 @@
 value foo(value b){
-    b = b - 1;
-    return b;
+    zero? (b) {
+        return 1;
+    }
+    zero? (b-1) {
+        return 1;
+    }
+    value a = b - 1;
+    value d = foo(a);
+    d = d + b;
+    return d;
 }
 value main(){
-    value a = 2;
-    value c = foo(a);
-    return c;
+    value b = 3;
+    value a = foo(b);
+    return a;
 }

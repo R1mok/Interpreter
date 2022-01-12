@@ -1,11 +1,9 @@
-import lombok.val;
-import org.w3c.dom.Node;
-
 import java.util.*;
 
 public class VarFunctionsContext extends Construction {
     private HashMap<String, FunctionDefinition> functions = new HashMap<>();
     private LinkedList<HashMap<String, Variable>> variables = new LinkedList<>();
+    private HashMap<String, Variable> curVariables = null;
     private Stack funcStack = new Stack();
     public void getFunctions() {
         System.out.println(functions);
@@ -178,11 +176,11 @@ public class VarFunctionsContext extends Construction {
                             throw new Exception("Break founded");
                         }
                         case ASSIGN -> {
-                            if (((Variable) p.ops.get(0)).type.equals(Types.ARRAY_OF) && p.ops.size() == 2) {
+                            if (((Variable) p.ops.get(0)).type.equals(Types.ARRAY_OF) && p.ops.size() == 2) { // присвоение массивов
                                 ((Variable) p.ops.get(0)).value = ((Variable) ex(p.ops.get(1))).value;
                                 return p.ops.get(0);
                             }
-                            if (((Variable) p.ops.get(0)).type.equals(Types.ARRAY_OF) && p.ops.size() == 3) {
+                            if (((Variable) p.ops.get(0)).type.equals(Types.ARRAY_OF) && p.ops.size() == 3) { // присвоение массиву
                                 Opr fst = p.ops.get(1);
                                 if (p.ops.get(1) instanceof Variable)
                                     fst = ex(p.ops.get(1));
@@ -206,7 +204,7 @@ public class VarFunctionsContext extends Construction {
                                     ((Variable[]) ((Variable) p.ops.get(0)).value)[index] = var;
                                     return p.ops.get(0);
                                 }
-                            } else {
+                            } else { // присвоение value
                                 Opr val = ex(p.ops.get(1));
                                 int intVal = 0;
                                 if (val instanceof Variable)
@@ -397,22 +395,26 @@ public class VarFunctionsContext extends Construction {
                                 String funcName = p.ops.get(0).funcCall;
                                 Opr funcCall = this.rootFunc(funcName);
                                 Opr fst = p.ops.get(1), scnd = p.ops.get(2);
-                                List<Opr> funcInfo = new ArrayList<>();
-                                funcInfo.add(funcCall);
-                                funcInfo.add(fst);
-                                funcInfo.add(scnd);
-                                funcStack.add(funcInfo);
                                 if (p.ops.get(1) != null && p.ops.get(2) != null) {
                                     setFuncParams(fst, scnd);
                                 }
+                                HashMap<String, Variable> newSet = new HashMap<>();
+                                for (String elem : variables.getLast().keySet()){
+                                    Variable curVar = variables.getLast().get(elem);
+                                    Variable newVar = new Variable(curVar.type, elem);
+                                    newVar.value = curVar.value;
+                                    newVar.intValue = curVar.intValue;
+                                    newSet.put(elem, newVar);
+                                }
+                                curVariables = newSet;
+                                funcStack.add(newSet);
                                 return ex(funcCall);
                             } catch (Exception e) {
-                                funcStack.pop();
+                                variables.add((HashMap<String, Variable>) funcStack.pop());
                                 return new Const(Integer.parseInt(e.getMessage()));
                             }
                         }
                     }
-
             }
         }
         return new Const(0);
