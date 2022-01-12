@@ -1,12 +1,9 @@
-value main(){
-    value b = 10;
-    while (b >= 2){
-        zero? (b - 5) {
-            break;
-        }
-        b = b - 1;
-    } finish {
-        return b;
-    }
+value foo(value b){
+    b = b - 1;
     return b;
+}
+value main(){
+    value a = 2;
+    value c = foo(a);
+    return c;
 }

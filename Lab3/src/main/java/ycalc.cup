@@ -92,18 +92,19 @@ parser code {:
     }
 
    public static class Main {
-     static public void main(String argv[]) {
+     static public void main(String argv[]) throws Exception {
        /* Start the parser */
        try {
          Parser p = new Parser(new Lexer(new FileReader(argv[0])));
+         Robot robot = new Robot(argv[1]);
          System.out.println("Start parsing");
          Program result = (Program) p.parse().value;
          System.out.println(p.context.ex(p.context.rootFunc("main")));
          p.context.getFunctions();
          p.context.getVariables();
          System.out.println("Finish parsing");
-       } catch (Exception e) {
-         /* do cleanup here -- possibly rethrow e */
+        }catch (RuntimeException e) {
+          //do cleanup here -- possibly rethrow e
          System.out.println("");
          e.printStackTrace();
        }
@@ -159,8 +160,8 @@ precedence left TIMES, DIVIDE;
    programm ::= programm function  {: RESULT = new Program(); :}
                 | function
                 ;
-   function ::= type:t NAME:n  LPAREN {: context.newScope(); :} function_parametrs_declaration:fp RPAREN LBRACE function_body:b RBRACE // объявление функции
-                {: context.registerFunction(new FunctionDefinition(t, n, fp, b)); context.deleteScope(); :}
+   function ::= type:t NAME:n  LPAREN {: context.newScope(); :} function_parametrs_declaration:fp {: context.registerFunctionByName(n, fp); :}RPAREN LBRACE function_body:b // объявление функции
+                {: context.registerFunction(n, new FunctionDefinition(t, n, fp, b)); context.deleteScope(); :} RBRACE
                 ;
    function_parametrs_declaration ::= initialize:i  function_parametrs_declaration:fpd {:
                 Opr res = new Opr(NodeType.OPR, operType.NEXTSTMT);
@@ -187,14 +188,9 @@ precedence left TIMES, DIVIDE;
                 ;
    statement    ::=
                 RETURN expr:n SEMI {:
-                if (n instanceof Variable) {
-                    Opr res = new Opr(NodeType.OPR, operType.RETURN);
-                    Variable var = context.getVar(((Variable) n).getName());
-                    res.addInListOpr(var);
-                    RESULT = res;
-                    } else {
-                    RESULT = n;
-                }
+                Opr res = new Opr(NodeType.OPR, operType.RETURN);
+                res.addInListOpr(n);
+                RESULT = res;
                 :}
                 | SEMI {: Opr res = new Opr(NodeType.OPR, operType.SEMI);
                  RESULT = res;
@@ -277,7 +273,7 @@ precedence left TIMES, DIVIDE;
                 {:
                 Opr funcParams = context.funcParametrs(n);
                 Opr res = new Opr(NodeType.OPR, operType.FUNC_CALL);
-                res.addInListOpr(context.rootFunc(n));
+                res.addInListOpr(new Opr(n));
                 res.addInListOpr(funcParams);
                 res.addInListOpr(p);
                 RESULT = res;
@@ -319,6 +315,10 @@ precedence left TIMES, DIVIDE;
                      var.setValue(new Const(0));
                      RESULT = var;
                      :}
+                     | const_value NAME:n {:
+                     Variable var = new Variable(Types.CONST_VALUE, n);
+                      context.addVar(var);
+                      RESULT = var; :}
                      ;
    defenition_pointer ::= POINTER:p type:t NAME:n
                     {: Variable var = new Variable(Types.POINTER, n);

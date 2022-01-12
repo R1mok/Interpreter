@@ -5,10 +5,14 @@ public class Opr extends Construction {
 
     NodeType typeNode;
     operType operType;
+    String funcCall;
     Opr(NodeType nt){
         this.typeNode = nt;
     }
     Opr() {}
+    Opr (String funcName){
+        this.funcCall = funcName;
+    }
     Opr(NodeType nt, operType ot){
         this.typeNode = nt;
         this.operType = ot;

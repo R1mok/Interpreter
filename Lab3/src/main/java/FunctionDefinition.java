@@ -16,7 +16,11 @@ public class FunctionDefinition extends Construction {
         this.parametrs = parametrs;
         this.returnType = returnType;
     }
-
+    FunctionDefinition(String name, Opr params){
+        this.name = name;
+        this.functionStatements = new Opr(NodeType.OPR, operType.FUNC_CALL);
+        this.parametrs = params;
+    }
     public void setParametrs(Opr parametrs) {
         this.parametrs = parametrs;
     }
