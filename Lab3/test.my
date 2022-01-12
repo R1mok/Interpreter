@@ -1,7 +1,12 @@
-value foo(){
-    return a;
-}
 value main(){
-    value a = 10;
-    return foo();
+    value b = 10;
+    while (b >= 2){
+        zero? (b - 5) {
+            break;
+        }
+        b = b - 1;
+    } finish {
+        return b;
+    }
+    return b;
 }

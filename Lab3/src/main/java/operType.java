@@ -11,10 +11,12 @@ public enum operType {
     FUNC_CALL,
     TAKE_FROM_ARRAY,
     WHILE,
+    WHILE_LOOP,
     LTE,
     GTE,
     NE,
     ZERO,
     NOTZERO,
-    FOREACH
+    FOREACH,
+    BREAK
 }

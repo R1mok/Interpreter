@@ -132,7 +132,7 @@ parser code {:
 
 terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, ASSIGN, COMMA, MOD, GTE, LTE, NE; // arythmetical terminals
 terminal Integer NUMBER; // int terminals
-terminal String LBRACE, RBRACE, LSQUARE, RSQUARE, WHILE, ZERO, NOTZERO, FOREACH; // other string terminals
+terminal String LBRACE, RBRACE, LSQUARE, RSQUARE, WHILE, BREAK, FINISH, ZERO, NOTZERO, FOREACH; // other string terminals
 terminal String POINTER, VALUE, NAME, CONST, ARRAY_OF; // type terminals
 
 non terminal Opr initialize, initialize_part;
@@ -143,7 +143,7 @@ non terminal Opr   function_parametrs, function_call, function_parametrs_declara
 non terminal Opr   expr_list;
 non terminal Opr       statement_list, statement;
 non terminal Opr   function_body;
-non terminal Opr     function;
+non terminal Opr     function, while_loop;
 non terminal Opr       factor, term;
 non terminal Opr       expr;
 non terminal String     programm_name; // other string non terminals
@@ -199,6 +199,7 @@ precedence left TIMES, DIVIDE;
                 | SEMI {: Opr res = new Opr(NodeType.OPR, operType.SEMI);
                  RESULT = res;
                  :}
+                | BREAK SEMI {: RESULT = new Opr(NodeType.OPR, operType.BREAK); :}
                 | NAME:n ASSIGN expr:e SEMI {: Opr res = new Opr(NodeType.OPR, operType.ASSIGN);
                 Variable var = context.getVar(n);
                 res.addInListOpr(var);
@@ -212,13 +213,14 @@ precedence left TIMES, DIVIDE;
                 res.addInListOpr(e);
                 RESULT = res;
                 :}
-                | WHILE LPAREN expr:e RPAREN LBRACE {: context.newScope(); :} function_body:s RBRACE {:
-                Opr res = new Opr(NodeType.OPR, operType.WHILE);
-                res.addInListOpr(e);
-                res.addInListOpr(s);
-                RESULT = res;
-                context.deleteScope();
-                :}
+                | while_loop:wl FINISH LBRACE function_body:f RBRACE {:
+                                    Opr res = new Opr(NodeType.OPR, operType.WHILE_LOOP);
+                                    res.addInListOpr(wl);
+                                    res.addInListOpr(f);
+                                    RESULT = res;
+                                    context.deleteScope();
+                                    :}
+                | while_loop:wl {: RESULT = wl; context.deleteScope(); :}
                 | ZERO LPAREN expr:e RPAREN LBRACE {: context.newScope(); :} function_body:s RBRACE {:
                 Opr res = new Opr(NodeType.OPR, operType.ZERO);
                 res.addInListOpr(e);
@@ -244,6 +246,12 @@ precedence left TIMES, DIVIDE;
                 | initialize:i SEMI {: RESULT = i; :}
                 | expr_list SEMI
                 ;
+   while_loop ::= WHILE LPAREN expr:e RPAREN LBRACE {: context.newScope(); :} function_body:s RBRACE {:
+                  Opr res = new Opr(NodeType.OPR, operType.WHILE);
+                  res.addInListOpr(e);
+                  res.addInListOpr(s);
+                  RESULT = res;
+                  :} ;
    function_parametrs ::=
                 NAME:n function_parametrs:fp // один или несколько параметров
                 {: Opr res = new Opr(NodeType.OPR);

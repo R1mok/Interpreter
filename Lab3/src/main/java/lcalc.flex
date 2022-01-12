@@ -138,6 +138,8 @@ name = [A-Za-z_]*[0-9]*
     "zero?"            { return symbol(sym.ZERO); }
     "notzero?"         { return symbol(sym.NOTZERO); }
     "foreach"          { return symbol(sym.FOREACH); }
+    "finish"           { return symbol(sym.FINISH); }
+    "break"            { return symbol(sym.BREAK); }
    
     /* If an integer is found print it out, return the token NUMBER
        that represents an integer and the value of the integer that is

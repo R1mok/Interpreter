@@ -26,7 +26,7 @@ public class VarFunctionsContext extends Construction{
         FunctionDefinition func = functions.get(funcName);
         return func.getParametrs();
     }
-    public Opr ex(Opr p){
+    public Opr ex(Opr p) throws Exception {
         if (p == null) return new Const(0);
         switch (p.typeNode){
             case CONST -> {
@@ -127,24 +127,46 @@ public class VarFunctionsContext extends Construction{
                             return sec;
                         }
                     }
-                    case WHILE -> {
+                    case WHILE_LOOP -> {
+                        boolean breakFounded = false;
                         Opr fst = ex(p.ops.get(0));
-                        if (fst instanceof Variable) {
-                            fst = p.ops.get(0);
-                            Opr sec = p.ops.get(1);
-                            while (((Variable)ex(fst)).intValue != 0){
-                                sec = ex(p.ops.get(1));
-                            }
-                            return sec;
+                        if (fst.operType != null && fst.operType.equals(operType.BREAK)){
+                            breakFounded = true;
                         }
-                        else if (fst instanceof Const){
-                            fst = p.ops.get(0);
-                            Opr sec = p.ops.get(1);
-                            while (((Const)ex(fst)).value != 0){
-                                sec = ex(p.ops.get(1));
-                            }
-                            return sec;
+                        if (!breakFounded) {
+                            return ex(p.ops.get(1));
                         }
+                        return new Const(0);
+                    }
+                    case WHILE -> {
+                        boolean breakFounded = false;
+                        try {
+                            Opr fst = ex(p.ops.get(0));
+                            if (fst instanceof Variable) {
+                                fst = p.ops.get(0);
+                                Opr sec = p.ops.get(1);
+                                while (((Variable) ex(fst)).intValue != 0) {
+                                    sec = ex(p.ops.get(1));
+                                }
+                                return sec;
+                            } else if (fst instanceof Const) {
+                                fst = p.ops.get(0);
+                                Opr sec = p.ops.get(1);
+                                while (((Const) ex(fst)).value != 0) {
+                                    sec = ex(p.ops.get(1));
+                                }
+                                return sec;
+                            }
+                        } catch (Exception e){
+                            breakFounded = true;
+                        }
+                        if (breakFounded){
+                            Opr res = new Opr(NodeType.OPR, operType.BREAK);
+                            return res;
+                        }
+                    }
+                    case BREAK -> {
+                        throw new Exception("Break founded");
                     }
                     case ASSIGN -> {
                         if (((Variable) p.ops.get(0)).type.equals(Types.ARRAY_OF) && p.ops.size() == 2){
@@ -337,7 +359,7 @@ public class VarFunctionsContext extends Construction{
         }
         return new Const(0);
     }
-    public void setFuncParams(Opr newVal, Opr val){
+    public void setFuncParams(Opr newVal, Opr val) throws Exception {
         Opr fst = newVal.ops.get(0);
         Opr scnd = val.ops.get(0);
         if (fst.ops.size() == 2){
