@@ -49,7 +49,8 @@ public class VarFunctionsContext extends Construction {
                 } else if (p.operType != null && p.operType.equals(operType.NEXTSTMT)) {
                     return ex(p.ops.get(0));
                 }
-                return p;
+                Variable var = getVar(((Variable) p).name);
+                return var;
             }
             case OPR -> {
                 if (p.operType == null) {
@@ -212,8 +213,14 @@ public class VarFunctionsContext extends Construction {
                                 else if (val instanceof Const)
                                     intVal = ((Const) val).value;
                                 if (((Variable) p.ops.get(0)).type.equals(Types.VALUE) | (((Variable) p.ops.get(0)).type.equals(Types.CONST_VALUE) && ((Variable) p.ops.get(0)).value == null)) {
+                                    HashMap curMap = variables.getFirst();
                                     ((Variable) p.ops.get(0)).setIntValue(intVal);
                                     ((Variable) p.ops.get(0)).setValue(p.ops.get(1));
+                                    Variable var = new Variable(Types.VALUE, ((Variable)p.ops.get(0)).name, intVal);
+                                    var.typeNode = NodeType.VAR;
+                                    var.value = p.ops.get(1);
+                                    curMap.put(var.name, var);
+
                                 } else if (((Variable) p.ops.get(0)).type.equals(Types.CONST_VALUE) && ((Variable) p.ops.get(0)).value != null) {
                                     throw new Exception("Cannot be assigned to a constant value");
                                 }
@@ -324,13 +331,7 @@ public class VarFunctionsContext extends Construction {
                         }
                         case RETURN -> {
                             Opr res = ex(p.ops.get(0));
-                            int val = 0;
-                            if (res instanceof Const) {
-                                val = ((Const) res).value;
-                            } else if (res instanceof Variable) {
-                                val = ((Variable) res).intValue;
-                            }
-                            throw new Exception(String.valueOf(val));
+                            throw new MyException(res);
                         }
                         case DIVIDE -> {
                             int a = 0, b = 0;
@@ -371,9 +372,14 @@ public class VarFunctionsContext extends Construction {
                             return new Const(a % b);
                         }
                         case MINUS -> {
-
                             int a = 0, b = 0;
                             Opr fst = p.ops.get(0), sec = p.ops.get(1);
+                            if (fst instanceof Variable){
+                                fst = getVar(((Variable)fst).name);
+                            }
+                            if (sec instanceof Variable){
+                                sec = getVar(((Variable)sec).name);
+                            }
                             if (!(p.ops.get(0) instanceof Variable) && !(p.ops.get(0) instanceof Const)) {
                                 fst = ex(p.ops.get(0));
                             }
@@ -392,26 +398,17 @@ public class VarFunctionsContext extends Construction {
                         }
                         case FUNC_CALL -> {
                             try {
+                                newScope();
                                 String funcName = p.ops.get(0).funcCall;
                                 Opr funcCall = this.rootFunc(funcName);
                                 Opr fst = p.ops.get(1), scnd = p.ops.get(2);
                                 if (p.ops.get(1) != null && p.ops.get(2) != null) {
                                     setFuncParams(fst, scnd);
                                 }
-                                HashMap<String, Variable> newSet = new HashMap<>();
-                                for (String elem : variables.getLast().keySet()){
-                                    Variable curVar = variables.getLast().get(elem);
-                                    Variable newVar = new Variable(curVar.type, elem);
-                                    newVar.value = curVar.value;
-                                    newVar.intValue = curVar.intValue;
-                                    newSet.put(elem, newVar);
-                                }
-                                curVariables = newSet;
-                                funcStack.add(newSet);
                                 return ex(funcCall);
-                            } catch (Exception e) {
-                                variables.add((HashMap<String, Variable>) funcStack.pop());
-                                return new Const(Integer.parseInt(e.getMessage()));
+                            } catch (MyException e) {
+                                deleteScope();
+                                return e.getReturnVariable();
                             }
                         }
                     }
@@ -432,11 +429,15 @@ public class VarFunctionsContext extends Construction {
             if (((Variable) fst).type.equals(Types.VALUE) && ((Variable) scnd).type.equals(Types.VALUE)) {
                 ((Variable) fst).value = ((Variable) scnd).value;
                 ((Variable) fst).intValue = ((Variable) scnd).intValue;
+                Variable var = new Variable(Types.VALUE, ((Variable)fst).name, ((Variable)fst).intValue);
+                var.value = ((Variable)fst).value;
+                var.typeNode = NodeType.VAR;
+                variables.get(0).put(var.name, var);
                 if (newVal.ops.size() != 1 || val.ops.size() != 1)
                     setFuncParams(newVal.ops.get(1), val.ops.get(1));
                 else return;
             } else if (((Variable) fst).type.equals(Types.ARRAY_OF) && ((Variable) scnd).type.equals(Types.ARRAY_OF)) {
-                ((Variable) fst).value = ((Variable) scnd).value;
+                ((Variable) fst).value = ((Variable) scnd).value; // добавление в variables
             }
             if (newVal.ops.size() != 1 || val.ops.size() != 1){
                 setFuncParams(newVal.ops.get(1), val.ops.get(1));

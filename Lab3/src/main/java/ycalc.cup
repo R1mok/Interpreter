@@ -100,6 +100,7 @@ parser code {:
          System.out.println("Start parsing");
          Program result = (Program) p.parse().value;
          try {
+            p.context.newScope();
             System.out.println(p.context.ex(p.context.rootFunc("main")));
          } catch (Exception e){
          System.out.println(e.getMessage());
@@ -165,7 +166,7 @@ precedence left TIMES, DIVIDE;
                 | function
                 ;
    function ::= type:t NAME:n  LPAREN {: context.newScope(); :} function_parametrs_declaration:fp {: context.registerFunctionByName(n, fp); :}RPAREN LBRACE function_body:b // объявление функции
-                {: context.registerFunction(n, new FunctionDefinition(t, n, fp, b)); :} RBRACE
+                {: context.registerFunction(n, new FunctionDefinition(t, n, fp, b)); context.deleteScope(); :} RBRACE
                 ;
    function_parametrs_declaration ::= initialize:i  function_parametrs_declaration:fpd {:
                 Opr res = new Opr(NodeType.OPR, operType.NEXTSTMT);
@@ -251,6 +252,7 @@ precedence left TIMES, DIVIDE;
                   res.addInListOpr(e);
                   res.addInListOpr(s);
                   RESULT = res;
+                  context.deleteScope();
                   :} ;
    function_parametrs ::=
                 NAME:n function_parametrs:fp // один или несколько параметров

@@ -1,0 +1,13 @@
+value fact(value n){
+    zero? (n){
+        return 1;
+    }
+    value c = n - 1;
+    value a = fact(c);
+    return n*a;
+}
+value main(){
+    value n = 10;
+    value a = fact(n);
+    return a;
+}

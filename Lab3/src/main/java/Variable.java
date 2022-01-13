@@ -14,7 +14,11 @@ public class Variable extends Opr {
     Variable(NodeType nt) {
         super(nt);
     }
-
+    Variable(Types type, String name, int val){
+        this.type = type;
+        this.name = name;
+        this.intValue = val;
+    }
     public void setValue(Object value) { this.value = value; }
     public void setValue(Opr value) {
         this.value = value;

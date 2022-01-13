@@ -459,9 +459,10 @@ public class Parser extends java_cup.runtime.lr_parser {
          System.out.println("Start parsing");
          Program result = (Program) p.parse().value;
          try {
+            p.context.newScope();
             System.out.println(p.context.ex(p.context.rootFunc("main")));
-         } catch (Exception e){
-         System.out.println(e.getMessage());
+         } catch (MyException e){
+         System.out.println(e.getReturnVariable());
          }
          p.context.getFunctions();
          p.context.getVariables();
@@ -589,7 +590,7 @@ class CUP$Parser$actions {
 		int bleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int bright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Opr b = (Opr)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
- context.registerFunction(n, new FunctionDefinition(t, n, fp, b)); 
+ context.registerFunction(n, new FunctionDefinition(t, n, fp, b)); context.deleteScope(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("NT$2",32, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -964,6 +965,7 @@ class CUP$Parser$actions {
                   res.addInListOpr(e);
                   res.addInListOpr(s);
                   RESULT = res;
+                  context.deleteScope();
                   
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("while_loop",18, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
