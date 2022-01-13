@@ -17,6 +17,12 @@ public enum operType {
     NE,
     ZERO,
     NOTZERO,
+    TOP,
+    BOTTOM,
+    PORTAL,
+    TELEPORT,
+    LEFT,
+    RIGHT,
     FOREACH,
     BREAK
 }

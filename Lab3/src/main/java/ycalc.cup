@@ -31,21 +31,6 @@ import java.util.Arrays;
 parser code {:
     /** User initialization code. */
     VarFunctionsContext context = new VarFunctionsContext();
-    public static void newScope(){
-	typenames.push(new HashSet<String>());
-    }
-    public static void deleteScope(){
-	typenames.pop();
-    }
-    public static boolean lookupType(String name){
-	for (HashSet<String> scope: typenames)
-	    if (scope.contains(name)) return true;
-	return false;
-    }
-    public static void addType(String name){
-        typenames.peek().add(name);
-    }
-    Set<Pair<String, Integer>> varArray = new HashSet();
     public static LinkedList<HashSet<String>> typenames = new LinkedList<HashSet<String>>();
     public Parser(Lexer lex, ComplexSymbolFactory sf) {
         super(lex,sf);
@@ -96,14 +81,16 @@ parser code {:
        /* Start the parser */
         Parser p = new Parser(new Lexer(new FileReader(argv[0])));
        try {
-         Robot robot = new Robot(argv[1]);
+         p.context.robot = new Robot(argv[1]);
          System.out.println("Start parsing");
+         System.out.println("---------------");
+         p.context.robot.printMaze();
          Program result = (Program) p.parse().value;
          try {
             p.context.newScope();
             System.out.println(p.context.ex(p.context.rootFunc("main")));
-         } catch (Exception e){
-         System.out.println(e.getMessage());
+         } catch (MyException e){
+         System.out.println(e.getReturnVariable());
          }
          p.context.getFunctions();
          p.context.getVariables();
@@ -140,6 +127,7 @@ terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, ASSIGN, COMMA, MOD, G
 terminal Integer NUMBER; // int terminals
 terminal String LBRACE, RBRACE, LSQUARE, RSQUARE, WHILE, BREAK, FINISH, ZERO, NOTZERO, FOREACH; // other string terminals
 terminal String POINTER, VALUE, NAME, CONST, ARRAY_OF; // type terminals
+terminal String TOP, BOTTOM, LEFT, RIGHT, PORTAL, TELEPORT; // robot terminals
 
 non terminal Opr initialize, initialize_part;
 non terminal Program    programm;
@@ -192,7 +180,11 @@ precedence left TIMES, DIVIDE;
                 RESULT = res; :}
                 ;
    statement    ::=
-                RETURN expr:n SEMI {:
+                TOP SEMI {: RESULT = new Opr(NodeType.OPR, operType.TOP); :}
+                | BOTTOM SEMI {: RESULT = new Opr(NodeType.OPR, operType.BOTTOM); :}
+                | RIGHT SEMI {: RESULT = new Opr(NodeType.OPR, operType.RIGHT); :}
+                | PORTAL SEMI {: RESULT = new Opr(NodeType.OPR, operType.PORTAL); :}
+                | RETURN expr:n SEMI {:
                 Opr res = new Opr(NodeType.OPR, operType.RETURN);
                 res.addInListOpr(n);
                 RESULT = res;
@@ -214,14 +206,14 @@ precedence left TIMES, DIVIDE;
                 res.addInListOpr(e);
                 RESULT = res;
                 :}
-                | while_loop:wl FINISH LBRACE function_body:f RBRACE {:
+                | while_loop:wl FINISH {: context.newScope(); :} LBRACE function_body:f RBRACE {:
                                     Opr res = new Opr(NodeType.OPR, operType.WHILE_LOOP);
                                     res.addInListOpr(wl);
                                     res.addInListOpr(f);
                                     RESULT = res;
                                     context.deleteScope();
                                     :}
-                | while_loop:wl {: RESULT = wl; context.deleteScope(); :}
+                | while_loop:wl {: RESULT = wl; :}
                 | ZERO LPAREN expr:e RPAREN LBRACE {: context.newScope(); :} function_body:s RBRACE {:
                 Opr res = new Opr(NodeType.OPR, operType.ZERO);
                 res.addInListOpr(e);

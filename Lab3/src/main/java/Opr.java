@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Opr extends Construction {
+public class Opr {
 
     NodeType typeNode;
     operType operType;

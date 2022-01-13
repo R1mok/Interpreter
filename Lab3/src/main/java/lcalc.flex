@@ -140,7 +140,12 @@ name = [A-Za-z_]*[0-9]*
     "foreach"          { return symbol(sym.FOREACH); }
     "finish"           { return symbol(sym.FINISH); }
     "break"            { return symbol(sym.BREAK); }
-   
+    "top"              { return symbol(sym.TOP); }
+    "bottom"           { return symbol(sym.BOTTOM); }
+    "left"             { return symbol(sym.LEFT); }
+    "right"            { return symbol(sym.RIGHT); }
+    "portal"           { return symbol(sym.PORTAL); }
+    "teleport"         { return symbol(sym.TELEPORT); }
     /* If an integer is found print it out, return the token NUMBER
        that represents an integer and the value of the integer that is
        held in the string yytext which will get turned into an integer

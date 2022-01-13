@@ -3,7 +3,7 @@ import lombok.Data;
 import java.util.HashMap;
 
 @Data
-public class FunctionDefinition extends Construction {
+public class FunctionDefinition {
     private String name;
     private Opr parametrs;
     private Types returnType;

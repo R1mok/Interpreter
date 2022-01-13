@@ -7,7 +7,7 @@ value fact(value n){
     return n*a;
 }
 value main(){
-    value n = 10;
+    value n = 5;
     value a = fact(n);
     return a;
 }

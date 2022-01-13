@@ -1,10 +1,11 @@
 import java.util.*;
 
-public class VarFunctionsContext extends Construction {
+public class VarFunctionsContext {
     private HashMap<String, FunctionDefinition> functions = new HashMap<>();
     private LinkedList<HashMap<String, Variable>> variables = new LinkedList<>();
     private HashMap<String, Variable> curVariables = null;
     private Stack funcStack = new Stack();
+    protected Robot robot;
     public void getFunctions() {
         System.out.println(functions);
     }
@@ -332,6 +333,22 @@ public class VarFunctionsContext extends Construction {
                         case RETURN -> {
                             Opr res = ex(p.ops.get(0));
                             throw new MyException(res);
+                        }
+                        case TOP -> {
+                            int n = this.robot.toTOP();
+                            return new Const(n);
+                        }
+                        case BOTTOM -> {
+                            int n = this.robot.toBOTTOM();
+                            return new Const(n);
+                        }
+                        case LEFT -> {
+                            int n = this.robot.toLEFT();
+                            return new Const(n);
+                        }
+                        case RIGHT -> {
+                            int n = this.robot.toRIGHT();
+                            return new Const(n);
                         }
                         case DIVIDE -> {
                             int a = 0, b = 0;
