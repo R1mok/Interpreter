@@ -162,13 +162,15 @@ public class VarFunctionsContext {
                                     }
                                     return sec;
                                 }
-                            } catch (Exception e) {
+                            }
+                            catch (MyException e) {
+                                throw e;
+                            }
+                            catch (Exception e) {
                                 if (e.getMessage() != null && e.getMessage().equals("Break founded")) {
                                     breakFounded = true;
                                 } else {
-                                    if (e instanceof MyException)
-                                        throw e;
-                                    else throw new Exception("Break founded");
+                                    throw new Exception("Break founded");
                                 }
                             }
                             if (breakFounded) {
@@ -338,18 +340,30 @@ public class VarFunctionsContext {
                         }
                         case TOP -> {
                             int n = this.robot.toTOP();
+                            if (this.robot.inExit()){
+                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
+                            }
                             return new Const(n);
                         }
                         case BOTTOM -> {
                             int n = this.robot.toBOTTOM();
+                            if (this.robot.inExit()){
+                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
+                            }
                             return new Const(n);
                         }
                         case LEFT -> {
                             int n = this.robot.toLEFT();
+                            if (this.robot.inExit()){
+                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
+                            }
                             return new Const(n);
                         }
                         case RIGHT -> {
                             int n = this.robot.toRIGHT();
+                            if (this.robot.inExit()){
+                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
+                            }
                             return new Const(n);
                         }
                         case PORTAL -> {
@@ -435,7 +449,11 @@ public class VarFunctionsContext {
                                 return ex(funcCall);
                             } catch (MyException e) {
                                 deleteScope();
-                                return e.getReturnVariable();
+                                if (e.getReturnVariable().funcCall.equals("ROBOT OUT FROM MAZE")){
+                                    throw e;
+                                } else {
+                                    return e.getReturnVariable();
+                                }
                             }
                         }
                     }

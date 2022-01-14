@@ -9,7 +9,7 @@ public class Robot {
     private List<String> fileMaze = new ArrayList<>();
     private int x;
     private int y;
-    private String[][] matrix; // space = " ", wall = "#", robot = "R", exit = "X" portal = "O"
+    private String[][] matrix; // space = " ", wall = "#", robot = "R", exit = "X"
     Pair<Integer, Integer> coordinates;
     Pair<Integer, Integer> exitCoord;
     Stack<Pair<Integer, Integer>> portals = new Stack<>();

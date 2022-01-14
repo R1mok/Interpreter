@@ -513,8 +513,8 @@ public class Parser extends java_cup.runtime.lr_parser {
          } catch (MyException e){
             System.out.println(e.getReturnVariable());
          }
-         p.context.getFunctions();
-         p.context.getVariables();
+         //p.context.getFunctions();
+         //p.context.getVariables();
          System.out.println("Finish parsing");
         }catch (Exception e) {
           //do cleanup here -- possibly rethrow e

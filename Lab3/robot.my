@@ -1,15 +1,17 @@
-value trace (){
+value leftMove(){
     portal;
-    value b = bottom;
+    value l = left;
     teleport;
-    while (b){
-        zero? (left){
-            b = bottom;
+    while (l){
+        zero? (top){
+            l = left;
         }
-        notzero? (left) {
+        notzero? (top) {
             break;
         }
     }
+}
+value rightMove(){
     portal;
     value r = right;
     teleport;
@@ -21,6 +23,8 @@ value trace (){
             break;
         }
     }
+}
+value topMove(){
     portal;
     value t = top;
     teleport;
@@ -32,15 +36,55 @@ value trace (){
             break;
         }
     }
+}
+value bottomMove(){
+    portal;
+    value b = bottom;
+    teleport;
+    while (b){
+        zero? (left){
+            b = bottom;
+        }
+        notzero? (left) {
+            break;
+        }
+    }
+}
+value trace (){
     portal;
     value l = left;
+    value b = bottom;
     teleport;
-    while (l){
-        zero? (top){
-            l = left;
+    zero? (l){
+        notzero? (b){
+            bottomMove();
         }
-        notzero? (top) {
-            break;
+    }
+    portal;
+    value t = top;
+    l = left;
+    teleport;
+    zero? (t){
+        notzero? (l){
+            leftMove();
+        }
+    }
+    portal;
+    value r = right;
+    t = top;
+    teleport;
+    zero? (r){
+        notzero? (t){
+            topMove();
+        }
+    }
+    portal;
+    b = bottom;
+    r = right;
+    teleport;
+    zero? (b){
+        notzero? (r){
+            rightMove();
         }
     }
     trace();
