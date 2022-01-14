@@ -511,7 +511,11 @@ public class Parser extends java_cup.runtime.lr_parser {
             p.context.newScope();
             System.out.println(p.context.ex(p.context.rootFunc("main")));
          } catch (MyException e){
-            System.out.println(e.getReturnVariable());
+             if (e.getReturnVariable().funcCall != null && e.getReturnVariable().funcCall.equals("Return type does not match with function type")){
+                 System.err.println("Return type does not match with function type");
+             } else {
+                 System.out.println(e.getReturnVariable());
+             }
          }
          //p.context.getFunctions();
          //p.context.getVariables();

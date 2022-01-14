@@ -34,10 +34,6 @@ public class VarFunctionsContext {
                 return p;
             }
             case VAR -> {
-                if (((Variable) p).type.equals(Types.CONST_VALUE) && ((Variable) p).value == null && p.ops.size() == 0) {
-                    // const not initialize
-                    throw new Exception("Const not initialize");
-                }
                 if (p.ops.size() == 2) {
                     int size = ((Const) ex(p.ops.get(1))).value;
                     Variable[] value = new Variable[size];
@@ -46,9 +42,13 @@ public class VarFunctionsContext {
                         value[i].setType(((Variable) p.ops.get(0)).type.type);
                     }
                     ((Variable) p.ops.get(0)).value = value;
+                    variables.getFirst().put(((Variable)p.ops.get(0)).name, (Variable)p.ops.get(0));
                     return p;
                 } else if (p.operType != null && p.operType.equals(operType.NEXTSTMT)) {
                     return ex(p.ops.get(0));
+                } else if (((Variable) p).type.equals(Types.CONST_VALUE) && ((Variable) p).value == null && p.ops.size() == 0) {
+                        // const not initialize
+                        throw new Exception("Const not initialize");
                 }
                 Variable var = getVar(((Variable) p).name);
                 return var;
@@ -60,7 +60,8 @@ public class VarFunctionsContext {
                     switch (p.operType) {
                         case TAKE_FROM_ARRAY -> {
                             int index = ((Const) p.ops.get(1)).value;
-                            return ex(((Variable[]) ((Variable) p.ops.get(0)).value)[index]);
+                            Variable curVar = variables.getFirst().get(((Variable)p.ops.get(0)).name);
+                            return ex(((Variable[]) curVar.value)[index]);
                         }
                         case FOREACH -> {
                             if (p.ops.get(0) instanceof Variable) {
@@ -80,8 +81,10 @@ public class VarFunctionsContext {
                                             arr[i].intValue = ((Const) res).value;
                                         }
                                     }
-                                    ((Variable) p.ops.get(1).ops.get(2).ops.get(0)).intValue = funcParamsIntValue;
-                                    ((Variable) p.ops.get(1).ops.get(2).ops.get(0)).value = funcParamsValue;
+                                    HashMap curMap = variables.getFirst();
+                                    curMap.put(((Variable)p.ops.get(0)).name, p.ops.get(0));
+                                    //((Variable) p.ops.get(1).ops.get(2).ops.get(0)).intValue = funcParamsIntValue;
+                                    //((Variable) p.ops.get(1).ops.get(2).ops.get(0)).value = funcParamsValue;
                                 } else if (((Variable) p.ops.get(0)).type.equals(Types.VALUE)) {
                                     Opr res = ex(p.ops.get(1));
                                     if (res instanceof Const) {
@@ -138,7 +141,7 @@ public class VarFunctionsContext {
                             if (fst.operType != null && fst.operType.equals(operType.BREAK)) {
                                 breakFounded = true;
                             }
-                            if (!breakFounded) {
+                            if (breakFounded) {
                                 return ex(p.ops.get(1));
                             }
                             return new Const(0);
@@ -170,7 +173,7 @@ public class VarFunctionsContext {
                                 if (e.getMessage() != null && e.getMessage().equals("Break founded")) {
                                     breakFounded = true;
                                 } else {
-                                    throw new Exception("Break founded");
+                                    throw e;
                                 }
                             }
                             if (breakFounded) {
@@ -336,7 +339,11 @@ public class VarFunctionsContext {
                         }
                         case RETURN -> {
                             Opr res = ex(p.ops.get(0));
-                            throw new MyException(res);
+                            if (((Variable) res).type.equals(this.functions.get("main").getReturnType())) {
+                                throw new MyException(res);
+                            } else {
+                                throw new MyException(new Opr("Return type does not match with function type"));
+                            }
                         }
                         case TOP -> {
                             int n = this.robot.toTOP();
@@ -449,7 +456,7 @@ public class VarFunctionsContext {
                                 return ex(funcCall);
                             } catch (MyException e) {
                                 deleteScope();
-                                if (e.getReturnVariable().funcCall.equals("ROBOT OUT FROM MAZE")){
+                                if (e.getReturnVariable().funcCall != null && e.getReturnVariable().funcCall.equals("ROBOT OUT FROM MAZE")){
                                     throw e;
                                 } else {
                                     return e.getReturnVariable();
@@ -506,7 +513,6 @@ public class VarFunctionsContext {
         FunctionDefinition pastdef = functions.get(name);
         pastdef.setFunctionStatements(funcdef.getFunctionStatements());
         pastdef.setParametrs(funcdef.getParametrs());
-        pastdef.setVariables(funcdef.getVariables());
         pastdef.setReturnType(funcdef.getReturnType());
     }
     public void registerFunctionByName(String name, Opr funcParams){
