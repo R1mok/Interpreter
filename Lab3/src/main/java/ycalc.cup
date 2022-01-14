@@ -90,7 +90,7 @@ parser code {:
             p.context.newScope();
             System.out.println(p.context.ex(p.context.rootFunc("main")));
          } catch (MyException e){
-         System.out.println(e.getReturnVariable());
+            System.out.println(e.getReturnVariable());
          }
          p.context.getFunctions();
          p.context.getVariables();
@@ -139,7 +139,7 @@ non terminal Opr       statement_list, statement;
 non terminal Opr   function_body;
 non terminal Opr     function, while_loop;
 non terminal Opr       factor, term;
-non terminal Opr       expr;
+non terminal Opr       expr, robot;
 non terminal String     programm_name; // other string non terminals
 non terminal Opr defenition_value, defenition_const_value, defenition_array_of, defenition_const_array_of, defenition_pointer, defeniniton_const_pointer; // defenition
 non terminal boolean    const;
@@ -180,10 +180,7 @@ precedence left TIMES, DIVIDE;
                 RESULT = res; :}
                 ;
    statement    ::=
-                TOP SEMI {: RESULT = new Opr(NodeType.OPR, operType.TOP); :}
-                | BOTTOM SEMI {: RESULT = new Opr(NodeType.OPR, operType.BOTTOM); :}
-                | RIGHT SEMI {: RESULT = new Opr(NodeType.OPR, operType.RIGHT); :}
-                | PORTAL SEMI {: RESULT = new Opr(NodeType.OPR, operType.PORTAL); :}
+                robot:r SEMI {: RESULT = r; :}
                 | RETURN expr:n SEMI {:
                 Opr res = new Opr(NodeType.OPR, operType.RETURN);
                 res.addInListOpr(n);
@@ -239,6 +236,13 @@ precedence left TIMES, DIVIDE;
                 | initialize:i SEMI {: RESULT = i; :}
                 | expr_list SEMI
                 ;
+   robot ::= TOP {: RESULT = new Opr(NodeType.OPR, operType.TOP); :}
+                  | BOTTOM {: RESULT = new Opr(NodeType.OPR, operType.BOTTOM); :}
+                  | RIGHT {: RESULT = new Opr(NodeType.OPR, operType.RIGHT); :}
+                  | PORTAL {: RESULT = new Opr(NodeType.OPR, operType.PORTAL); :}
+                  | LEFT {: RESULT = new Opr(NodeType.OPR, operType.LEFT); :}
+                  | TELEPORT {: RESULT = new Opr(NodeType.OPR, operType.TELEPORT); :}
+                  ;
    while_loop ::= WHILE LPAREN expr:e RPAREN LBRACE {: context.newScope(); :} function_body:s RBRACE {:
                   Opr res = new Opr(NodeType.OPR, operType.WHILE);
                   res.addInListOpr(e);
@@ -277,7 +281,9 @@ precedence left TIMES, DIVIDE;
                 RESULT = res;
                 :}
                 ;
-   type ::=     const_value:v {: :}
+
+   type ::=     array_of:t {: RESULT = t; :}
+                | const_value:v {: :}
                 |
                 value:v {: RESULT = v; :}
                 |
@@ -286,8 +292,6 @@ precedence left TIMES, DIVIDE;
                 pointer:p {:  :}
                 |
                 const_array_of:a // массив
-                |
-                array_of:t {: RESULT = t; :}
                 ;
    initialize ::= defenition_value:e ASSIGN expr:n
                      {: Opr res = new Opr(NodeType.OPR, operType.ASSIGN);
@@ -324,7 +328,10 @@ precedence left TIMES, DIVIDE;
                      RESULT = var; :}
                     ;
    defenition_array_of ::= array_of:t NAME:n
-                    {: Variable var = new Variable(Types.ARRAY_OF, n);
+                    {: 	 Types type = Types.ARRAY_OF;
+                    type.arrayType = t;
+                    Variable var = new Variable(type, n);
+                    var.setType(t);
                     context.addVar(var);
                     Opr res = new Opr(NodeType.VAR);
                     res.addInListOpr(var);
@@ -341,7 +348,8 @@ precedence left TIMES, DIVIDE;
                     RESULT = res;
                     :}
                     ;
-   expr      ::=  function_call:fc {: RESULT = fc; :}
+   expr      ::= robot:r {: RESULT = r; :}
+                 |function_call:fc {: RESULT = fc; :}
                  | expr:e LTE factor:f {: Opr res = new Opr(NodeType.OPR, operType.LTE);
                   res.addInListOpr(e);
                   res.addInListOpr(f);
@@ -397,7 +405,15 @@ precedence left TIMES, DIVIDE;
    const_value ::= CONST VALUE {: RESULT = Types.CONST_VALUE; :};
    pointer ::= POINTER type:t {: RESULT = Types.POINTER; RESULT.setType(t); :};
    const_pointer ::= CONST POINTER type:t {: RESULT = Types.CONST_POINTER; RESULT.setType(t); :} ;
-   array_of ::= ARRAY_OF type:t {: RESULT = t; :} ;
+   array_of ::= ARRAY_OF type:t {:
+                    if (t.equals(Types.ARRAY_OF) && t.type.equals(Types.VALUE)) {
+                        t.arrayType = Types.ARRAY_OF;
+                        RESULT = t;
+                    } else {
+                    RESULT = Types.ARRAY_OF;
+                    RESULT.setType(t);
+                    }
+                :};
    const_array_of ::= CONST ARRAY_OF type;
    term      ::= LPAREN expr:e RPAREN
                  {: RESULT = e; :}

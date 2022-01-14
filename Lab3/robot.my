@@ -1,9 +1,7 @@
 value trace (){
     portal;
     value b = bottom;
-    notzero? (left){
-        teleport;
-    }
+    teleport;
     while (b){
         zero? (left){
             b = bottom;

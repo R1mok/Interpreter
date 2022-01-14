@@ -163,10 +163,12 @@ public class VarFunctionsContext {
                                     return sec;
                                 }
                             } catch (Exception e) {
-                                if (e.getMessage().equals("Break founded")) {
+                                if (e.getMessage() != null && e.getMessage().equals("Break founded")) {
                                     breakFounded = true;
                                 } else {
-                                    throw new Exception(e.getMessage());
+                                    if (e instanceof MyException)
+                                        throw e;
+                                    else throw new Exception("Break founded");
                                 }
                             }
                             if (breakFounded) {
@@ -349,6 +351,14 @@ public class VarFunctionsContext {
                         case RIGHT -> {
                             int n = this.robot.toRIGHT();
                             return new Const(n);
+                        }
+                        case PORTAL -> {
+                            this.robot.putPortal();
+                            return new Const(0);
+                        }
+                        case TELEPORT -> {
+                            this.robot.teleport();
+                            return new Const(0);
                         }
                         case DIVIDE -> {
                             int a = 0, b = 0;
