@@ -13,6 +13,6 @@ value fib(value n){
     return num_next;
 }
 value main(){
-    value n = 10;
+    value n = 5;
     return fib(n);
 }

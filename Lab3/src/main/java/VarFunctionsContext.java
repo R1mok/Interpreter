@@ -339,7 +339,8 @@ public class VarFunctionsContext {
                         }
                         case RETURN -> {
                             Opr res = ex(p.ops.get(0));
-                            if (((Variable) res).type.equals(this.functions.get("main").getReturnType())) {
+                            if (res instanceof Variable && ((Variable) res).type.equals(this.functions.get("main").getReturnType())
+                            || res instanceof Const && this.functions.get("main").getReturnType().equals(Types.VALUE)) {
                                 throw new MyException(res);
                             } else {
                                 throw new MyException(new Opr("Return type does not match with function type"));
