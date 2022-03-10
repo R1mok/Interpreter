@@ -5,18 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-public class Robot {
-    private List<String> fileMaze = new ArrayList<>();
-    private int x;
-    private int y;
+public class Robot { // класс робота
+    private List<String> fileMaze = new ArrayList<>(); // список сторк файла
+    private int x; // координата X
+    private int y; // координата Y
     private String[][] matrix; // space = " ", wall = "#", robot = "R", exit = "X"
-    Pair<Integer, Integer> coordinates;
-    Pair<Integer, Integer> exitCoord;
-    Stack<Pair<Integer, Integer>> portals = new Stack<>();
-    private String currentDirection;
+    Pair<Integer, Integer> coordinates; // текущие координаты робота
+    Pair<Integer, Integer> exitCoord; // координаты выхода (считываются с карты лабиринта)
+    Stack<Pair<Integer, Integer>> portals = new Stack<>(); // стэк порталов
 
-    protected boolean inExit() throws MyException {
-        if (coordinates.equals(exitCoord)) {
+    protected boolean inExit() throws MyException { // проверяет робота на нахождение у выхода
+        if (coordinates.equals(exitCoord)) { // если робот на выходе, выбрасывает из программы
             System.out.println("ROBOT OUT FROM MAZE");
             MyException e = new MyException(new Opr("ROBOT OUT FROM MAZE"));
             throw e;
@@ -25,9 +24,9 @@ public class Robot {
 
     public void putPortal() {
         portals.add(coordinates);
-    }
+    } // ставит портал
 
-    public void teleport() {
+    public void teleport() { // телепортируется на место последнего портала
         matrix[coordinates.getValue()][coordinates.getKey()] = " ";
         coordinates = portals.peek();
         matrix[coordinates.getValue()][coordinates.getKey()] = "R";
@@ -35,7 +34,7 @@ public class Robot {
         System.out.println("TELEPORT");
     }
 
-    public void printMaze() {
+    public void printMaze() { // вывод лабиринта
         for (int i = 0; i < this.y; ++i) {
             for (int j = 0; j < this.x; ++j) {
                 System.out.print(matrix[i][j]);
@@ -45,11 +44,10 @@ public class Robot {
         System.out.println("---------------");
     }
 
-    public int toTOP() throws MyException {
+    public int toTOP() throws MyException { // робот идет вверх
         if (coordinates.getValue() - 1 < 0 || matrix[coordinates.getValue() - 1][coordinates.getKey()].equals("#")) {
-            return 0;
+            return 0; // если уперлись в стену
         } else {
-            currentDirection = "top";
             coordinates = new Pair<>(coordinates.getKey(), coordinates.getValue() - 1);
             matrix[coordinates.getValue()][coordinates.getKey()] = "R";
             matrix[coordinates.getValue() + 1][coordinates.getKey()] = " ";
@@ -62,11 +60,10 @@ public class Robot {
         return 1;
     }
 
-    public int toBOTTOM() throws MyException {
+    public int toBOTTOM() throws MyException { // робот идет вниз
         if (coordinates.getValue() + 1 == this.y || matrix[coordinates.getValue() + 1][coordinates.getKey()].equals("#")) {
             return 0;
         } else {
-            currentDirection = "bottom";
             coordinates = new Pair<>(coordinates.getKey(), coordinates.getValue() + 1);
             matrix[coordinates.getValue()][coordinates.getKey()] = "R";
             matrix[coordinates.getValue() - 1][coordinates.getKey()] = " ";
@@ -83,7 +80,6 @@ public class Robot {
         if (coordinates.getKey() + 1 == this.x || matrix[coordinates.getValue()][coordinates.getKey() + 1].equals("#")) {
             return 0;
         } else {
-            currentDirection = "right";
             coordinates = new Pair<>(coordinates.getKey() + 1, coordinates.getValue());
             matrix[coordinates.getValue()][coordinates.getKey()] = "R";
             matrix[coordinates.getValue()][coordinates.getKey() - 1] = " ";
@@ -100,7 +96,6 @@ public class Robot {
         if (coordinates.getKey() - 1 < 0 || matrix[coordinates.getValue()][coordinates.getKey() - 1].equals("#")) {
             return 0;
         } else {
-            currentDirection = "left";
             coordinates = new Pair<>(coordinates.getKey() - 1, coordinates.getValue());
             matrix[coordinates.getValue()][coordinates.getKey()] = "R";
             matrix[coordinates.getValue()][coordinates.getKey() + 1] = " ";
@@ -114,7 +109,7 @@ public class Robot {
     }
 
     public Robot(String fileName) {
-        try {
+        try { // считываение с файла в fileMaze
             File file = new File(fileName);
             FileReader fr = new FileReader(file);
             BufferedReader reader = new BufferedReader(fr);
@@ -130,7 +125,7 @@ public class Robot {
         if (fileMaze.size() != 0) {
             this.x = fileMaze.get(0).length();
         }
-        this.matrix = new String[this.y][this.x];
+        this.matrix = new String[this.y][this.x]; // составление матрицы, в которой содержится лабиринт
         for (int i = 0; i < this.y; ++i) {
             String str = fileMaze.get(i);
             for (int j = 0; j < this.x; ++j) {

@@ -4,8 +4,6 @@ import com.mxgraph.layout.*;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.util.mxCellRenderer;
 import javafx.util.Pair;
-import org.antlr.v4.runtime.misc.OrderedHashSet;
-import org.jgraph.graph.Edge;
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.DirectedWeightedPseudograph;
