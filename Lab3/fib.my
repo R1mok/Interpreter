@@ -4,7 +4,7 @@ value fib(value n){
     value num_temp = 0;
     value num_next = 1;
     value i = 0;
-    while (i <= (n-2)){
+    while (i <= (n-1)){
        num_next = num1 + num2;
        num1 = num2;
        num2 = num_next;
@@ -13,6 +13,6 @@ value fib(value n){
     return num_next;
 }
 value main(){
-    value n = 6;
+    value n = 5;
     return fib(n);
 }

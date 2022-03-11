@@ -1,12 +1,15 @@
 import java.util.*;
 
-public class VarFunctionsContext { // контекст, содержащий информацию о всех функциях и переменных в программе
-    private HashMap<String, FunctionDefinition> functions = new HashMap<>(); // набор функций
-    private LinkedList<HashMap<String, Variable>> variables = new LinkedList<>(); // список набора переменных (по областям видимости)
-    protected Robot robot; // обращение к роботу
+public class VarFunctionsContext {
+    private HashMap<String, FunctionDefinition> functions = new HashMap<>();
+    private LinkedList<HashMap<String, Variable>> variables = new LinkedList<>();
+    private HashMap<String, Variable> curVariables = null;
+    private Stack funcStack = new Stack();
+    protected Robot robot;
     public void getFunctions() {
         System.out.println(functions);
     }
+
     public void getVariables() {
         for (HashMap<String, Variable> elem : variables) {
             System.out.print(elem);
@@ -14,23 +17,23 @@ public class VarFunctionsContext { // контекст, содержащий и�
         System.out.println("");
     }
 
-    public Opr rootFunc(String funcName) { // получение тела функции по имени
+    public Opr rootFunc(String funcName) {
         FunctionDefinition func = functions.get(funcName);
         return func.getFunctionStatements();
     }
 
-    public Opr funcParametrs(String funcName) { // получение параметров функции по имени
+    public Opr funcParametrs(String funcName) {
         FunctionDefinition func = functions.get(funcName);
         return func.getParametrs();
     }
 
-    public Opr ex(Opr p) throws Exception { // функция рекурсивного обхода дерева
+    public Opr ex(Opr p) throws Exception {
         if (p == null) return new Const(0);
         switch (p.typeNode) {
-            case CONST -> { // если узел константа - возвращаем его
+            case CONST -> {
                 return p;
             }
-            case VAR -> { // если узел переменная, определяем какая
+            case VAR -> {
                 if (p.ops.size() == 2) {
                     int size = ((Const) ex(p.ops.get(1))).value;
                     Variable[] value = new Variable[size];
@@ -50,17 +53,17 @@ public class VarFunctionsContext { // контекст, содержащий и�
                 Variable var = getVar(((Variable) p).name);
                 return var;
             }
-            case OPR -> { // если узел не константа и не переменная, то спускаемся ниже
+            case OPR -> {
                 if (p.operType == null) {
                     return ex(p.ops.get(0));
                 } else
                     switch (p.operType) {
-                        case TAKE_FROM_ARRAY -> { // получение значение из массива
+                        case TAKE_FROM_ARRAY -> {
                             int index = ((Const) p.ops.get(1)).value;
                             Variable curVar = variables.getFirst().get(((Variable)p.ops.get(0)).name);
                             return ex(((Variable[]) curVar.value)[index]);
                         }
-                        case FOREACH -> { // foreach для переменных
+                        case FOREACH -> {
                             if (p.ops.get(0) instanceof Variable) {
                                 if (((Variable) p.ops.get(0)).type.equals(Types.ARRAY_OF)) {
                                     Object funcParamsValue = ((Variable) p.ops.get(1).ops.get(2).ops.get(0)).value;
@@ -96,7 +99,7 @@ public class VarFunctionsContext { // контекст, содержащий и�
 
                             }
                         }
-                        case ZERO -> { // условие равенства нулю
+                        case ZERO -> {
                             Opr fst = ex(p.ops.get(0));
                             if (fst instanceof Variable) {
                                 fst = p.ops.get(0);
@@ -114,7 +117,7 @@ public class VarFunctionsContext { // контекст, содержащий и�
                                 return new Const(0);
                             }
                         }
-                        case NOTZERO -> { // условие неравенства нулю
+                        case NOTZERO -> {
                             Opr fst = ex(p.ops.get(0));
                             if (fst instanceof Variable) {
                                 fst = p.ops.get(0);
@@ -132,18 +135,18 @@ public class VarFunctionsContext { // контекст, содержащий и�
                                 return new Const(0);
                             }
                         }
-                        case WHILE_LOOP -> { // finish, который идет после while
+                        case WHILE_LOOP -> {
                             boolean breakFounded = false;
                             Opr fst = ex(p.ops.get(0));
                             if (fst.operType != null && fst.operType.equals(operType.BREAK)) {
                                 breakFounded = true;
                             }
-                            if (!breakFounded) {
+                            if (breakFounded) {
                                 return ex(p.ops.get(1));
                             }
                             return new Const(0);
                         }
-                        case WHILE -> { // цикл while без finish
+                        case WHILE -> {
                             boolean breakFounded = false;
                             try {
                                 Opr fst = ex(p.ops.get(0));
@@ -163,25 +166,25 @@ public class VarFunctionsContext { // контекст, содержащий и�
                                     return sec;
                                 }
                             }
-                            catch (MyException e) { // ловим программные исключения
+                            catch (MyException e) {
                                 throw e;
                             }
-                            catch (Exception e) { // ловим break
+                            catch (Exception e) {
                                 if (e.getMessage() != null && e.getMessage().equals("Break founded")) {
                                     breakFounded = true;
                                 } else {
                                     throw e;
                                 }
                             }
-                            if (breakFounded) { // если break есть, выходим
+                            if (breakFounded) {
                                 Opr res = new Opr(NodeType.OPR, operType.BREAK);
                                 return res;
                             }
                         }
-                        case BREAK -> { // попали на break
+                        case BREAK -> {
                             throw new Exception("Break founded");
                         }
-                        case ASSIGN -> { // присвоение
+                        case ASSIGN -> {
                             if (((Variable) p.ops.get(0)).type.equals(Types.ARRAY_OF) && p.ops.size() == 2) { // присвоение массивов
                                 ((Variable) p.ops.get(0)).value = ((Variable) ex(p.ops.get(1))).value;
                                 return p.ops.get(0);
@@ -227,12 +230,12 @@ public class VarFunctionsContext { // контекст, содержащий и�
                                     curMap.put(var.name, var);
 
                                 } else if (((Variable) p.ops.get(0)).type.equals(Types.CONST_VALUE) && ((Variable) p.ops.get(0)).value != null) {
-                                    throw new Exception("Cannot be assigned to a constant value"); // к константе нельзя присвоить - исключение
+                                    throw new Exception("Cannot be assigned to a constant value");
                                 }
                                 return val;
                             }
                         }
-                        case GTE -> { // >=
+                        case GTE -> {
                             int a = 0, b = 0;
                             Opr fst = p.ops.get(0), sec = p.ops.get(1);
                             if (!(p.ops.get(0) instanceof Variable) && !(p.ops.get(0) instanceof Const)) {
@@ -252,7 +255,7 @@ public class VarFunctionsContext { // контекст, содержащий и�
                             if (a >= b) return new Const(1);
                             else return new Const(0);
                         }
-                        case LTE -> { // <=
+                        case LTE -> {
                             int a = 0, b = 0;
                             Opr fst = p.ops.get(0), sec = p.ops.get(1);
                             if (!(p.ops.get(0) instanceof Variable) && !(p.ops.get(0) instanceof Const)) {
@@ -272,7 +275,7 @@ public class VarFunctionsContext { // контекст, содержащий и�
                             if (a <= b) return new Const(1);
                             else return new Const(0);
                         }
-                        case NE -> { // !=
+                        case NE -> {
                             int a = 0, b = 0;
                             Opr fst = p.ops.get(0), sec = p.ops.get(1);
                             if (!(p.ops.get(0) instanceof Variable) && !(p.ops.get(0) instanceof Const)) {
@@ -311,7 +314,7 @@ public class VarFunctionsContext { // контекст, содержащий и�
                                 b = ((Const) ex(sec)).value;
                             return new Const(a + b);
                         }
-                        case TIMES -> { // *
+                        case TIMES -> {
                             int a = 0, b = 0;
                             Opr fst = p.ops.get(0), sec = p.ops.get(1);
                             if (!(p.ops.get(0) instanceof Variable) && !(p.ops.get(0) instanceof Const)) {
@@ -330,7 +333,56 @@ public class VarFunctionsContext { // контекст, содержащий и�
                                 b = ((Const) ex(sec)).value;
                             return new Const(a * b);
                         }
-                        case DIVIDE -> { // /
+                        case NEXTSTMT -> {
+                            ex(p.ops.get(0));
+                            return ex(p.ops.get(1));
+                        }
+                        case RETURN -> {
+                            Opr res = ex(p.ops.get(0));
+                            if (res instanceof Variable && ((Variable) res).type.equals(this.functions.get("main").getReturnType())
+                            || res instanceof Const && this.functions.get("main").getReturnType().equals(Types.VALUE)) {
+                                throw new MyException(res);
+                            } else {
+                                throw new MyException(new Opr("Return type does not match with function type"));
+                            }
+                        }
+                        case TOP -> {
+                            int n = this.robot.toTOP();
+                            if (this.robot.inExit()){
+                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
+                            }
+                            return new Const(n);
+                        }
+                        case BOTTOM -> {
+                            int n = this.robot.toBOTTOM();
+                            if (this.robot.inExit()){
+                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
+                            }
+                            return new Const(n);
+                        }
+                        case LEFT -> {
+                            int n = this.robot.toLEFT();
+                            if (this.robot.inExit()){
+                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
+                            }
+                            return new Const(n);
+                        }
+                        case RIGHT -> {
+                            int n = this.robot.toRIGHT();
+                            if (this.robot.inExit()){
+                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
+                            }
+                            return new Const(n);
+                        }
+                        case PORTAL -> {
+                            this.robot.putPortal();
+                            return new Const(0);
+                        }
+                        case TELEPORT -> {
+                            this.robot.teleport();
+                            return new Const(0);
+                        }
+                        case DIVIDE -> {
                             int a = 0, b = 0;
                             Opr fst = p.ops.get(0), sec = p.ops.get(1);
                             if (!(p.ops.get(0) instanceof Variable) && !(p.ops.get(0) instanceof Const)) {
@@ -349,7 +401,7 @@ public class VarFunctionsContext { // контекст, содержащий и�
                                 b = ((Const) ex(sec)).value;
                             return new Const(a / b);
                         }
-                        case MOD -> { // %
+                        case MOD -> {
                             int a = 0, b = 0;
                             Opr fst = p.ops.get(0), sec = p.ops.get(1);
                             if (!(p.ops.get(0) instanceof Variable) && !(p.ops.get(0) instanceof Const)) {
@@ -393,76 +445,24 @@ public class VarFunctionsContext { // контекст, содержащий и�
                                 b = ((Const) ex(sec)).value;
                             return new Const(a - b);
                         }
-                        case NEXTSTMT -> { // связующий узел - спускаемся сначала в одного ребенка, потом в другого
-                            ex(p.ops.get(0));
-                            return ex(p.ops.get(1));
-                        }
-                        case RETURN -> { // возврат
-                            Opr res = ex(p.ops.get(0));
-                            if (res instanceof Variable && ((Variable) res).type.equals(this.functions.get("main").getReturnType())
-                                    || res instanceof Const && this.functions.get("main").getReturnType().equals(Types.VALUE)) {
-                                throw new MyException(res);
-                            } else { // если тип возвращаемого значения не совпадает со значением функции
-                                throw new MyException(new Opr("Return type does not match with function type"));
-                            }
-                        }
-                        case FUNC_CALL -> { // вызов функции
+                        case FUNC_CALL -> {
                             try {
-                                newScope(); // открываем новую область видимости
+                                newScope();
                                 String funcName = p.ops.get(0).funcCall;
-                                Opr funcCall = this.rootFunc(funcName); // находим функцию, в которую переходим
+                                Opr funcCall = this.rootFunc(funcName);
                                 Opr fst = p.ops.get(1), scnd = p.ops.get(2);
-                                if (scnd.ops != null && this.variables != null && variables.get(1) != null) {
-                                    scnd.ops.set(0, this.variables.get(1).get(((Variable) scnd.ops.get(0)).name));
-                                }
                                 if (p.ops.get(1) != null && p.ops.get(2) != null) {
-                                    setFuncParams(fst, scnd); // выставляем нужные параметры функции
+                                    setFuncParams(fst, scnd);
                                 }
                                 return ex(funcCall);
-                            } catch (MyException e) { // если поймали выход из функции по return
-                                deleteScope(); // удаляем область видимости при выходе из функции
+                            } catch (MyException e) {
+                                deleteScope();
                                 if (e.getReturnVariable().funcCall != null && e.getReturnVariable().funcCall.equals("ROBOT OUT FROM MAZE")){
-                                    throw e; // если робот дошёл до конца лабиринта
+                                    throw e;
                                 } else {
-                                    return e.getReturnVariable(); // возвращаем значение
+                                    return e.getReturnVariable();
                                 }
                             }
-                        }
-                        case TOP -> { // операция робота вверх
-                            int n = this.robot.toTOP();
-                            if (this.robot.inExit()){
-                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
-                            }
-                            return new Const(n);
-                        }
-                        case BOTTOM -> { // операция робота вниз
-                            int n = this.robot.toBOTTOM();
-                            if (this.robot.inExit()){
-                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
-                            }
-                            return new Const(n);
-                        }
-                        case LEFT -> { // операция робота влево
-                            int n = this.robot.toLEFT();
-                            if (this.robot.inExit()){
-                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
-                            }
-                            return new Const(n);
-                        }
-                        case RIGHT -> { // операция робота вправо
-                            int n = this.robot.toRIGHT();
-                            if (this.robot.inExit()){
-                                throw new MyException(new Opr("ROBOT OUT FROM MAZE"));
-                            }
-                            return new Const(n);
-                        }
-                        case PORTAL -> { // робот поставил портал
-                            this.robot.putPortal();
-                            return new Const(0);
-                        }
-                        case TELEPORT -> { // робот телепортировался на прошлый портал
-                            this.robot.teleport();
-                            return new Const(0);
                         }
                     }
             }
@@ -485,7 +485,7 @@ public class VarFunctionsContext { // контекст, содержащий и�
                 Variable var = new Variable(Types.VALUE, ((Variable)fst).name, ((Variable)fst).intValue);
                 var.value = ((Variable)fst).value;
                 var.typeNode = NodeType.VAR;
-                variables.get(0).put(var.name, var); // добавляем в variables значение параметров
+                variables.get(0).put(var.name, var);
                 if (newVal.ops.size() != 1 || val.ops.size() != 1)
                     setFuncParams(newVal.ops.get(1), val.ops.get(1));
                 else return;
@@ -495,7 +495,7 @@ public class VarFunctionsContext { // контекст, содержащий и�
             if (newVal.ops.size() != 1 || val.ops.size() != 1){
                 setFuncParams(newVal.ops.get(1), val.ops.get(1));
             }
-        } else { // если fst или scnd не Variable, спускаемся ниже и получаем значения
+        } else {
             if (newVal.ops.get(0).operType.equals(operType.NEXTSTMT))
                 fst = newVal.ops.get(0);
             if (val.ops.get(0).operType.equals(operType.NEXTSTMT))
@@ -503,32 +503,32 @@ public class VarFunctionsContext { // контекст, содержащий и�
             setFuncParams(fst, scnd);
         }
     }
-    public Variable getVar(String varName){ // получить значение переменной по имени
+    public Variable getVar(String varName){
         for (HashMap<String, Variable> elem : variables){
             if (elem.get(varName)!= null)
                 return elem.get(varName);
         }
         return  null;
     }
-    public void registerFunction(String name, FunctionDefinition funcdef){ // добавление функции после всего её описания
+    public void registerFunction(String name, FunctionDefinition funcdef){
         FunctionDefinition pastdef = functions.get(name);
         pastdef.setFunctionStatements(funcdef.getFunctionStatements());
         pastdef.setParametrs(funcdef.getParametrs());
         pastdef.setReturnType(funcdef.getReturnType());
     }
-    public void registerFunctionByName(String name, Opr funcParams){ // добавление функции при инициализации
+    public void registerFunctionByName(String name, Opr funcParams){
         FunctionDefinition fd = new FunctionDefinition(name, funcParams);
         functions.put(fd.getName(), fd);
 
     }
     public void newScope(){
         variables.push(new HashMap<>());
-    } // создать новую область видимости
+    }
     public void deleteScope(){
         variables.pop();
-    } // удалить область видимости
+    }
     public void addVar(Variable var){
         variables.peek().put(var.name, var);
-    } // добавить переменную в область видимости
+    }
 
 }

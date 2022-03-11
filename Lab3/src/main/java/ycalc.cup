@@ -90,14 +90,10 @@ parser code {:
             p.context.newScope();
             System.out.println(p.context.ex(p.context.rootFunc("main")));
          } catch (MyException e){
-             if (e.getReturnVariable().funcCall != null && e.getReturnVariable().funcCall.equals("Return type does not match with function type")){
-                 System.err.println("Return type does not match with function type");
-             } else {
-                 System.out.println(e.getReturnVariable());
-             }
+            System.out.println(e.getReturnVariable());
          }
-         //p.context.getFunctions();
-         //p.context.getVariables();
+         p.context.getFunctions();
+         p.context.getVariables();
          System.out.println("Finish parsing");
         }catch (Exception e) {
           //do cleanup here -- possibly rethrow e
@@ -154,7 +150,7 @@ precedence left PLUS, MINUS;
 precedence left TIMES, DIVIDE;
 
 
-   programm ::= programm function {: RESULT = new Program(); :}
+   programm ::= programm function  {: RESULT = new Program(); :}
                 | function
                 ;
    function ::= type:t NAME:n  LPAREN {: context.newScope(); :} function_parametrs_declaration:fp {: context.registerFunctionByName(n, fp); :}RPAREN LBRACE function_body:b // объявление функции
@@ -215,17 +211,19 @@ precedence left TIMES, DIVIDE;
                                     context.deleteScope();
                                     :}
                 | while_loop:wl {: RESULT = wl; :}
-                | ZERO LPAREN expr:e RPAREN LBRACE function_body:s RBRACE {:
+                | ZERO LPAREN expr:e RPAREN LBRACE {: context.newScope(); :} function_body:s RBRACE {:
                 Opr res = new Opr(NodeType.OPR, operType.ZERO);
                 res.addInListOpr(e);
                 res.addInListOpr(s);
                 RESULT = res;
+                context.deleteScope();
                  :}
-                | NOTZERO LPAREN expr:e RPAREN LBRACE function_body:s RBRACE {:
+                | NOTZERO LPAREN expr:e RPAREN LBRACE {: context.newScope(); :} function_body:s RBRACE {:
                 Opr res = new Opr(NodeType.OPR, operType.NOTZERO);
                 res.addInListOpr(e);
                 res.addInListOpr(s);
                 RESULT = res;
+                context.deleteScope();
                 :}
                 | FOREACH NAME:n function_call:fc SEMI {:
                 Opr res = new Opr(NodeType.OPR, operType.FOREACH);
@@ -351,6 +349,7 @@ precedence left TIMES, DIVIDE;
                     :}
                     ;
    expr      ::= robot:r {: RESULT = r; :}
+                 |function_call:fc {: RESULT = fc; :}
                  | expr:e LTE factor:f {: Opr res = new Opr(NodeType.OPR, operType.LTE);
                   res.addInListOpr(e);
                   res.addInListOpr(f);
@@ -418,8 +417,8 @@ precedence left TIMES, DIVIDE;
    const_array_of ::= CONST ARRAY_OF type;
    term      ::= LPAREN expr:e RPAREN
                  {: RESULT = e; :}
-                 | function_call:fc {: RESULT = fc; :}
-                 | NUMBER:n
+                 |
+                 NUMBER:n
                  {: RESULT = (Opr) new Const(n);
                  :}
                  |

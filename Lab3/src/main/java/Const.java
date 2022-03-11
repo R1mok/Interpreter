@@ -2,7 +2,7 @@ import lombok.Data;
 
 @Data
 public class Const extends Opr {
-    int value; // значение константы
+    int value; // const value
 
     Const(int value){
         super(NodeType.CONST);

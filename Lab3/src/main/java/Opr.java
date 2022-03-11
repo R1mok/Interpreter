@@ -1,10 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Opr { // базовый узел дерева
+public class Opr {
 
-    NodeType typeNode; // тип узла (константа, переменная, другой узел)
-    operType operType; // тип операции узла
+    NodeType typeNode;
+    operType operType;
     String funcCall;
     Opr(NodeType nt){
         this.typeNode = nt;
@@ -17,7 +17,7 @@ public class Opr { // базовый узел дерева
         this.typeNode = nt;
         this.operType = ot;
     }
-    protected List<Opr> ops = new ArrayList<>(); // список детей узла
+    protected List<Opr> ops = new ArrayList<>();
     public void addInListOpr(Opr oper){
         ops.add(oper);
     }
